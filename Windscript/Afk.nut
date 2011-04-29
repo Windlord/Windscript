@@ -7,30 +7,19 @@
 	_______________________________ (_/ ________
 	                                 by Windlord	*/
 
-function cmdAway ( player, reason, ... )
+
+function cmdAway ( player, reason, channel = config.irc_echo_lower )
+	return Afk( player, channel ).Add( reason );
+
+function cmdBack ( player, channel = config.irc_echo_lower )
 {
-	local channel = vargv.len() > 0 ? vargv[ 0 ] : config.irc_echo_lower;
-
-	local awaydata = Afk( player, channel );
-	return awaydata.Add( reason );
-}
-
-function cmdBack ( player, ... )
-{
-	local channel = vargv.len() > 0 ? vargv[ 0 ] : config.irc_echo_lower;
-
 	local awaydata = Afk( player, channel );
 	if ( awaydata.Num ) awaydata.Del();
 	else return mError( "You are not away", player );
 }
 
-function cmdAfk ( player, params, ... )
-{
-	local channel = vargv.len() > 0 ? vargv[ 0 ] : config.irc_echo_lower;
-
-	local awaydata = Afk( player, channel );
-	return awaydata.List();
-}
+function cmdAfk ( player, params, channel = config.irc_echo_lower )
+	return Afk( player, channel ).List();
 
 class Afk
 {

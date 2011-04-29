@@ -37,16 +37,16 @@ function CallFunc2 ( func, ... )				// This is to use a dummy timer to make Call
 function Echo ( message )					// Sends a message to the echo channel
 	return SendToEcho( config.irc_echo, "msg", message );
 
-function EMessage ( message, ... )				// Sends a message both to the server and the echo channel
+function EMessage ( message, col = colWhite )			// Sends a message both to the server and the echo channel
 {								// Format: EMessage ( message, Colour() );
-	Message( StripCol( message ), vargv.len() > 0 ? vargv[ 0 ] : colWhite );
+	Message( StripCol( message ), col );
 	return SendToEcho( config.irc_echo, "msg", message );
 }
 
-function SendMessage ( message, target, ... )			// Sends a pm ingame if player is ingame. Sends a notice if IRC user.
+function SendMessage ( message, target, col = colWhite )	// Sends a pm ingame if player is ingame. Sends a notice if IRC user.
 {								// Format: SendMessage( message, player/user, Colour() );
 	if ( target.ID > 1000 ) return SendToEcho( target.Name, "notice", message );
-	else return MessagePlayer( StripCol( message ), target, vargv.len() > 0 ? vargv[ 0 ] : colWhite );
+	else return MessagePlayer( StripCol( message ), target, col );
 }
 
 function AdminMessage ( message )
@@ -86,9 +86,9 @@ IRC_LEVELCOLO <- ["05", "06", "07", "02", "03", "04" ];
 // If it is 1, it will return the name of the level of the player
 // If it is 2, it will return the IRC level prefix (ie. + % @ & ~ )
 // If it is 3, it will return the IRC colours with the level prefix and name
-function FindLevel ( player, ... )
+function FindLevel ( player, type = 1 )
 {
-	local type = vargv.len() > 0 ? vargv[ 0 ] : 0, ilevel;
+	local ilevel;
 	if ( player.ID > 1000 ) ilevel = player.Level;
 	else {
 		ilevel = 4;

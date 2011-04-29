@@ -42,9 +42,8 @@ function CreateBot ( name )
 	else return IRCBots.rawset( lname, EchoBot( name ) );
 }
 
-function RemoveBot ( bot, ... )
+function RemoveBot ( bot, unloading = false )
 {
-	local unloading = vargv.len() > 0 ? true : false;
 	local name = bot.lName;						// Cache bot's name and id for the print below
 
 	bot.CheckLogin.Delete();
@@ -138,14 +137,13 @@ class EchoBot
 		return true;
 	}
 	function Login		() { return Send( "PRIVMSG NickServ identify "+ config.irc_password ); }
-	function Join		( channel, ... ) {
-		local key = vargv.len() > 0 ? vargv[ 0 ] : "";
+	function Join		( channel, key = "" ) {
 		local lchannel = channel.tolower();
 		if ( !IRCChannels.rawin( lchannel ) ) IRCChannels.rawset( lchannel, IRCChannel( channel, key ) );
 		return Send( "JOIN "+ channel +" "+ key );
 	}
 	function Send		( message ) { Socket.Send( message +"\r\n" ); return true; }
-	function Part		( channel, ... ) { return Send( "PART "+ channel + JoinArray( vargv, " " ) ); }
+	function Part		( channel, msg = "Good bye" ) { return Send( "PART "+ channel +" "+ msg ); }
 	function Quit		( message ) { return Send( "QUIT :"+ message ); }
 	function Msg		( target, message ) { return Send( "PRIVMSG " + target + " :" + message ); }					// For sending messages to channel/user
 	function Adminmsg	( target, message ) { return Send( "PRIVMSG %" + target + ":" + message ); }					// For sending messages to all halfops on a channel
@@ -169,11 +167,11 @@ function SendMessageToIRC ( botname, message ) { return FindBot( botname ).Send(
 IRCChannels <- {};
 class IRCChannel
 {
-	constructor ( channel, ... )
+	constructor ( channel, key = "" )
 	{
 		Name = channel;
 		lName = channel.tolower();
-		Key = vargv.len() > 0 ? vargv[ 0 ] : "";
+		Key = key;
 		Users = 0;
 		Bots = [];
 	}

@@ -7,11 +7,11 @@
 	_______________________________ (_/ ________
 	                                 by Windlord	*/
 
-function IncData ( section, item, ... )
-	return CheckDataSection( section ).Inc( item, vargv.len() > 0 ? vargv[ 0 ] : 1 );
+function IncData ( section, item, inc = 1 )
+	return CheckDataSection( section ).Inc( item, inc );
 
-function DecData ( section, item, ... )
-	return CheckDataSection( section ).Dec( item, vargv.len() > 0 ? vargv[ 0 ] : 1 );
+function DecData ( section, item, dec = 1 )
+	return CheckDataSection( section ).Dec( item, dec );
 
 function GetData ( section, item )
 	return CheckDataSection( section ).Get( item );

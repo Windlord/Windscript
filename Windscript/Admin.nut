@@ -11,12 +11,12 @@
 // NEED TO EDIT AND ADD IN COMMANDLEVEL RETRIEVING!!! //
 // Note: This function also checks whether a player is registered
 //       if a command's level is set to 2
-function CheckLevel ( player, command, ... )
+function CheckLevel ( player, command, ingame = false )
 {
 	local userlvl;
 	if ( player.ID > 1000 )
 	{
-		if ( vargv.len() > 0 )
+		if ( ingame )
 		{
 			mError( "InGame Command ("+ command.toupper() +")", player );
 			return false;

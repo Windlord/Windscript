@@ -87,11 +87,9 @@ function StripCol ( text )
 // This function generates random integers depending on the arguments.
 // If you supply one argument, it'll return a number between 1 and the provided number
 // If you supply two arguments where the 2nd one is larger, it'll provide a number between the two
-function RandNum ( start, ... )
+function RandNum ( start, end = 0 )
 {
-	local end;
-	if ( vargv.len() > 0 ) end = vargv[ 0 ];
-	else { end = start; start = 1; }
+	if ( !end ) { end = start; start = 1; }
 	return start + ( rand() % ( end - start + 1 ) );
 }
 
