@@ -1,14 +1,13 @@
+>	     __       __)
+>	    (, )  |  /  ,       /)             ,
+>	       | /| /    __   _(/  _   _  __    __  _/_
+>	       |/ |/  _(_/ (_(_(_ /_)_(__/ (__(_/_)_(__
+>	       /  |                          .-/
+>	    _______________________________ (_/ ________
+>	                                     version 1.0
+>	                                     by Windlord
 
-	     __       __)
-	    (, )  |  /  ,       /)             ,
-	       | /| /    __   _(/  _   _  __    __  _/_
-	       |/ |/  _(_/ (_(_(_ /_)_(__/ (__(_/_)_(__
-	       /  |                          .-/
-	    _______________________________ (_/ ________
-	                                     version 1.0
-	                                     by Windlord
-
-*Last Updated: 28/04/2011 22:00 GMT*
+*Last Updated: 29/04/2011 08:00 GMT*
 
 # NOTE: Windscript is still in development. Use at own risk!!!
 
@@ -26,8 +25,9 @@
 ## 1. What is Windscript?
 
 Windscript is a collection of tools which forms a solid base for any server
-scripter to work on for quick game-mode production. Windscript comes with
-several advanced features. The main ones are listed here:
+scripter to work on for quick game-mode production for the GTA3 Multipleyer
+Modification, [Liberty Unleashed]. Windscript comes with several advanced features.
+The main ones are listed here:
 
 * Safe and automatic syncing of data between memory and HDD which minimises usage of resources by keeping track of changes.
 * Persistent IRC echo connections which never die unless your network does.
@@ -124,10 +124,11 @@ Once you have found out why the bots are not logging in, use
 bot directly and solve your issue.
 
 
-[Download Windscript]:			https://github.com/Windlord/Windscript/zipball/master	"Windscript Source"
-[http://liberty-unleashed.co.uk/]:			http://liberty-unleashed.co.uk/				"Liberty Unleashed"
-[http://forum.liberty-unleashed.co.uk/]:	http://forum.liberty-unleashed.co.uk/		"Liberty Unleashed Forum"
-[http://liberty-unleashed.co.uk/LUWiki]:	http://liberty-unleashed.co.uk/LUWiki		"Liberty Unleashed Wiki"
-[http://www.windlord.net/]:					http://www.windlord.net/					"Windlord.Net"
-[windlord@windlord.net]:					mailto:windlord@windlord.net				"Contact Windlord"
-[http://www.ka-clan.net/]:					http://www.ka-clan.net/						"Kuslahden alaste Clan Forum"
+[Download Windscript]:				https://github.com/Windlord/Windscript/zipball/master	"Windscript Source"
+[Liberty Unleashed]:				http://liberty-unleashed.co.uk/				"Liberty Unleashed"
+[http://liberty-unleashed.co.uk/]:		http://liberty-unleashed.co.uk/				"Liberty Unleashed"
+[http://forum.liberty-unleashed.co.uk/]:	http://forum.liberty-unleashed.co.uk/			"Liberty Unleashed Forum"
+[http://liberty-unleashed.co.uk/LUWiki]:	http://liberty-unleashed.co.uk/LUWiki			"Liberty Unleashed Wiki"
+[http://www.windlord.net/]:			http://www.windlord.net/				"Windlord.Net"
+[windlord@windlord.net]:			mailto:windlord@windlord.net				"Contact Windlord"
+[http://www.ka-clan.net/]:			http://www.ka-clan.net/					"Kuslahden alaste Clan Forum"
