@@ -53,7 +53,8 @@ class Afk
 		Num = ::GetData( Hash, ID );
 		Time = ::GetData( Hash, Num + ".Time" );
 		Reason = ::GetData( Hash, Num + ".Reason" );
-		LastTime = ::GetData( "AFK", ID );
+		LastTime = ::GetData( "AFK", ID + ".LastTime" );
+		LastTime = LastTime ? LastTime : 0;
 	}
 
 	function Save ()
@@ -72,19 +73,20 @@ class Afk
 
 		Num = ::IncData( Hash, "Total" );
 		Time = ::GetTime();
-		Reason = reason ? reason : "None";
+		Reason = reason ? reason : "No Reason";
 		if ( !SpamCheck() ) Msg( ::iCol( 3, ::iBold( Player.Name ) +" is away ("+ Reason +")" ), ::colGreen );
-		else Msg( ::iCol( 3, "You are away ("+ Reason +")" ), ::colGreen );
+		else ::SendMessage( ::iCol( 3, "You are away ("+ Reason +")" ), Player, ::colGreen );
 		return Save();
 	}
 
 	function Del ()
 	{
-		local dur = ( GetTime() - Time );
+		local dur = GetTime() - Time, tot = ::IncData( "AFK", ID + ".TotalTime", dur );
 		::DecData( Hash, "Total" )
 		::DelData( Hash, ID );
-		if ( !SpamCheck() ) Msg( ::iCol( 3, ::iBold( Player.Name ) +" returned from "+ Reason +" after "+ ::Duration( dur ) ), ::colGreen );
-		else Msg( ::iCol( 3, "You returned from "+ Reason +" after "+ ::Duration( dur ) ), ::colGreen );
+		if ( !SpamCheck() ) Msg( ::iCol( 3, ::iBold( Player.Name ) +" returned from \""+ Reason +"\" after "+ ::Duration( dur ) ), ::colGreen );
+		else ::SendMessage( ::iCol( 3, "You returned from \""+ Reason +"\" after "+ ::Duration( dur ) ), Player, ::colGreen );
+		::SendMessage( ::iCol( 3, "You have so far logged a total AFK time of: "+ ::Duration( tot ) ), Player, ::colGreen );
 		return true;
 	}
 
@@ -92,18 +94,18 @@ class Afk
 	{
 		if ( !Time ) return Add( reason );
 
-		if ( Reason == reason )
+		if ( Reason == reason || Reason == "No Reason" )
 		{
 			local dur = ( GetTime() - Time );
-			if ( !SpamCheck() ) Msg( ::iCol( 3, ::iBold( Player.Name ) +" is still away for "+ Reason +" ("+ ::Duration( dur ) +")" ), ::colGreen );
-			else Msg( ::iCol( 3, "You are still away for "+ Reason +" ("+ ::Duration( dur ) +")" ), ::colGreen );
+			if ( !SpamCheck() ) Msg( ::iCol( 3, ::iBold( Player.Name ) +" is still away for \""+ Reason +"\" ("+ ::Duration( dur ) +")" ), ::colGreen );
+			else ::SendMessage( ::iCol( 3, "You are still away for \""+ Reason +"\" ("+ ::Duration( dur ) +")" ), Player, ::colGreen );
 		}
 		else
 		{
 			Time = ::GetTime();
-			Reason = reason ? reason : "None";
+			Reason = reason ? reason : "No Reason";
 			if ( !SpamCheck() ) Msg( ::iCol( 3, ::iBold( Player.Name ) +" is now away ("+ Reason +")" ), ::colGreen );
-			else Msg( ::iCol( 3, "You are now away ("+ Reason +")" ), ::colGreen );
+			else ::SendMessage( ::iCol( 3, "You are now away ("+ Reason +")" ), Player, ::colGreen );
 			return Save();
 		}
 	}
@@ -138,9 +140,8 @@ class Afk
 	function SpamCheck ()
 	{
 		local now = ::GetTime(), dt = now - LastTime;
-		LastTime = now;
-		if ( dt < 30 )
-			return true;
+		::AddData( "AFK", ID + ".LastTime", now );
+		if ( dt < 30 ) return true;
 		else return false;
 	}
 
