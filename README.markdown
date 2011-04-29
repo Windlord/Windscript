@@ -54,6 +54,8 @@ follows:-
 
 ## 3. Script Installaion:
 
+[Download Windscript]
+
 1. Move the folders into the `Scripts` folder
 2. Add `<script folder="Windscript_Loader"/>` to `LU/content.xml` and `VU/content.xml`.
 3. Edit `Scripts/Windscript/CONFIG.txt`
@@ -122,6 +124,7 @@ Once you have found out why the bots are not logging in, use
 bot directly and solve your issue.
 
 
+[Download Windscript]:			https://github.com/Windlord/Windscript/zipball/master	"Windscript Source"
 [http://liberty-unleashed.co.uk/]:			http://liberty-unleashed.co.uk/				"Liberty Unleashed"
 [http://forum.liberty-unleashed.co.uk/]:	http://forum.liberty-unleashed.co.uk/		"Liberty Unleashed Forum"
 [http://liberty-unleashed.co.uk/LUWiki]:	http://liberty-unleashed.co.uk/LUWiki		"Liberty Unleashed Wiki"
