@@ -7,6 +7,8 @@
 	_______________________________ (_/ ________
 	                                 by Windlord	*/
 
+config.rawset( "irc_echo_lower", config.irc_echo.tolower() );
+
 // Array of IRCUser2 objects for storing info in this script.
 IRCUsers2 <- [];
 class IRCUser2
@@ -67,7 +69,7 @@ function onIRCMessage_Desc ( user, text )
 function onIRCChat ( channel, user, text )
 {
 	local user = FindIRCUser( user );
-	if ( channel.tolower() == config.irc_echo.tolower() )
+	if ( channel.tolower() == config.irc_echo_lower )
 	{
 		local prefix = text[ 0 ];					// This gets the ASCII code for the prefix
 		if ( prefix == '!' )						// Check if prefix is '!'

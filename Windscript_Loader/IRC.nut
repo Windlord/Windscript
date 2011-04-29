@@ -400,14 +400,14 @@ function ProcessRaw ( bot, raw, nick, address )
 		}
 
 		else if ( raw[ 1 ] == "MODE" && raw[ 2 ].tolower() == config.irc_echo )	// If a MODE event is received to botID 0 on the echo,
-			ProcessModes( raw.slice( 3 ) );												// Process the output (Update user levels)
+			ProcessModes( raw.slice( 3 ) );					// Process the output (Update user levels)
 	}
 
-	else if ( words > 2 )
+	if ( words > 2 )
 	{
 		if ( raw[ 2 ] == bot.Name )
 		{
-			if ( raw[ 1 ] == "324" && raw.len() > 5 )			// If channel mode has something after the +modes bit
+			if ( raw[ 1 ] == "324" && raw.len() > 5 )		// If channel mode has something after the +modes bit
 			FindChannel( raw[ 3 ] ).Key = raw[ 5 ];			// Assume it is channel key and store
 
 			else if ( raw[ 1 ] == "401" && raw[ 3 ] == "NickServ" )

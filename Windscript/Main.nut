@@ -67,6 +67,7 @@ function onScriptLoad ()
 	AttemptLoad ( "Commands.nut" );		// Load Commands.nut which handles IRC and Player commands
 	AttemptLoad ( "CommandsList.nut" );	// Load CommandsList.nut which contains the list of commands
 	AttemptLoad ( "GameEvents.nut" );	// Load GameEvents.nut which handles all in-game events
+	AttemptLoad ( "Afk.nut" );		// Load Afk.nut which allows AFK logging ingame and on IRC
 	AttemptLoad ( "Plugins.nut" );		// Load Plugins.nut which deals with load/unloading plugins
 
 	print ( "\r- Completed Loading All Scripts.\n" );

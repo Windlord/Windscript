@@ -75,10 +75,15 @@ class WindData
 	function Dec ( item, amount )
 	{
 		item = item.tostring();
-		local result = Hash.Dec( item, amount );
-		if ( result <= 0 ) Hash.Add( item, 0 );
+		Hash.Dec( item, amount );
+		local result = Hash.Get( item );
+		if ( result < 0 )
+		{
+			Hash.Add( item, 0 );
+			return 0;
+		}
 		Changed();
-		return result != null ? Hash.Get( item ) : false;
+		return result;
 	}
 
 	function Changed ()
@@ -89,7 +94,10 @@ class WindData
 	}
 
 	function Get ( item )
-		return Hash.Get( item.tostring() );
+	{
+		local data = Hash.Get( item.tostring() );
+		return data ? data : 0;
+	}
 
 	function Save ()
 	{

@@ -27,7 +27,7 @@ function onCommand ( player, command, params )
 {
 	local a = "";
 	foreach( val in command )					// For each character in the variable command
-		if ( val != 33 && val != 47 ) a += val.tochar();	// Only write char if value isn't "!" or "/"
+		if ( val != '!' && val != '/' ) a += val.tochar();	// Only write char if value isn't "!" or "/"
 	command = (a == "") ? null : a;					// This strips command of "!" and "/"
 									// Note that this bit of code also makes it impossible for command names with "!" or "/" in them to work.
 

@@ -96,21 +96,20 @@ function RandNum ( start, ... )
 }
 
 
-// This function returns a duration statement from ticks (ms)
-function Duration ( ticks )
+// This function returns a duration statement from seconds
+function Duration ( num )
 {
-	ticks		= floor ( ticks / 1000 );
-	local days	= floor ( ticks % 604800 / 86400 );
-	local hours	= floor ( ticks % 86400 / 3600 );
-	local mins	= floor ( ticks % 3600 / 60 );
-	local secs	= ticks % 60;
-	local weeks	= floor ( ( ticks - days*86400 - hours*3600 - mins*60 - secs ) / 604800 );
+	local days = floor ( num % 604800 / 86400 );
+	local hours = floor ( num % 86400 / 3600 );
+	local mins = floor ( num % 3600 / 60 );
+	local secs = num % 60;
+	local weeks = floor ( ( num - days*86400 - hours*3600 - mins*60 - secs ) / 604800 );
 	local a = [];
-	if ( weeks	!= 0 ) a.append( weeks + "wks" );
-	if ( days	!= 0 ) a.append( days + "days" );
-	if ( hours	!= 0 ) a.append( hours + "hrs" );
-	if ( mins	!= 0 ) a.append( mins + "mins" );
-	if ( secs	!= 0 ) a.append( secs + "secs" );
+	if ( weeks != 0 ) a.append( weeks + "wks" );
+	if ( days != 0 ) a.append( days + "days" );
+	if ( hours != 0 ) a.append( hours + "hrs" );
+	if ( mins != 0 ) a.append( mins + "mins" );
+	if ( secs != 0 ) a.append( secs + "secs" );
 	return JoinArray( a, " " );
 }
 
@@ -162,4 +161,24 @@ function GetNth ( num )
 			break;
 	}
 	return num.tostring() + suffix;
+}
+
+// This function returns the name of a month
+function GetMonth ( num )
+{
+	switch ( num )
+	{
+		case 1: return "Jan";
+		case 2: return "Feb";
+		case 3: return "Mar";
+		case 4: return "Apr";
+		case 5: return "May";
+		case 6: return "Jun";
+		case 7: return "Jul";
+		case 8: return "Aug";
+		case 9: return "Sep";
+		case 10: return "Oct";
+		case 11: return "Nov";
+		case 12: return "Dec";
+	}
 }

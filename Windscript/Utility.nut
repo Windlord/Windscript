@@ -29,7 +29,7 @@ function CallFunc2 ( func, ... )				// This is to use a dummy timer to make Call
 	exec += " );"						// Close function
 
 	local runthis = compilestring( exec );			// Compile exec
-	runthis();						// run!
+	return runthis();					// run!
 }
 
 

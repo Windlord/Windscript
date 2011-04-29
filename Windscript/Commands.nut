@@ -63,10 +63,10 @@ function cmdPos ( plr )
 
 function cmdUptime ( player )
 {
-	local svr = GameTimerTicks - cInit_Ticks;
+	local svr = ( GameTimerTicks - cInit_Ticks ) / 1000;
 	local tot_uptime = GetData( "Misc", "TotalUptime" );
 	tot_uptime = tot_uptime ? tot_uptime : 0;
-	tot_uptime += GameTimerTicks - UptimeLastUpdated;
+	tot_uptime += GameTimerTicks / 1000 - UptimeLastUpdated;
 	SendMessage( iCol( 2, "Server Uptime: " ) + iCol( 6, Duration( svr ) ), player );
 	if ( tot_uptime ) SendMessage( iCol( 2, "Total Uptime: " ) + iCol( 6, Duration( tot_uptime ) ), player );
 	return 1;
@@ -132,26 +132,3 @@ function cmdReload ( player )
 	return 1;
 }
 
-function cmdAway ( player, reason, ... )
-{
-	if ( vargv.len() > 0 ) local channel = vargv[ 0 ];
-	else local channel = config.irc_echo;
-
-	return 1;
-}
-
-function cmdBack ( player, ... )
-{
-	if ( vargv.len() > 0 ) local channel = vargv[ 0 ];
-	else local channel = config.irc_echo;
-
-	return 1;
-}
-
-function cmdAfk ( player, params, ... )
-{
-	if ( vargv.len() > 0 ) local channel = vargv[ 0 ];
-	else local channel = config.irc_echo;
-
-	return 1;
-}

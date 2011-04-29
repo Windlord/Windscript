@@ -13,14 +13,20 @@
 //       if a command's level is set to 2
 function CheckLevel ( player, command, ... )
 {
-	if ( vargv.len() > 0 && player.ID > 1000 )
+	local userlvl;
+	if ( player.ID > 1000 )
 	{
-		mError( "InGame Command ("+ command.toupper() +")", player );
-		return false;
+		if ( vargv.len() > 0 )
+		{
+			mError( "InGame Command ("+ command.toupper() +")", player );
+			return false;
+		}
+		userlvl = player.Level;
 	}
+	else userlvl = GetUser( player ).Level;
 
-	local commandlvl = 4, user = GetUser( player );
-	if ( user.Level >= commandlvl ) return true;
+	local commandlvl = 4;
+	if ( userlvl >= commandlvl ) return true;
 	else
 	{
 		mError( "Invalid Command ("+ command.toupper() +")", player );
@@ -31,7 +37,7 @@ function CheckLevel ( player, command, ... )
 
 function UpdateUptime()
 {
-	local inctime = GameTimerTicks - UptimeLastUpdated;
-	UptimeLastUpdated <- GameTimerTicks;
+	local inctime = GameTimerTicks / 1000 - UptimeLastUpdated;
+	UptimeLastUpdated <- GameTimerTicks / 1000;
 	return IncData( "Misc", "TotalUptime", inctime );
 }
