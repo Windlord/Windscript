@@ -8,7 +8,7 @@
 	                                 by Windlord	*/
 
 
-function cmdAway ( player, reason, channel = config.irc_echo_lower )
+function cmdAway ( player, reason = "No Reason", channel = config.irc_echo_lower )
 	return Afk( player, channel ).Add( reason );
 
 function cmdBack ( player, channel = config.irc_echo_lower )
@@ -62,7 +62,6 @@ class Afk
 
 		Num = ::IncData( Hash, "Total" );
 		Time = ::GetTime();
-		Reason = reason ? reason : "No Reason";
 		if ( !SpamCheck() ) Msg( ::iCol( 3, ::iBold( Player.Name ) +" is away ("+ Reason +")" ), ::colGreen );
 		else ::SendMessage( ::iCol( 3, "You are away ("+ Reason +")" ), Player, ::colGreen );
 		return Save();
@@ -83,7 +82,7 @@ class Afk
 	{
 		if ( !Time ) return Add( reason );
 
-		if ( Reason == reason || Reason == "No Reason" )
+		if ( Reason == reason )
 		{
 			local dur = ( GetTime() - Time );
 			if ( !SpamCheck() ) Msg( ::iCol( 3, ::iBold( Player.Name ) +" is still away for \""+ Reason +"\" ("+ ::Duration( dur ) +")" ), ::colGreen );
