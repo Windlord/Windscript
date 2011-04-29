@@ -69,15 +69,16 @@ class WindData
 		item = item.tostring();
 		local result = Hash.Inc( item, amount );
 		Changed();
-		return result ? Hash.Get( item ) : false;
+		return result != null ? Hash.Get( item ) : false;
 	}
 
 	function Dec ( item, amount )
 	{
 		item = item.tostring();
 		local result = Hash.Dec( item, amount );
+		if ( result <= 0 ) Hash.Add( item, 0 );
 		Changed();
-		return result ? Hash.Get( item ) : false;
+		return result != null ? Hash.Get( item ) : false;
 	}
 
 	function Changed ()

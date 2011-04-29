@@ -8,8 +8,8 @@
 	                                 by Windlord	*/
 
 config.irc_echo = config.irc_echo.tolower();
-CTCP_VERSION_REPLY	<- "\x0001VERSION "+ircBold+ircCol+"02Windscript Version "+ cScript_Version +"\x0001";
-CTCP_FINGER_REPLY	<- "\x0001FINGER "+ircBold+ircCol+"04Watch it!\x0001";
+CTCP_VERSION_REPLY	<- "\x0001VERSION "+ iBold( iCol( 2, "Windscript Version "+ cScript_Version ) ) +"\x0001";
+CTCP_FINGER_REPLY	<- "\x0001FINGER "+ iBold( iCol( 4, "Watch it!" ) ) +"\x0001";
 
 // This function is called onScriptLoad to start up all bots needed
 function InitialiseBots ()
@@ -600,21 +600,4 @@ function BotMessage ( target, type, text )
 		if ( type.tolower() == "notice" ) min.Notice( target, text );
 		else min.Msg( target, text );
 	}
-}
-
-// This function can be found in /Windscript/Misc.nut
-function JoinArray ( array, delimit )
-{
-	local a, z = array.len(), output = "";
-	if ( z > 0 )
-	{
-		if ( z > 1 )
-		{
-			for ( a = 1; a < z; a++ )
-				output += delimit + array[ a ];
-			return array[ 0 ] + output;
-		}
-		else return array[ 0 ];
-	}
-	else return output;
 }

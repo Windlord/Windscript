@@ -53,20 +53,21 @@ function onScriptLoad ()
 	LoadModule( "lu_hashing" );
 
 	// Load component scripts
-	// NOTE: The order in which these scripts are loaded matters. It really does!
-	AttemptLoad ( "Settings.nut"	);
-	AttemptLoad ( "Misc.nut"		);	// Load Misc.nut which contains all miscellaneous functions.
+	// NOTE: The order in which these scripts are loaded matters.
+	AttemptLoad ( "Settings.nut"	);	// Load Settings.nut which parses CONFIG.ini
+	AttemptLoad ( "Misc.nut"		);	// Load Misc.nut which contains all miscellaneous functions
+	AttemptLoad ( "Utility.nut"		);	// Load Utility.nut which contain functions necessary in Windscript/
 	AttemptLoad ( "Background.nut"	);	// Load Background.nut which handles all background operations
 	AttemptLoad ( "Data.nut"		);	// Load Data.nut which handles all data processes
 	AttemptLoad ( "Echo.nut"		);	// Load Echo.nut which handles the IRC echo
-	AttemptLoad ( "Accounts.nut"	);
+	AttemptLoad ( "Accounts.nut"	);	// Load Accounts.nut which deals with all accounts data
 	AttemptLoad ( "Mail.nut"		);	// Load Mail.nut which handles the sending of emails
 	AttemptLoad ( "IPInfo.nut"		);	// Load IPInfo.nut which retrieves information of IP from a website
-	AttemptLoad ( "Admin.nut"		);
-	AttemptLoad ( "Commands.nut"	);	// Load Commands.nut which handles IRC and Player commands.
-	AttemptLoad ( "CommandsList.nut");	// Load CommandsList.nut which contains the list of commands.
+	AttemptLoad ( "Admin.nut"		);	// Load Admin.nut which deals with administration functions
+	AttemptLoad ( "Commands.nut"	);	// Load Commands.nut which handles IRC and Player commands
+	AttemptLoad ( "CommandsList.nut");	// Load CommandsList.nut which contains the list of commands
 	AttemptLoad ( "GameEvents.nut"	);	// Load GameEvents.nut which handles all in-game events
-	AttemptLoad ( "Plugins.nut"		);
+	AttemptLoad ( "Plugins.nut"		);	// Load Plugins.nut which deals with load/unloading plugins
 
 	print ( "\r- Completed Loading All Scripts.\n" );
 	NewTimer ( "AfterScriptLoad", 1000, 1 );

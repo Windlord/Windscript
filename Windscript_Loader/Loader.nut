@@ -27,6 +27,7 @@ function onScriptLoad ()
 
 	LoadModule ( "lu_ini" );
 	dofile ( cScript_Dir + "Settings.nut" );
+	dofile ( cScript_Dir + "Misc.nut" );
 
 	AttemptLoad ( "IRC.nut" );
 	debug ( "Loaded Windscript Loader" );

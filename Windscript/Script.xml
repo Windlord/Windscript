@@ -1,0 +1,6 @@
+<!-- Script Header -->
+
+<!-- Specifies which scripts belong in this parent -->
+<script file="Main.nut" client="0"/>
+<script file="Client/ZoomInOnPlayer.nut" client="1"/>
+
