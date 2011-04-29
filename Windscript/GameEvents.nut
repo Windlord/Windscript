@@ -45,10 +45,10 @@ function onPlayerDeath ( player, reason )
 
 function onPlayerKill ( killer, player, weapon, bodypart )
 {
-	weapon			= GetWeaponName( weapon );
-	bodypart		= GetBodyPartName( bodypart );
-	local killern	= FindLevel( killer, 3 );
-	local playern	= FindLevel( player, 3 );
+	weapon = GetWeaponName( weapon );
+	bodypart = GetBodyPartName( bodypart );
+	local killern = FindLevel( killer, 3 );
+	local playern = FindLevel( player, 3 );
 	EMessage( killern + iCol( 4, " killed " ) + playern + iCol( 4, " ("+ weapon +" - "+ bodypart +")" ), colRed );
 	return 1;
 }
@@ -65,8 +65,8 @@ function onPlayerChat ( player, text )
 	{
 		local a = split( text, " " );
 		local command = a[ 0 ].slice( 1 );
-		local param   = (a.len() > 1) ? JoinArray( a.slice( 1 ), " " ) : "";
-		text          = param ? command + " " + param : command;
+		local param = (a.len() > 1) ? JoinArray( a.slice( 1 ), " " ) : "";
+		text = param ? command + " " + param : command;
 		Echo( FindLevel( player, 3 ) +iCol( 4, ": !" )+ text );
 		onCommand( player, command, param );
 		//NewTimer( "onCommand", 200, 1, player, command, param );

@@ -32,7 +32,7 @@ function CheckDataSection ( section )
 }
 
 // Table where hashtable data is stored
-Data_Chunks		<- {};
+Data_Chunks <- {};
 
 class WindData
 {

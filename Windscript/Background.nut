@@ -11,6 +11,10 @@
 // This initiates a timer which runs the Background function every half a second.
 // A single timer is used in this script to increase efficiency and performance.
 // The main reason a single timer is used is because having multiple timers will stress the server.
+
+// The reason the code is messy is because I deemed this to be the more efficient way of doing things
+// I could have easily calculated modulii (%) repeatedly but dividing repeatedly is more efficient.
+
 function StartBackground()
 	GameTimer <- NewTimer ( "Background", 500, 0 );
 local GameTimerNum = 0.0;

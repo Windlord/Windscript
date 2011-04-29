@@ -12,39 +12,39 @@ function CallFunc2 ( func, ... )				// This is to use a dummy timer to make Call
 {
 	local exec = "NewTimer( \"CallFunc\", 0, 1, cScript_Loader, \"" + func + "\"";
 
-	foreach ( param in vargv )					// For each optional param...
+	foreach ( param in vargv )				// For each optional param...
 	{
 		if ( typeof param == "string" )			// If string
 		{
-			local output = "";					// Initiate empty output string
-			foreach ( chr in param )			// For each character in param
+			local output = "";			// Initiate empty output string
+			foreach ( chr in param )		// For each character in param
 			{
 				if (chr == 34) output += "\\\"";// Output \" if "
 				else output += chr.tochar();	// Output the char otherwise
 			}
-			param = "\""+ output +"\"";			// Put \" around the string
+			param = "\""+ output +"\"";		// Put \" around the string
 		}
-		exec += ", " + param;					// Add param to execstring
+		exec += ", " + param;				// Add param to execstring
 	}
-	exec += " );"								// Close function
+	exec += " );"						// Close function
 
-	local runthis = compilestring( exec );		// Compile exec
-	runthis();									// run!
+	local runthis = compilestring( exec );			// Compile exec
+	runthis();						// run!
 }
 
 
 // Messaging functions
-function Echo ( message )						// Sends a message to the echo channel
+function Echo ( message )					// Sends a message to the echo channel
 	SendToEcho( config.irc_echo, "msg", message );
 
 function EMessage ( message, ... )				// Sends a message both to the server and the echo channel
-{												// Format: EMessage ( message, Colour() );
+{								// Format: EMessage ( message, Colour() );
 	SendToEcho( config.irc_echo, "msg", message );
 	Message( StripCol( message ), vargv.len() > 0 ? vargv[ 0 ] : colWhite );
 }
 
-function SendMessage ( message, target, ... )	// Sends a pm ingame if player is ingame. Sends a notice if IRC user.
-{												// Format: SendMessage( message, player/user, Colour() );
+function SendMessage ( message, target, ... )			// Sends a pm ingame if player is ingame. Sends a notice if IRC user.
+{								// Format: SendMessage( message, player/user, Colour() );
 	if ( target.ID > 1000 ) SendToEcho( target.Name, "notice", message );
 	else MessagePlayer( StripCol( message ), target, vargv.len() > 0 ? vargv[ 0 ] : colWhite );
 }

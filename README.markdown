@@ -1,12 +1,12 @@
 
-		__       __)
-	(, )  |  /  ,       /)             ,
-		| /| /    __   _(/  _   _  __    __  _/_
-		|/ |/  _(_/ (_(_(_ /_)_(__/ (__(_/_)_(__
-		/  |                          .-/
-	_______________________________ (_/ ________
-										version 1.0
-										by Windlord
+	     __       __)
+	    (, )  |  /  ,       /)             ,
+	       | /| /    __   _(/  _   _  __    __  _/_
+	       |/ |/  _(_/ (_(_(_ /_)_(__/ (__(_/_)_(__
+	       /  |                          .-/
+	    _______________________________ (_/ ________
+	                                     version 1.0
+	                                     by Windlord
 
 *Last Updated: 28/04/2011 22:00 GMT*
 
@@ -65,7 +65,6 @@ follows:-
 *Note: It is recommended that you run Windscript alone as a server-side script.*
 
 
-
 ## 4. Some extra information
 
 Windscript is not for the faint hearted or the newly born. The scripts
@@ -77,7 +76,6 @@ complicated or difficult to use and edit, take a look at Force's Beginner Script
 (FBS) first and get used to using the various squirrel language features. To
 aid the more experienced scripters however, I have tried to provide as much
 comments as possible inside of my scripts. Please do not ignore them.
-
 
 
 ## 5. Support
