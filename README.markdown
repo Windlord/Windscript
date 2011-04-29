@@ -10,6 +10,8 @@
 
 *Last Updated: 28/04/2011 22:00 GMT*
 
+# NOTE: Windscript is still in development. Use at own risk!!!
+
 # Contents
 
 1. What is Windscript?
@@ -38,7 +40,7 @@ Windscript was developed slowly for a period of up to two years and is a culmina
 of many of the author's experiences with scripting for GTA:MP modifications.
 
 
-## 2. Mutual Agreement:
+## 2. Mutual Agreement
 
 Although this script package is not directly including any sort of license,
 the mutual agreement which I wish all users of Windscript to abide by is as
@@ -52,7 +54,7 @@ follows:-
 6. You shall not demand for new features or fixes, nor will you attack the author but will courteously approach and request for changes to be made, or actions taken.
 
 
-## 3. Script Installaion:
+## 3. Script Installaion
 
 [Download Windscript]
 
@@ -64,7 +66,7 @@ follows:-
 
 
 
-## 4. Some extra information:
+## 4. Some extra information
 
 Windscript is not for the faint hearted or the newly born. The scripts
 written in this package can be very complicated. The structure of the scripts
@@ -78,7 +80,7 @@ comments as possible inside of my scripts. Please do not ignore them.
 
 
 
-## 5. Support:
+## 5. Support
 
 There are a few ways you can obtain help for Windscript
 
@@ -90,7 +92,7 @@ There are a few ways you can obtain help for Windscript
 5.  E-mail - [windlord@windlord.net] - refrain from contacting unless urgent
 
 
-## 6. Credits:
+## 6. Credits
 
 Every single line of script written in this script package has been written by:
 
@@ -106,7 +108,7 @@ I would like to thank the following people for their valuable help:
 * Force - Providing FBS, an excellent starter script for me to refer to.
 
 
-## 7. Frequently Asked Questions:
+## 7. Frequently Asked Questions
 
 ### 1. Why do you have two folders?
 This is to allow for the seamless reloading. Only Windscript_Loader is loaded to
