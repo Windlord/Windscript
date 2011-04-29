@@ -1,0 +1,42 @@
+
+	__       __)
+	(, )  |  /  ,       /)             ,
+	   | /| /    __   _(/  _   _  __    __  _/_
+	   |/ |/  _(_/ (_(_(_ /_)_(__/ (__(_/_)_(__
+	   /  |                          .-/
+	_______________________________ (_/ ________
+	                                 by Windlord
+
+# Any setting saved into this text file in the following format:
+ 		key		data	# Comment
+# will be stored into Windscript onScriptLoad as config.key
+# data can be an integer, boolean or string (ref. Settings.nut)
+# Some pre-defined keys are shown below.
+
+debug				true							# Set this to true if you want to view all debug messages. (Default: true)
+
+server_motd			"Welcome to the Windscript"
+server_rules		"Always respect other players."
+
+email_replyto		windlord@windlord.net			# This is the address the reply to sent emails will be sent to
+email_server		127.0.0.1						# This is the mail server which will be used
+
+irc_server			irc.liberty-unleashed.co.uk		# This is the IRC server IP which you want to connect to. (Default: irc.liberty-unleashed.co.uk)
+irc_port			6667							# Port which the bot should connect through (Default: 6667)
+irc_password		"123456"						# Nickserv password for bot
+
+irc_botnames		"Botname1, Botname2"			# This is the list of bot names which should be used to create bots with.
+													# Only up to 3 bots are recommended due to session limits. Listed in the following format;
+													#	"Bot1, Bot2, Bot3"
+													# (The script can theoretically handle infinite amount of bots)
+
+irc_channels		"#Windlord"						# This is a list of channels which the bot will join.
+													# The channels are listed in the following format;
+													#	"#Channel1, #Channel2, #Channel3:Password"
+
+irc_echo			"#Windlord"						# This sets the echo channel for the bot to echo server messages to
+
+irc_registerbots	false							# Set to true if you want the script to register your bot for you
+
+plugins				"lms"							# List all plugin names (folder names) of plugins you want to run with Windscript.
+													# For example: "Plugin1, Plugin2, Plugin3"

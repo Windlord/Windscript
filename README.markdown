@@ -56,7 +56,7 @@ follows:-
 
 1. Move the folders into the `Scripts` folder
 2. Add `<script folder="Windscript_Loader"/>` to `LU/content.xml` and `VU/content.xml`.
-3. Edit 'Scripts/Windscript/CONFIG.txt'
+3. Edit `Scripts/Windscript/CONFIG.txt`
 
 *Note: It is recommended that you run Windscript alone as a server-side script.*
 
