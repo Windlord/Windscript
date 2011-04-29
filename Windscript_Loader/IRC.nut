@@ -59,8 +59,8 @@ function RemoveBot ( bot, ... )
 
 function RecoverBot ( bot )
 {
+	local deadbot = bot.Name, deadbotid = bot.ID;
 	bot.Debug( "RECOVER", "Recovering dead bot" );
-	deadbot = bot.Name, deadbotid = bot.ID;
 	RemoveBot( bot );
 	NewTimer( "CreateBot", 2000 * ( deadbotid + 1 ), 1, deadbot );
 }
@@ -129,6 +129,12 @@ class EchoBot
 		foreach ( chan in Channels )
 			if ( chan == channel ) return true;
 		return false;
+	}
+	function Identify ()
+	{
+		Send( "USER " + Name + " windlord.net windlord.net Windscript " + cScript_Version + " Echo-Bot" );
+		Send( "NICK " + Name );
+		Send( "MODE " + Name + " +B" );
 	}
 	function Login		() { Send( "PRIVMSG NickServ identify "+ config.irc_password ); }
 	function Join		( channel, ... ) {
@@ -251,12 +257,7 @@ function IsUserBot ( name )
 
 // This function is triggered when the sockets connect to the IRC server
 function onIRCConnected ( socket )
-{
-	local bot = FindBot( socket );					// This process is the equivalent to FindPlayer()
-	bot.Send( "USER " + bot.Name + " windlord.net windlord.net Windscript " + cScript_Version + " Echo-Bot" );
-	bot.Send( "NICK " + bot.Name );
-	bot.Send( "MODE " + bot.Name + " +B" );
-}
+	FindBot( socket ).Identify();
 
 function onIRCDisconnected ( socket )
 {
@@ -277,7 +278,9 @@ function onIRCData ( socket, raw )
 	local ntemp, nick, address, words;
 	foreach ( rawline in raw )					// This loops through the raw string to make sure all IRC lines are processed
 	{
+		/* UNCOMMENT FOR IRC RAW OUTPUT */
 		//bot.Debug( "RAW", rawline );				// Uncomment this line to see all raw output from the server
+		/* UNCOMMENT FOR IRC RAW OUTPUT */
 
 		rawline = split( rawline, " " );
 		words = rawline.len();
@@ -289,126 +292,128 @@ function onIRCData ( socket, raw )
 			AddUpdateUser( nick, address );
 		}
 
-		if ( words > 1 )
+		if ( words > 1 ) ProcessRaw( bot, rawline, nick, address )
+	}
+}
+
+function ProcessRaw ( bot, raw, nick, address )
+{
+	local words = raw.len();
+	if ( raw[ 1 ] == "001" )			// Bot has connected to the network.
+	{
+		bot.Debug( "CONNECTED", "Connected to "+ raw[ 6 ] );
+		bot.Login();				// Proceed to logging into the network.
+	}
+
+	else if ( raw[ 0 ] == "ERROR" )
+	{
+		bot.Debug( "ERROR", JoinArray( raw.slice( 1 ), " " ).slice( 1 ) );
+		if ( raw[ 1 ] == ":Closing" && raw[2] == "Link:" )	// For some reason the bot is losing its connection
 		{
-			if ( rawline[ 1 ] == "001" )			// Bot has connected to the network.
-			{
-				bot.Debug( "CONNECTED", "Connected to "+ rawline[ 6 ] );
-				bot.Login();				// Proceed to logging into the network.
-			}
+			if ( raw[ 4 ] == "\x0028Ping" && raw[ 5 ] == "timeout\x0029" )
+				RecoverBot ( bot );
+			else
+				RemoveBot ( bot );
+		}
+	}
+	else if ( raw[ 0 ] == "PING" ) { bot.Send( "PONG " + raw[ 1 ] ); }	// Reply to server PING events to keep bot alive
 
-			else if ( rawline[ 0 ] == "ERROR" )
+
+
+	else if ( raw[ 1 ] == "433" )		// If there is a nickname clash
+	{
+		bot.Name = bot.Name + "_";	// Append '_' to current name
+		bot.Identify();			// Try re-identifying with server
+	}
+
+	else if ( raw[ 1 ] == "KICK" )
+	{
+		if ( raw[ 3 ] == bot.Name )	// Update the list of channels the bot is in
+		{				// The data is stored as "#Chan1 #Chan2 #Chan3"
+			local chan = AddUpdateChannel( raw[ 2 ] );
+			bot.Channels.rawdelete( chan.Name );
+			bot.Join( chan.Name, chan.Key );
+			UpdateAvailBots( chan );
+		}
+	}
+
+	else if	( raw[ 1 ] == "PRIVMSG" )
+	{
+		raw[ 3 ] = raw[ 3 ].slice( 1 );
+		local target = raw[ 2 ], text = JoinArray( raw.slice( 3 ), " " );
+		if ( raw[ 3 ][ 0 ] == 1 )
+		{
+			if ( raw[ 3 ] == "\x0001ACTION" )
 			{
-				bot.Debug( "ERROR", JoinArray( rawline.slice( 1 ), " " ).slice( 1 ) );
-				if ( JoinArray( rawline.slice( 1, 3 ), " " ) == ":Closing Link:" )	// For some reason the bot is losing its connection
+				if ( bot.ID == 0 )
 				{
-					if ( JoinArray( rawline.slice( 4 ), " " ) == "\x0028Ping timeout\x0029" )
-						RecoverBot ( bot );
-					else
-						RemoveBot ( bot );
+					text = text.slice( 8, -1 );
+					if ( target[ 0 ] == 35 && !IsUserBot( target ) ) CallFunc( cScript_Main, "onIRCChat_Desc", target, nick, text );
+					else CallFunc( cScript_Main, "onIRCMessage_Desc", nick, text );
 				}
 			}
-			else if ( rawline[ 0 ] == "PING" ) { bot.Send( "PONG " + rawline[ 1 ] ); }	// Reply to server PING events to keep bot alive
+			else if	( raw[ 3 ] == "\x0001VERSION\x0001" ) bot.Notice( nick, CTCP_VERSION_REPLY );
+			else if ( raw[ 3 ] == "\x0001PING" ) bot.Notice( nick, "\x0001PING "+ raw[ 4 ] );
+			else if ( raw[ 3 ] == "\x0001FINGER\x0001" ) bot.Notice( nick, CTCP_FINGER_REPLY );
+		}
+		else if ( bot.ID == 0 )
+		{
+			if ( target[ 0 ] == 35 && !IsUserBot( target ) ) CallFunc( cScript_Main, "onIRCChat", target, nick, text );
+			else CallFunc( cScript_Main, "onIRCMessage", nick, text );
+		}
+	}
 
+	else if	( raw[ 1 ] == "NOTICE" )
+	{
+		raw[ 3 ] = raw[ 3 ].slice( 1 );
+		local target = raw[ 2 ], text = JoinArray( raw.slice( 3 ), " " );
 
+		if ( nick == "NickServ" ) DealWithNickServ( bot, text );	// The notice was sent by NickServ!
+	}
 
-			else if ( rawline[ 1 ] == "433" )		// If there is a nickname clash
-			{
-				bot.Name = bot.Name + "_";		// Append '_' to current name
-				onIRCConnected( socket );		// Try re-identifying with server
-			}
+	else if ( nick == bot.Name )
+	{
+		if ( raw[ 1 ] == "JOIN" )
+		{
+			local chan = AddUpdateChannel( raw[ 2 ].slice( 1 ) );
+			if ( !bot.Channels.rawin( chan.Name ) ) bot.Channels.rawset( chan.Name, chan );
+			bot.Send( "MODE "+ chan.Name );
+			bot.Debug( "JOIN", chan.Name );
+			UpdateAvailBots( chan );
+		}
+		else if ( raw[ 1 ] == "PART" )
+		{
+			local chan = AddUpdateChannel( raw[ 2 ] );
+			bot.Channels.rawdelete( chan.Name );
+			bot.Debug( "PART", chan.Name );
+			UpdateAvailBots( chan );
+		}
+	}
 
-			else if ( rawline[ 1 ] == "KICK" )
-			{
-				if ( rawline[ 3 ] == bot.Name )		// Update the list of channels the bot is in
-				{					// The data is stored as "#Chan1 #Chan2 #Chan3"
-					local chan = AddUpdateChannel( rawline[ 2 ] );
-					bot.Channels.rawdelete( chan.Name );
-					bot.Join( chan.Name, chan.Key );
-					UpdateAvailBots( chan );
-				}
-			}
+	if ( bot.ID == 0 )
+	{
+		if ( raw[ 1 ] == "353" && raw[ 4 ].tolower() == config.irc_echo )	// If a NAMES event is received to botID 0 on the echo,
+		{
+			raw[ 5 ] = raw[ 5 ].slice( 1 );
+			ProcessNAMES( raw[ 4 ], raw.slice( 5 ) );			// Process the output (Update user levels)
+		}
 
-			else if	( rawline[ 1 ] == "PRIVMSG" )
-			{
-				rawline[ 3 ] = rawline[ 3 ].slice( 1 );
-				local target = rawline[ 2 ], text = JoinArray( rawline.slice( 3 ), " " );
-				if ( rawline[ 3 ][ 0 ] == 1 )
-				{
-					if ( rawline[ 3 ] == "\x0001ACTION" )
-					{
-						if ( bot.ID == 0 )
-						{
-							text = text.slice( 8, -1 );
-							if ( target[ 0 ] == 35 && !IsUserBot( target ) ) CallFunc( cScript_Main, "onIRCChat_Desc", target, nick, text );
-							else CallFunc( cScript_Main, "onIRCMessage_Desc", nick, text );
-						}
-					}
-					else if	( rawline[ 3 ] == "\x0001VERSION\x0001"	) bot.Notice( nick, CTCP_VERSION_REPLY );
-					else if ( rawline[ 3 ] == "\x0001PING"			) bot.Notice( nick, "\x0001PING "+ rawline[ 4 ] );
-					else if ( rawline[ 3 ] == "\x0001FINGER\x0001"	) bot.Notice( nick, CTCP_FINGER_REPLY );
-				}
-				else if ( bot.ID == 0 )
-				{
-					if ( target[ 0 ] == 35 && !IsUserBot( target ) ) CallFunc( cScript_Main, "onIRCChat", target, nick, text );
-					else CallFunc( cScript_Main, "onIRCMessage", nick, text );
-				}
-			}
+		else if ( raw[ 1 ] == "MODE" && raw[ 2 ].tolower() == config.irc_echo )	// If a MODE event is received to botID 0 on the echo,
+			ProcessModes( raw.slice( 3 ) );												// Process the output (Update user levels)
+	}
 
-			else if	( rawline[ 1 ] == "NOTICE" )
-			{
-				rawline[ 3 ] = rawline[ 3 ].slice( 1 );
-				local target = rawline[ 2 ], text = JoinArray( rawline.slice( 3 ), " " );
+	else if ( words > 2 )
+	{
+		if ( raw[ 2 ] == bot.Name )
+		{
+			if ( raw[ 1 ] == "324" && raw.len() > 5 )			// If channel mode has something after the +modes bit
+			FindChannel( raw[ 3 ] ).Key = raw[ 5 ];			// Assume it is channel key and store
 
-				if ( nick == "NickServ" ) DealWithNickServ( bot, text );	// The notice was sent by NickServ!
-			}
+			else if ( raw[ 1 ] == "401" && raw[ 3 ] == "NickServ" )
+				bot.Autojoin();
 
-			else if ( nick == bot.Name )
-			{
-				if ( rawline[ 1 ] == "JOIN" )
-				{
-					local chan = AddUpdateChannel( rawline[ 2 ].slice( 1 ) );
-					if ( !bot.Channels.rawin( chan.Name ) ) bot.Channels.rawset( chan.Name, chan );
-					bot.Send( "MODE "+ chan.Name );
-					bot.Debug( "JOIN", chan.Name );
-					UpdateAvailBots( chan );
-				}
-				else if ( rawline[ 1 ] == "PART" )
-				{
-					local chan = AddUpdateChannel( rawline[ 2 ] );
-					bot.Channels.rawdelete( chan.Name );
-					bot.Debug( "PART", chan.Name );
-					UpdateAvailBots( chan );
-				}
-			}
-
-			if ( bot.ID == 0 )
-			{
-				if ( rawline[ 1 ] == "353" && rawline[ 4 ].tolower() == config.irc_echo )	// If a NAMES event is received to botID 0 on the echo,
-				{
-					rawline[ 5 ] = rawline[ 5 ].slice( 1 );
-					ProcessNAMES( rawline[ 4 ], rawline.slice( 5 ) );			// Process the output (Update user levels)
-				}
-
-				else if ( rawline[ 1 ] == "MODE" && rawline[ 2 ].tolower() == config.irc_echo )	// If a MODE event is received to botID 0 on the echo,
-					ProcessModes( rawline.slice( 3 ) );												// Process the output (Update user levels)
-			}
-
-			else if ( words > 2 )
-			{
-				if ( rawline[ 2 ] == bot.Name )
-				{
-					if ( rawline[ 1 ] == "324" && rawline.len() > 5 )			// If channel mode has something after the +modes bit
-						FindChannel( rawline[ 3 ] ).Key = rawline[ 5 ];			// Assume it is channel key and store
-
-					else if ( rawline[ 1 ] == "401" && rawline[ 3 ] == "NickServ" )
-						bot.Autojoin();
-
-					else if ( rawline[ 1 ] == "INVITE" )
-						bot.Join( rawline[ 3 ].slice( 1 ) );
-
-				}
-			}
+			else if ( raw[ 1 ] == "INVITE" )
+				bot.Join( raw[ 3 ].slice( 1 ) );
 		}
 	}
 }
@@ -504,6 +509,7 @@ function CheckBotLogin ( botname )
 		{
 			bot.Msg( "NickServ", "Group "+ split( config.irc_botnames, ", " )[ 0 ] +" "+ config.irc_password );
 			MainBot.Msg( "HostServ", "Group" );
+			bot.Autojoin();
 		}
 	}
 }
@@ -538,7 +544,8 @@ function DealWithNickServ ( bot, text )
 	}
 	else if ( text =="Your nick isn't registered." )
 	{
-		NewTimer( "SendMessageToIRC", 60000, 1, bot.name, "Privmsg Nickserv :Register "+ config.irc_password + " windlord@windlord.net" );
+		if ( config.irc_registerbots )
+			NewTimer( "SendMessageToIRC", 60000, 1, bot.Name, "Privmsg Nickserv :Register "+ config.irc_password + " windlord@windlord.net" );
 		bot.Autojoin();
 	}
 }

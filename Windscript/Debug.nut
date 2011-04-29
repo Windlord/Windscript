@@ -21,7 +21,10 @@ function debug ( msg )
 
 		// Initiate file stream if not already done
 		if ( !getroottable().rawin( "DEBUG_STREAM" ) )
+		{
 			DEBUG_STREAM <- file( cScript_Dir +"debug.log", "a" );
+			debug_newline();
+		}
 
 		// Write debug message to file stream
 		foreach ( idx, chr in msg )
@@ -40,8 +43,4 @@ function debug_newline ()
 {
 	DEBUG_STREAM.writen( '\r', 'b' );
 	DEBUG_STREAM.writen( '\n', 'b' );
-}
-
-{
-	debug_newline();
 }

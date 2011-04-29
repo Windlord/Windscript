@@ -70,19 +70,19 @@ function onIRCChat ( channel, user, text )
 	if ( channel.tolower() == config.irc_echo.tolower() )
 	{
 		local prefix = text[ 0 ];					// This gets the ASCII code for the prefix
-		if ( prefix == 33 )						// Check if prefix is '!'
+		if ( prefix == '!' )						// Check if prefix is '!'
 		{
 			local a = split( text, " " ), cmd = a[ 0 ].slice( 1 ).tolower();
 			local params = JoinArray( a.slice( 1 ), " " );
 			if ( cmd ) onCommand ( user, cmd, params );
 		}
-		else if ( prefix == 46 && text.len() > 1 )			// Check if prefix is '.' and text exists after .
+		else if ( prefix == '.' && text.len() > 1 )			// Check if prefix is '.' and text exists after .
 		{
 			local next = text[ 1 ];
-			if ( next != 95 && next != 46 && next != 47 )		// Don't process if ./ ._ ..
+			if ( next != '_' && next != '.' && next != '/' )	// Don't process if ./ ._ ..
 			{
 				local text = text.slice( 1 ), leveln = FindLevel( user, 3 );
-				if ( next == 32 ) text = text.slice( 1 );		// If there's a space, slice it
+				if ( next == ' ' ) text = text.slice( 1 );	// If there's a space, slice it
 				EMessage( leveln + iCol( 6, ": " ) + text, colWhite );
 			}
 		}
@@ -90,9 +90,9 @@ function onIRCChat ( channel, user, text )
 	else									// Afk commands can be used outside of the echo channel
 	{
 		local a = split( text, " " ), cmd = a[ 0 ].tolower();
-		if		( cmd == "!away") cmdAway( user, JoinArray( a.slice( 1 ), " " ), channel );
-		else if	( cmd == "!back") cmdBack( user, channel );
-		else if	( cmd == "!afk" ) cmdAfk( user, JoinArray( a.slice( 1 ), " " ), channel );
+		if ( cmd == "!away") cmdAway( user, JoinArray( a.slice( 1 ), " " ), channel );
+		else if ( cmd == "!back") cmdBack( user, channel );
+		else if ( cmd == "!afk" ) cmdAfk( user, JoinArray( a.slice( 1 ), " " ), channel );
 
 	}
 }
