@@ -11,6 +11,7 @@
 *Last Updated: 28/04/2011 22:00 GMT*
 
 # Contents
+
 1. What is Windscript?
 2. Mutual Agreement
 3. Script Installation
@@ -42,6 +43,7 @@ of many of the author's experiences with scripting for GTA:MP modifications.
 Although this script package is not directly including any sort of license,
 the mutual agreement which I wish all users of Windscript to abide by is as
 follows:-
+
 1. Windscript is provided as-is and comes with no warranty. There is no minimum	service period and updates for Windscript may be stopped at any time.
 2. No one shall re-use Windscript for commercial purposes
 3. Any modifications to Windscript must abide to the rules of the environment in which the script package is being used. (LU itself and the server where Windscript is running)
@@ -77,6 +79,7 @@ comments as possible inside of my scripts. Please do not ignore them.
 ## 5. Support:
 
 There are a few ways you can obtain help for Windscript
+
 1.  Liberty Unleashed Forums - [http://forum.liberty-unleashed.co.uk/]
 2.  Liberty Unleashed Wiki - [http://liberty-unleashed.co.uk/LUWiki]
 2.  LUnet IRC Network - irc://irc.liberty-unleashed.co.uk/Windlord
@@ -89,11 +92,13 @@ There are a few ways you can obtain help for Windscript
 
 Every single line of script written in this script package has been written by:
 
-Windlord ([windlord@windlord.net])
+### Windlord ([windlord@windlord.net])
+
 - Tester for Liberty Unleashed and Vice Unleashed   - [http://liberty-unleashed.co.uk/]
 - Senior member of the Kuslahden alaste clan        - [http://forum.liberty-unleashed.co.uk/]
 
 I would like to thank the following people for their valuable help:
+
 * ozzie - Introducing me to the idea of seamless script-reloading
 * Juppi - Providing support for usage of embedded functions
 * Force - Providing FBS, an excellent starter script for me to refer to.
