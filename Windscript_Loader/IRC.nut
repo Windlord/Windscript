@@ -135,22 +135,23 @@ class EchoBot
 		Send( "USER " + Name + " windlord.net windlord.net Windscript " + cScript_Version + " Echo-Bot" );
 		Send( "NICK " + Name );
 		Send( "MODE " + Name + " +B" );
+		return true;
 	}
-	function Login		() { Send( "PRIVMSG NickServ identify "+ config.irc_password ); }
+	function Login		() { return Send( "PRIVMSG NickServ identify "+ config.irc_password ); }
 	function Join		( channel, ... ) {
 		local key = vargv.len() > 0 ? vargv[ 0 ] : "";
 		local lchannel = channel.tolower();
 		if ( !IRCChannels.rawin( lchannel ) ) IRCChannels.rawset( lchannel, IRCChannel( channel, key ) );
-		Send( "JOIN "+ channel +" "+ key );
+		return Send( "JOIN "+ channel +" "+ key );
 	}
-	function Send		( message ) { Socket.Send( message +"\r\n" ); }
-	function Part		( channel, ... ) { Send( "PART "+ channel + JoinArray( vargv, " " ) ); }
-	function Quit		( message ) { Send( "QUIT :"+ message ); }
-	function Msg		( target, message ) { Send( "PRIVMSG " + target + " :" + message ); }					// For sending messages to channel/user
-	function Adminmsg	( target, message ) { Send( "PRIVMSG %" + target + ":" + message ); }					// For sending messages to all halfops on a channel
-	function Notice		( target, message ) { Send( "NOTICE " + target + " :" + message ); }					// For sending notices to channel/user
-	function Me			( target, message ) { Send( "PRIVMSG " + target + " :\x0001ACTION "+ message +"\x0001" ); }	// For sending /me text
-	function Rejoin		( channel ) { Part( channel ); Join( channel, FindChannel( channel ).Key ); }
+	function Send		( message ) { Socket.Send( message +"\r\n" ); return true; }
+	function Part		( channel, ... ) { return Send( "PART "+ channel + JoinArray( vargv, " " ) ); }
+	function Quit		( message ) { return Send( "QUIT :"+ message ); }
+	function Msg		( target, message ) { return Send( "PRIVMSG " + target + " :" + message ); }					// For sending messages to channel/user
+	function Adminmsg	( target, message ) { return Send( "PRIVMSG %" + target + ":" + message ); }					// For sending messages to all halfops on a channel
+	function Notice		( target, message ) { return Send( "NOTICE " + target + " :" + message ); }					// For sending notices to channel/user
+	function Me			( target, message ) { return Send( "PRIVMSG " + target + " :\x0001ACTION "+ message +"\x0001" ); }	// For sending /me text
+	function Rejoin		( channel ) { Part( channel ); return Join( channel, FindChannel( channel ).Key ); }
 	function Autojoin	() {
 		local channels = split( config.irc_channels, ", " ), info, key;
 		foreach ( chanstr in channels )
@@ -159,30 +160,30 @@ class EchoBot
 			key = info.len() > 1 ? info[ 1 ] : "";
 			Join ( info[ 0 ], key );
 		}
+		return true;
 	}
-	function Debug ( item, msg )
-		debug( "[IRC:"+ Name +":"+ item +"] "+ msg );
+	function Debug ( item, msg ) { debug( "[IRC:"+ Name +":"+ item +"] "+ msg ); return true; }
 }
-function SendMessageToIRC ( botname, message ) { FindBot( botname ).Send( message ); }
+function SendMessageToIRC ( botname, message ) { return FindBot( botname ).Send( message ); }
 
 IRCChannels <- {};
 class IRCChannel
 {
 	constructor ( channel, ... )
 	{
-		Name	= channel;
-		lName	= channel.tolower();
-		Key		= vargv.len() > 0 ? vargv[ 0 ] : "";
-		Users	= 0;
-		Bots	= [];
+		Name = channel;
+		lName = channel.tolower();
+		Key = vargv.len() > 0 ? vargv[ 0 ] : "";
+		Users = 0;
+		Bots = [];
 	}
-	ID			= null;
-	Name		= null;
-	lName		= null;
-	Key			= null;
-	Users		= null;
-	Userlist	= null;
-	Bots		= [];
+	ID = null;
+	Name = null;
+	lName = null;
+	Key = null;
+	Users = null;
+	Userlist = null;
+	Bots = [];
 }
 
 function FindChannel ( channame )
@@ -209,16 +210,16 @@ class IRCUser
 {
 	constructor( nickname, address )
 	{
-		ID			= 1001 + ::IRCUsers.len();
-		Name		= nickname;
-		Address		= address;
-		Level		= 1;
+		ID = 1001 + ::IRCUsers.len();
+		Name = nickname;
+		Address = address;
+		Level = 1;
 	}
 
-	ID				= null;
-	Name			= null;
-	Address			= null;
-	Level			= null;
+	ID = null;
+	Name = null;
+	Address = null;
+	Level = null;
 }
 
 function GetIRCUserID ( name ) { return FindUser( name ).ID; }
@@ -588,8 +589,7 @@ function UpdateAvailBots ( chan )
 function BotMessage ( target, type, text )
 {
 	local max, min, botlist = IRCBots;
-	if ( target[ 0 ] == '#' )
-		botlist = FindChannel( target ) ? FindChannel( target ).Bots : false;
+	if ( target[ 0 ] == '#' ) botlist = FindChannel( target ) ? FindChannel( target ).Bots : false;
 
 	if ( botlist )
 	{
@@ -606,5 +606,7 @@ function BotMessage ( target, type, text )
 
 		if ( type.tolower() == "notice" ) min.Notice( target, text );
 		else min.Msg( target, text );
+		return true;
 	}
+	return false;
 }

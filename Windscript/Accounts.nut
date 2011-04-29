@@ -37,6 +37,7 @@ class User
 		::IncData( "UserData", "TotalUsersCount" );
 		ID = ::AddData( "User_Name_To_ID", name, next_ID );
 		Name = name;
+		Level = 1;
 	}
 
 	function UpdateInfo ()
@@ -69,14 +70,14 @@ class User
 	function SetPassword ( password )
 	{
 		local hash_pass = ::SHA1( password );
-		if ( !Password )
+		if ( !Pass )
 		{
-			Password = hash_pass;
-			return ::IncData( "UserData", "RegisteredUsersCount" );
+			Pass = hash_pass;
+			return onUserRegister( this, ::IncData( "UserData", "RegisteredUsersCount" ) );
 		}
 		else if ( LoggedIn )
 		{
-			Password = hash_pass;
+			Pass = hash_pass;
 			return true;
 		}
 		else return false;
@@ -86,13 +87,14 @@ class User
 	{
 		if ( Password && ::SHA1( password ) == Password )
 		{
-			local response = LastLogin ? LastLogin : true;
+			local response = LastLogin;
 			LoggedIn = true;
 			LastLogin = GetTime();
 			::IncData( "UserData", "LoginsCount" );
-			return response;
+			return onUserLogin( user, response );
 		}
-		else return false;
+		if ( Password ) return -1;
+		return 0;
 	}
 
 	function _get ( prop )

@@ -12,15 +12,7 @@ function cmdRegister ( player, params )
 	if ( params )
 	{
 		local user = GetUser( player );
-		local result = user.SetPassword( params );
-		if ( result )
-		{
-			result = ToThousands( GetNth( result ) );
-			AdminPM( "You have successfully registered!", player );
-			AdminPM( "Do you know that you are the "+ result +" registered user?", player );
-		}
-		else
-			mError ( "Your nickname is already registered.", player );
+		if ( !user.SetPassword( params ) ) mError ( "Your nickname is already registered.", player );
 	}
 	else
 		mFormat ( "/register <Password>", player );
@@ -30,19 +22,16 @@ function cmdLogin ( player, params )
 {
 	if ( params )
 	{
-		local user = GetUser( player );
-		local result = user.Login( params );
-		if ( result )
+		local user = GetUser( player ), success = user.Login( params );
+		switch ( success )
 		{
-			AdminPM( "Logged in successfully", player );
-			if ( type( result ) == "integer" )
-			{
-				result = Duration( ( GetTime() - result ) * 1000 );
-				AdminPM( "Last Logged in "+ result +" ago.", player );
-			}
+			case 1:
+				return true;
+			case 0:
+				return mError ( "Your Nickname is not registered.", player );
+			case -1:
+				return mError ( "Invalid Password", player );
 		}
-		else
-			AdminPM( "Login Unsuccessful", player )
 	}
 	else
 		mFormat ( "/login <Password>", player );

@@ -17,22 +17,7 @@ function onPlayerConnect( player )
 
 function onPlayerPart( player, reason )
 {
-	switch ( reason )
-	{
-		case PARTREASON_TIMEOUT:
-			reason = "Lost Connection";
-			break;
-		case PARTREASON_DISCONNECTED:
-			reason = "Quit";
-			break;
-		case PARTREASON_KICKED:
-			reason = "Kicked";
-			break;
-		case PARTREASON_BANNED:
-			reason = "Banned";
-			break;
-	}
-	Echo( iCol( 3, player.Name +" left the server. \x028"+ reason +"\x029" ) );
+	Echo( iCol( 3, player.Name +" left the server. \x028"+ GetPartReason( reason ) +"\x029" ) );
 	OnlineUsers.rawdelete( player );
 }
 

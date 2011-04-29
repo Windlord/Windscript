@@ -35,39 +35,39 @@ function CallFunc2 ( func, ... )				// This is to use a dummy timer to make Call
 
 // Messaging functions
 function Echo ( message )					// Sends a message to the echo channel
-	SendToEcho( config.irc_echo, "msg", message );
+	return SendToEcho( config.irc_echo, "msg", message );
 
 function EMessage ( message, ... )				// Sends a message both to the server and the echo channel
 {								// Format: EMessage ( message, Colour() );
-	SendToEcho( config.irc_echo, "msg", message );
 	Message( StripCol( message ), vargv.len() > 0 ? vargv[ 0 ] : colWhite );
+	return SendToEcho( config.irc_echo, "msg", message );
 }
 
 function SendMessage ( message, target, ... )			// Sends a pm ingame if player is ingame. Sends a notice if IRC user.
 {								// Format: SendMessage( message, player/user, Colour() );
-	if ( target.ID > 1000 ) SendToEcho( target.Name, "notice", message );
-	else MessagePlayer( StripCol( message ), target, vargv.len() > 0 ? vargv[ 0 ] : colWhite );
+	if ( target.ID > 1000 ) return SendToEcho( target.Name, "notice", message );
+	else return MessagePlayer( StripCol( message ), target, vargv.len() > 0 ? vargv[ 0 ] : colWhite );
 }
 
 function AdminMessage ( message )
-	EMessage( iCol( 2, ":: "+ message ), colBlue );
+	return EMessage( iCol( 2, ":: "+ message ), colBlue );
 
 function AdminPM ( message, target )
-	SendMessage( iCol( 2, ":: "+ message ), target, colBlue );
+	return SendMessage( iCol( 2, ":: "+ message ), target, colBlue );
 
 function SendToEcho ( channel, type, message )
-	CallFunc2( "BotMessage", channel, type, message );
+	return CallFunc2( "BotMessage", channel, type, message );
 
 
 // Error message functions
 function mError ( message, player )
-	SendMessage ( iBold( iCol( 4, "Error" ) + iCol( 3, " :: " ) ) + iCol( 4, message ), player, colRed );
+	return SendMessage ( iBold( iCol( 4, "Error" ) + iCol( 3, " :: " ) ) + iCol( 4, message ), player, colRed );
 
 function mFormat ( message, player )
-	SendMessage ( iBold( iCol( 3, "Format" ) + iCol( 4, " :: " ) ) + iCol( 3, message ), player, colGreen );
+	return SendMessage ( iBold( iCol( 3, "Format" ) + iCol( 4, " :: " ) ) + iCol( 3, message ), player, colGreen );
 
 function mErrorG ( message )
-	EMessage ( iBold( iCol( 4, "Error" ) + iCol( 3, " :: " ) ) + iCol( 4, message ), colRed );
+	return EMessage ( iBold( iCol( 4, "Error" ) + iCol( 3, " :: " ) ) + iCol( 4, message ), colRed );
 
 
 // Arrays to store IRC level names and symbols for quicker referencing
@@ -97,36 +97,14 @@ function FindLevel ( player, ... )
 	{
 		case 1:
 			return IRC_LEVELNAME[ ilevel - 1 ];
-			break;
 		case 2:
 			return IRC_LEVELSYML[ ilevel - 1 ];
-			break;
 		case 3:
 			return iCol( IRC_LEVELCOLO[ ilevel - 1 ], IRC_LEVELSYML[ ilevel - 1 ] + player.Name );
-			break;
 		default:
 			return ilevel;
-			break;
 	}
 	return 1;
-}
-
-// NEED TO EDIT AND ADD IN COMMANDLEVEL RETRIEVING!!! //
-// Note: This function also checks whether a player is registered
-//       if a command's level is set to 2
-function CheckLevel ( player, command, ... )
-{
-	if ( vargv.len() > 0 && player.ID > 1000 )
-	{
-		mError( "InGame Command ("+ command.toupper() +")", player );
-		return false;
-	}
-	else if ( FindLevel( player ) >= 4 ) return true;
-	else
-	{
-		mError( "Invalid Command ("+ command.toupper() +")", player );
-		return false;
-	}
 }
 
 
@@ -146,5 +124,20 @@ function FindPlayer2 ( text )
 	{
 		local plr = FindPlayer( text );
 		return plr ? plr : FindIRCUser( text );
+	}
+}
+
+function GetPartReason ( reasonid )
+{
+	switch ( reasonid )
+	{
+		case PARTREASON_TIMEOUT:
+			return "Lost Connection";
+		case PARTREASON_DISCONNECTED:
+			return "Quit";
+		case PARTREASON_KICKED:
+			return "Kicked";
+		case PARTREASON_BANNED:
+			return "Banned";
 	}
 }

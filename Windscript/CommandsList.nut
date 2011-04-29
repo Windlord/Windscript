@@ -32,23 +32,23 @@ function onCommand ( player, command, params )
 									// Note that this bit of code also makes it impossible for command names with "!" or "/" in them to work.
 
 	params = ( params == "" ) ? null : params;
-	if ( command )
+	switch ( command )
 	{
-		if ( command == "say" ) return cmdSay ( player, params );
-		else if	( command == "me" ) return cmdMe ( player, params );
-		else if ( command == "kill" ) return cmdKill ( player );
-		else if ( command == "pos" ) return cmdPos ( player );
-		else if	( command == "uptime" ) return cmdUptime ( player );
-		else if ( command == "createbot") return cmdCreateBot( player, params );
-		else if ( command == "ircdo" ) return cmdIRCDo ( player, params );
-		else if ( command == "raw" ) return cmdRaw ( player, params );
-		else if	( command == "reload" ) return cmdReload ( player );
-		else if	( command == "away" ) return cmdAway ( player, params );
-		else if	( command == "back" ) return cmdBack ( player );
-		else if	( command == "afk" ) return cmdAfk ( player, params );
-		else if ( command == "wep" ) player.SetWeapon( GetWeaponIDFromName( params ) );
-		else if ( command == "goto" ) player.Pos = FindPlayer( params ).Pos;
-		else if ( command == "spawn" ) CreateVehicle( GetVehicleIDFromName( IsNum( params ) ? params.tointeger() : params ), player.Pos, 0 );
-		else mError( "Invalid Command ("+ command.toupper() +")", player );
+		case "say": return cmdSay ( player, params );
+		case "me": return cmdMe ( player, params );
+		case "kill": return cmdKill ( player );
+		case "pos": return cmdPos ( player );
+		case "uptime": return cmdUptime ( player );
+		case "createbot": return cmdCreateBot( player, params );
+		case "ircdo": return cmdIRCDo ( player, params );
+		case "raw": return cmdRaw ( player, params );
+		case "reload": return cmdReload ( player );
+		case "away": return cmdAway ( player, params );
+		case "back": return cmdBack ( player );
+		case "afk": return cmdAfk ( player, params );
+		//else if ( command == "wep" ) player.SetWeapon( GetWeaponIDFromName( params ) );
+		//else if ( command == "goto" ) player.Pos = FindPlayer( params ).Pos;
+		//else if ( command == "spawn" ) CreateVehicle( GetVehicleIDFromName( IsNum( params ) ? params.tointeger() : params ), player.Pos, 0 );
+		default: return mError( "Invalid Command ("+ command.toupper() +")", player );
 	}
 }
