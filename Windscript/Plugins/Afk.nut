@@ -8,17 +8,17 @@
 	                                 by Windlord	*/
 
 
-function cmdAway ( player, reason, channel = config.irc_echo_lower )
+function cmdAway ( player, reason, channel )
 	return Afk( player, channel ).Add( reason ? reason : "No Reason" );
 
-function cmdBack ( player, dummyparams, channel = config.irc_echo_lower )
+function cmdBack ( player, dummyparams, channel )
 {
 	local awaydata = Afk( player, channel );
 	if ( awaydata.Num ) return awaydata.Del();
 	else return mError( "You are not away", player );
 }
 
-function cmdAfk ( player, params, channel = config.irc_echo_lower )
+function cmdAfk ( player, params, channel )
 	return Afk( player, channel ).List();
 
 class Afk
@@ -88,9 +88,11 @@ class Afk
 			local dur = ( GetTime() - Time );
 			if ( !SpamCheck() ) Msg( ::iCol( 3, ::iBold( Player.Name ) +" is still away for \""+ Reason +"\" ("+ ::Duration( dur ) +")" ), ::colGreen );
 			else ::SendMessage( ::iCol( 3, "You are still away for \""+ Reason +"\" ("+ ::Duration( dur ) +")" ), Player, ::colGreen );
+			return true;
 		}
 		else
 		{
+			::IncData( "AFK", ID + ".TotalTime", GetTime() - Time );
 			Time = ::GetTime();
 			Reason = reason;
 			if ( !SpamCheck() ) Msg( ::iCol( 3, ::iBold( Player.Name ) +" is now away ("+ Reason +")" ), ::colGreen );
@@ -123,15 +125,22 @@ class Afk
 	function Msg ( msg, col )
 	{
 		if ( Ingame || Channel == config.irc_echo_lower ) return ::EMessage( msg, col );
-		else return ::CallFunc2( "BotMessage", Channel, "msg", msg );
+		else
+		{
+			::CallFunc2( "BotMessage", Channel, "msg", msg );
+			return true;
+		}
 	}
 
 	function SpamCheck ()
 	{
 		local now = ::GetTime(), dt = now - LastTime;
-		::AddData( "AFK", ID + ".LastTime", now );
 		if ( dt < 15 ) return true;
-		else return false;
+		else
+		{
+			::AddData( "AFK", ID + ".LastTime", now );
+			return false;
+		}
 	}
 
 	Ingame = false;
@@ -147,7 +156,7 @@ class Afk
 }
 
 {
-	Plugins.Afk.RegisterCommand( "away", cmdAway );
-	Plugins.Afk.RegisterCommand( "back", cmdBack );
-	Plugins.Afk.RegisterCommand( "afk", cmdAfk );
+	Plugins.Afk.RegisterCommandAllChannels( "away", cmdAway );
+	Plugins.Afk.RegisterCommandAllChannels( "back", cmdBack );
+	Plugins.Afk.RegisterCommandAllChannels( "afk", cmdAfk );
 }

@@ -89,13 +89,12 @@ function onIRCChat ( channel, user, text )
 			}
 		}
 	}
-	else									// Afk commands can be used outside of the echo channel
+	else									// Commands which can be used outside of echo channel
 	{
-		local a = split( text, " " ), cmd = a[ 0 ].tolower();
-		if ( cmd == "!away") cmdAway( user, JoinArray( a.slice( 1 ), " " ), channel );
-		else if ( cmd == "!back") cmdBack( user, channel );
-		else if ( cmd == "!afk" ) cmdAfk( user, JoinArray( a.slice( 1 ), " " ), channel );
-
+		local a = split( text, " " ), cmd = a[ 0 ].tolower().slice( 1 );
+		local params = JoinArray( a.slice( 1 ), " " );
+		params = ( params == "" ) ? 0 : params;
+		PluginCommandChannels( cmd, user, params, channel );
 	}
 }
 

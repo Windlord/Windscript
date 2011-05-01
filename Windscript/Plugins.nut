@@ -28,6 +28,18 @@ function PluginCommand ( name, player, params )
 	{
 		if ( plugin.Commands.rawin( name ) )
 			return plugin.Commands.rawget( name )( player, params );
+		else if ( plugin.CommandsAllChannels.rawin( name ) )
+			return plugin.CommandsAllChannels.rawget( name )( player, params, config.irc_echo_lower );
+	}
+	return false;
+}
+
+function PluginCommandChannels ( name, user, params, channel )
+{
+	foreach ( plugin in Plugins )
+	{
+		if ( plugin.CommandsAllChannels.rawin( name ) )
+			return plugin.CommandsAllChannels.rawget( name )( user, params, channel );
 	}
 	return false;
 }
@@ -63,6 +75,9 @@ class Plugin
 	function RegisterCommand ( command, fn )
 		Commands.rawset( command.tolower(), fn );
 
+	function RegisterCommandAllChannels ( command, fn )
+		CommandsAllChannels.rawset( command.tolower(), fn );
+
 	function RegisterEvent ( event, fn )
 		Events.rawset( event, fn );
 
@@ -71,5 +86,6 @@ class Plugin
 
 	Name = "";
 	Commands = {};
+	CommandsAllChannels = {};
 	Events = {};
 }
