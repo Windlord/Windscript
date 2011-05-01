@@ -10,13 +10,13 @@
 
 function CallFunc2 ( func, ... )				// This is to use a dummy timer to make CallFunc work properly
 {
-	local exec = "NewTimer( \"CallFunc\", 0, 1, cScript_Loader, \"" + func + "\"";
+	local exec = "NewTimer( \"CallFunc\", 0, 1, cScript_Loader, \"" + func + "\"", output;
 
 	foreach ( param in vargv )				// For each optional param...
 	{
 		if ( typeof param == "string" )			// If string
 		{
-			local output = "";			// Initiate empty output string
+			output = "";				// Initiate empty output string
 			foreach ( chr in param )		// For each character in param
 			{
 				if (chr == 34) output += "\\\"";// Output \" if "
@@ -29,7 +29,8 @@ function CallFunc2 ( func, ... )				// This is to use a dummy timer to make Call
 	exec += " );"						// Close function
 
 	local runthis = compilestring( exec );			// Compile exec
-	return runthis();					// run!
+	local result = runthis();				// run!
+	return true;
 }
 
 

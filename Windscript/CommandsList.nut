@@ -25,13 +25,13 @@ function onPlayerCommand ( player, command, params )
 
 function onCommand ( player, command, params )
 {
-	local a = "";
+	local a = "", inplugins;
 	foreach( val in command )					// For each character in the variable command
 		if ( val != '!' && val != '/' ) a += val.tochar();	// Only write char if value isn't "!" or "/"
 	command = (a == "") ? null : a;					// This strips command of "!" and "/"
 									// Note that this bit of code also makes it impossible for command names with "!" or "/" in them to work.
 
-	params = ( params == "" ) ? null : params;
+	params = ( params == "" ) ? 0 : params;
 	switch ( command )
 	{
 		case "say": return cmdSay ( player, params );
@@ -43,12 +43,11 @@ function onCommand ( player, command, params )
 		case "ircdo": return cmdIRCDo ( player, params );
 		case "raw": return cmdRaw ( player, params );
 		case "reload": return cmdReload ( player );
-		case "away": return cmdAway ( player, params );
-		case "back": return cmdBack ( player );
-		case "afk": return cmdAfk ( player, params );
 		//else if ( command == "wep" ) player.SetWeapon( GetWeaponIDFromName( params ) );
 		//else if ( command == "goto" ) player.Pos = FindPlayer( params ).Pos;
 		//else if ( command == "spawn" ) CreateVehicle( GetVehicleIDFromName( IsNum( params ) ? params.tointeger() : params ), player.Pos, 0 );
-		default: return mError( "Invalid Command ("+ command.toupper() +")", player );
+		default:
+			inplugins = PluginCommand( command, player, params );
+			return inplugins ? inplugins : mError( "Invalid Command ("+ command.toupper() +")", player );
 	}
 }

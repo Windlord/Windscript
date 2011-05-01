@@ -67,7 +67,6 @@ function onScriptLoad ()
 	AttemptLoad ( "Commands.nut" );		// Load Commands.nut which handles IRC and Player commands
 	AttemptLoad ( "CommandsList.nut" );	// Load CommandsList.nut which contains the list of commands
 	AttemptLoad ( "GameEvents.nut" );	// Load GameEvents.nut which handles all in-game events
-	AttemptLoad ( "Afk.nut" );		// Load Afk.nut which allows AFK logging ingame and on IRC
 	AttemptLoad ( "Plugins.nut" );		// Load Plugins.nut which deals with load/unloading plugins
 
 	print ( "\r- Completed Loading All Scripts.\n" );
@@ -87,12 +86,13 @@ function AfterScriptLoad ()
 	NewTimer ( "StartBackground", 1000, 1 );
 	EMessage (  iCol( 4, "* Windscript Loaded." ), colRed );
 	debug ( "Loaded Windscript Version "+ cScript_Version );
+	LoadPlugins();
 }
 
 function AttemptLoad ( script )
 {
-	print ( "Loading "+ script	);
-	try { dofile ( cScript_Dir + script	); } catch ( ex )
+	print ( "Loading "+ script );
+	try { dofile ( cScript_Dir + script ); } catch ( ex )
 	if ( ex )
 	{
 		Load_Errors++;

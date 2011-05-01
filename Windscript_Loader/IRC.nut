@@ -487,7 +487,7 @@ function ProcessModes ( changes )
 		if ( level && user )
 		{
 			if ( mode == '+' && user.Level < level ) user.Level = level;
-			else if ( mode == '-' && user.Level >= level ) IRCBots[ 0 ].Send( "NAMES "+ config.irc_echo );
+			else if ( mode == '-' && user.Level >= level ) MainBot.Send( "NAMES "+ config.irc_echo );
 		}
 		num++;
 	}

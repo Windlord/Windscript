@@ -38,5 +38,5 @@ irc_echo		"#Windlord"			# This sets the echo channel for the bot to echo server 
 
 irc_registerbots	false				# Set to true if you want the script to register your bot for you
 
-plugins			"lms"				# List all plugin names (folder names) of plugins you want to run with Windscript.
+plugins			"Afk"				# List all plugin names (folder names) of plugins you want to run with Windscript.
 							# For example: "Plugin1, Plugin2, Plugin3"
