@@ -89,40 +89,42 @@ function IsDivided ( num )
 // EXECUTED: EVERY 1 SECONDS.
 function BackgroundOneSecond ()
 {
-
+	PluginEvent( BackgroundOneSecond );
 }
 
 // EXECUTED: EVERY 2 SECONDS.
 function BackgroundTwoSeconds ()
 {
-
+	PluginEvent( BackgroundTwoSeconds );
 }
 
 // EXECUTED: EVERY 10 SECONDS.
 function BackgroundTenSeconds ()
 {
-
+	PluginEvent( BackgroundTenSeconds );
 }
 
 // EXECUTED: EVERY 20 SECONDS.
 function BackgroundTwentySeconds ()
 {
 	SyncData();
+	PluginEvent( BackgroundTwentySeconds );
 }
 
 function BackgroundThirtySeconds ()
 {
-
+	PluginEvent( BackgroundThirtySeconds );
 }
 
 // EXECUTED: EVERY 1 MINUTE.
 function BackgroundOneMinute ()
 {
-
+	PluginEvent( BackgroundOneMinute );
 }
 
 // EXECUTED: EVERY 5 MINUTES.
 function BackgroundFiveMinutes ()
 {
 	UpdateUptime();
+	PluginEvent( BackgroundFiveMinutes );
 }

@@ -13,12 +13,14 @@ function onPlayerConnect( player )
 	GetUser( player ).UpdateInfo();
 	Echo( iCol( 3, player.Name +" joined the server." ) );
 	if ( config.rawin( "server_motd" ) ) AdminPM( config.server_motd, player );
+	PluginEvent( onPlayerConnect, player );
 }
 
 function onPlayerPart( player, reason )
 {
 	Echo( iCol( 3, player.Name +" left the server. \x028"+ GetPartReason( reason ) +"\x029" ) );
 	OnlineUsers.rawdelete( player );
+	PluginEvent( onPlayerPart, player, reason );
 }
 
 function onPlayerDeath ( player, reason )
@@ -26,6 +28,7 @@ function onPlayerDeath ( player, reason )
 	local playern = FindLevel( player, 3 );
 	if ( reason == WEP_DROWNED ) EMessage( playern + iCol( 4, " drowned" ), colRed );
 	else EMessage( playern + iCol( 4, " died" ), colRed );
+	PluginEvent( onPlayerDeath, player, reason );
 }
 
 function onPlayerKill ( killer, player, weapon, bodypart )
@@ -35,12 +38,14 @@ function onPlayerKill ( killer, player, weapon, bodypart )
 	local killern = FindLevel( killer, 3 );
 	local playern = FindLevel( player, 3 );
 	EMessage( killern + iCol( 4, " killed " ) + playern + iCol( 4, " ("+ weapon +" - "+ bodypart +")" ), colRed );
+	PluginEvent( onPlayerKill, killer, player, weapon, bodypart );
 	return 1;
 }
 
 function onPlayerAction ( player, text )
 {
 	Echo( iCol( 7, "* " ) + FindLevel( player, 3 ) + iCol( 7, " " + text ) );
+	PluginEvent( onPlayerAction, player, text );
 	return 1;
 }
 
@@ -61,6 +66,7 @@ function onPlayerChat ( player, text )
 	{
 		Echo( FindLevel( player, 3 ) +iCol( 5, ":" )+ " " + text );
 		Message( FindLevel( player, 2 ) + player.ColouredName + ": " + text, colWhite );
+		PluginEvent( onPlayerChat, player, text );
 		return 0;
 	}
 }

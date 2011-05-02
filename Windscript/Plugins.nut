@@ -50,7 +50,7 @@ function PluginEvent ( event, ... )
 	foreach ( plugin in Plugins )
 	{
 		if ( plugin.Events.rawin( event ) )
-			plugin.Events.rawget( name ).acall( vargv );
+			plugin.Events.rawget( event ).acall( vargv );
 	}
 }
 
