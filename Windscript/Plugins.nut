@@ -26,6 +26,7 @@ function PluginCommand ( name, player, params )
 {
 	foreach ( plugin in Plugins )
 	{
+		if ( !plugin.Enabled ) return;
 		if ( plugin.Commands.rawin( name ) )
 			return plugin.Commands.rawget( name )( player, params );
 		else if ( plugin.CommandsAllChannels.rawin( name ) )
@@ -38,7 +39,7 @@ function PluginCommandChannels ( name, user, params, channel )
 {
 	foreach ( plugin in Plugins )
 	{
-		if ( plugin.CommandsAllChannels.rawin( name ) )
+		if ( plugin.Enabled && plugin.CommandsAllChannels.rawin( name ) )
 			return plugin.CommandsAllChannels.rawget( name )( user, params, channel );
 	}
 	return false;
@@ -49,7 +50,7 @@ function PluginEvent ( event, ... )
 	vargv.insert( 0, this );
 	foreach ( plugin in Plugins )
 	{
-		if ( plugin.Events.rawin( event ) )
+		if ( plugin.Enabled && plugin.Events.rawin( event ) )
 			plugin.Events.rawget( event ).acall( vargv );
 	}
 }
@@ -72,6 +73,20 @@ class Plugin
 		debug ( "Loaded plugin." );
 	}
 
+	function Enable ()
+	{
+		if ( Enabled ) return;
+		Enabled = true;
+		debug ( "Enabled plugin." );
+	}
+
+	function Disable ()
+	{
+		if ( !Enabled ) return;
+		Enabled = false;
+		debug ( "Disabled plugin." );
+	}
+
 	function RegisterCommand ( command, fn )
 		Commands.rawset( command.tolower(), fn );
 
@@ -85,6 +100,7 @@ class Plugin
 		return ::debug( "[PLUGIN:"+ Name +"] "+ msg );
 
 	Name = "";
+	Enabled = true;
 	Commands = {};
 	CommandsAllChannels = {};
 	Events = {};
