@@ -115,7 +115,7 @@ class Afk
 				local dt = date( time );
 				if ( dt.month == date().month ) time = " left on the "+ ::GetNth( dt.day );
 				else time = " left on "+ ::GetNth( dt.day ) +" "+ ::GetMonth( dt.month );
-				time += " at "+ dt.hour +":"+ dt.min;
+				time += format( " at %02i:%02i", dt.hour, dt.min );
 			}
 			else time = " has been away for "+ ::Duration( now - time );
 			return ::SendMessage( iCol( 3, iBold( name ) + time + " ("+ reason +")" ), Player, ::colGreen );
