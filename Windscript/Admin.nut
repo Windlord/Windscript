@@ -8,6 +8,22 @@
 	                                 by Windlord	*/
 
 
+// This is for when the server is reloaded or if players join too quickly.
+function ReloadPlayers ( )
+{
+	local p = 0, plr, plrs = GetPlayers();
+	for ( local i = 0; i < cMax_Players; i++ )
+	{
+		plr = FindPlayer( i );
+		if ( plr )
+		{
+			onPlayerConnect( plr );
+			p++;
+		}
+		if ( p == plrs ) break;
+	}
+}
+
 // NEED TO EDIT AND ADD IN COMMANDLEVEL RETRIEVING!!! //
 // Note: This function also checks whether a player is registered
 //       if a command's level is set to 2

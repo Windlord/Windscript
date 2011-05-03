@@ -25,9 +25,7 @@ function AddData ( section, item, data )
 function CheckDataSection ( section )
 {
 	if ( !Data_Chunks.rawin( section ) )
-	{
 		Data_Chunks.rawset( section, WindData( section ) );
-	}
 	return Data_Chunks.rawget( section );
 }
 
@@ -38,11 +36,22 @@ class WindData
 {
 	constructor ( name )
 	{
-		local findhash = ::FindHashTable( name );
 		Name = name;
+		fName = cScript_Dir +"Hashes/"+ Name +".hsh";
 		LastSaved = ::GameTimerTicks;
-		UnsavedNum = 0;
-		if ( findhash ) Hash = findhash;
+		GetHash();
+	}
+
+	function GetHash ()
+	{
+		local findhash = ::FindHashTable( Name );
+		if ( typeof( findhash ) == "HashTable" )
+		{
+			Hash = findhash;
+			debug( "Found Hash Table. Loading." );
+			Load();
+		}
+		else if ( findhash ) debug( "Oh noes, FindHashTable is being a woman and spitting out strings" );
 		else
 		{
 			Hash = ::HashTable( Name );
@@ -53,6 +62,11 @@ class WindData
 	function Add ( item, data )
 	{
 		local result = Hash.Add( item.tostring(), data );
+		if ( result == false )
+		{
+			GetHash();
+			result = Hash.Add( item.tostring(), data );
+		}
 		Changed();
 		return result ? data : false;
 	}
@@ -60,6 +74,11 @@ class WindData
 	function Del ( item )
 	{
 		local result = Hash.Del( item.tostring() );
+		if ( result == false )
+		{
+			GetHash();
+			result = Hash.Del( item.tostring() );
+		}
 		Changed();
 		return result;
 	}
@@ -68,6 +87,11 @@ class WindData
 	{
 		item = item.tostring();
 		local result = Hash.Inc( item, amount );
+		if ( result == false )
+		{
+			GetHash();
+			result = Hash.Inc( item, amount );
+		}
 		Changed();
 		return result != null ? Hash.Get( item ) : false;
 	}
@@ -77,7 +101,12 @@ class WindData
 		item = item.tostring();
 		Hash.Dec( item, amount );
 		local result = Hash.Get( item );
-		if ( result < 0 )
+		if ( result == false )
+		{
+			GetHash();
+			result = Hash.Get( item );
+		}
+		if ( result.tointeger() < 0 )
 		{
 			Hash.Add( item, 0 );
 			return 0;
@@ -95,7 +124,13 @@ class WindData
 
 	function Get ( item )
 	{
-		local data = Hash.Get( item.tostring() );
+		item = item.tostring();
+		local data = Hash.Get( item );
+		if ( data == false )
+		{
+			GetHash();
+			data = Hash.Get( item )
+		}
 		return data ? data : 0;
 	}
 
@@ -103,48 +138,63 @@ class WindData
 	{
 		if ( UnsavedNum )
 		{
-			local result = Hash.Save( cScript_Dir +"Hashes/"+ Name +".hsh" );
-			if ( result ) debug( "[HASH:"+ Name +"] Saved" );
-			else debug( "HASH:"+ Name +"] Error while saving" );
-			LastSaved = GameTimerTicks;
+			local result = Hash.Save( fName );
+			if ( !result ) 
+			{
+				debug( "Error while saving to "+ fName );
+				return false;
+			}
+			debug( "Saved to "+ fName );
+			LastSaved = ::GameTimerTicks;
 			UnsavedNum = 0;
-			return 1;
+			return true;
 		}
-		else return 0;
+		else return false;
 	}
 
 	function Load ()
 	{
-		Hash.Load( cScript_Dir +"Hashes/"+ Name +".hsh" );
-		debug( "[HASH:"+ Name +"] Loaded" );
-		LastSaved = GameTimerTicks;
-		UnsavedNum = 0;
-		return 1;
+		local result = Hash.Load( fName );
+		if ( !result )
+		{
+			debug( "Hash file does not exist: "+ fName );
+			debug( "File will be made on next save." );
+		}
+		else debug( "Loaded "+ fName +". Ready." );
+		LastSaved = ::GameTimerTicks;
+		return true;
 	}
 
 	function Unload ()
 	{
-		Save();
-		Hash.Close();
-		debug( "[HASH:"+ Name +"] Unloaded" );
-		Data_Chunks.rawdelete( Name );
-		return 1;
+		if ( Save() )
+		{
+			Hash.Close();
+			debug( "Unloaded" );
+			Data_Chunks.rawdelete( Name );
+			return true;
+		}
+		else debug( "Aborting unload due to save failure" );
 	}
 
 	function Check ()
 	{
-		local dtime = GameTimerTicks - LastSaved;
+		local dtime = ::GameTimerTicks - LastSaved;
 		if ( UnsavedNum > 0 && ( UnsavedNum > 19 || dtime > 600000 ))
 			return Save();
 		else if ( UnsavedNum == 0 && dtime > 900000 )
 			return Unload();
 	}
 
+	function debug ( msg )
+		::debug ( "[HASH:"+ Name +"] "+ msg );
+
 	// Some properties
 	Name = null;
 	Hash = null;
-	LastSaved	= 0;
-	UnsavedNum	= 0;
+	fName = "";
+	LastSaved = 0;
+	UnsavedNum = 0;
 }
 
 function SyncData ()

@@ -97,7 +97,7 @@ class EchoBot
 		ID			= ::IRCBots.len();
 		lName		= name.tolower();
 		Channels	= {};				// List of channels which the bot is on
-		Init		= ::GetTickCount();		// Record when bot was created
+		Init		= time();			// Record when bot was created
 		Debug( "CREATED", "Bot created in slot "+ ID );
 		Socket		= ::NewSocket( "onIRCData" );	// This creates a new socket connection
 		Socket.SetLostConnFunc( onIRCDisconnected );	// This sets a function for the socket to call when disconnected
@@ -271,7 +271,7 @@ function onIRCData ( socket, raw )
 	local raw = split( raw, "\r\n" );				// This process splits multiple line strings the IRC server sends out
 									// This occurs when the server tries to send more than one line.
 									// In such a case, the different lines are sent in one line, delimited with \r\n, aka a crlf
-	bot.LastPing = GetTickCount();					// This records the last time the bot was pinged. The value is used in CheckBotTimeout()
+	bot.LastPing = time();						// This records the last time the bot was pinged. The value is used in CheckBotTimeout()
 									// Strictly speaking receiving data isn't pinging but this serves its purpose.
 
 	local ntemp, nick, address, words;
@@ -281,9 +281,11 @@ function onIRCData ( socket, raw )
 		//bot.Debug( "RAW", rawline );				// Uncomment this line to see all raw output from the server
 		/* UNCOMMENT FOR IRC RAW OUTPUT */
 
+		if ( rawline.len() < 2 ) continue;
+
 		rawline = split( rawline, " " );
 		words = rawline.len();
-		ntemp	= split( rawline[ 0 ], "!:");			// A user is identified as :Nickname!Username@Address
+		ntemp	= split( rawline[ 0 ], "!:" );			// A user is identified as :Nickname!Username@Address
 		if ( ntemp.len() > 1 )					// Make sure the format has both ! and : and two elements
 		{
 			nick = ntemp[ 0 ];
@@ -561,10 +563,10 @@ function CheckBotTimeout ( )
 	{
 		if ( bot )
 		{
-			dur = GetTickCount() - bot.LastPing;
-			if ( dur > 120000 )
+			dur = time() - bot.LastPing;
+			if ( dur > 120 )
 				RecoverBot( bot );
-			else if ( dur > 100000 )
+			else if ( dur > 100 )
 				bot.Send( "PING :"+ time() );
 		}
 	}
@@ -600,7 +602,7 @@ function BotMessage ( target, type, text )
 				else if ( bot.Used < min.Used ) min = bot;
 			}
 		}
-		min.Used = GetTickCount();
+		min.Used = time();
 
 		if ( type.tolower() == "notice" ) min.Notice( target, text );
 		else min.Msg( target, text );

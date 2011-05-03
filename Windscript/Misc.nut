@@ -134,9 +134,21 @@ function ToThousands ( num )
 function GetSubnet ( ip )
 {
 	local nums = split( ip, "." );
-	nums[2] = "*";
-	nums[3] = "*";
-	return JoinArray( nums, "." );
+	return format( "%s.%s.*.*", nums[ 0 ], nums[ 1 ] );
+}
+
+
+// This function adds str to strlist if str isn't in strlist
+function AddToList ( strlist, str )
+{
+	if ( strlist.find( str ) == null )					// If str not in strlist
+	{
+		strlist = split( strlist, " " );				// Split list into array
+		strlist.push( str );						// Push string into list
+		return JoinArray( strlist, " " );				// Return array as string
+	}
+	else
+		return false;							// If already there, return false
 }
 
 // This function returns 1st/2nd/3rd/4th from an integer
@@ -179,38 +191,4 @@ function GetMonth ( num )
 		case 11: return "Nov";
 		case 12: return "Dec";
 	}
-}
-
-// Used for inplace quicksort
-function swap_arr_elem ( arr, idx1, idx2 )
-{
-	local val1 = arr[ idx1 ], val2 = arr[ idx2 ];
-	arr[ idx1 ] = val2;
-	arr[ idx2 ] = val1;
-	return arr;
-}
-
-// Quicksort function for Squirrel
-function sort ( arr, left = 0, right = 0 )
-{
-	if ( !right ) right = arr.len() - 1;
-	local diff = right - left;
-	if ( diff < 1 ) return arr;
-	if ( diff == 1 && arr[ left ] <= arr[ right ] ) return arr;
-
-	local pivot = floor( arr.len() / 2 ), pidx = left;
-	arr = swap_arr_elem( arr, pivot, right );
-	pivot = arr[ right ];
-	for ( local i = left; i < right; i++ )
-	{
-		if ( arr[ i ] <= pivot )
-		{
-			arr = swap_arr_elem( arr, i, pidx );
-			pidx++;
-		}
-	}
-	arr = swap_arr_elem( arr, right, pidx );
-	arr = sort( arr, left, pidx - 1 );
-	arr = sort( arr, pidx + 1, right );
-	return arr;
 }

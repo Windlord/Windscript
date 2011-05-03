@@ -7,35 +7,35 @@
 	_______________________________ (_/ ________
 	                                 by Windlord	*/
 
-Plugins <- {};
+Plugins <- {};									// A table to store all Plugin instances into
 
 function LoadPlugins ()
 {
-	local plugins = split( config.plugins, ", " );
+	local plugins = split( config.plugins, ", " );				// Get config list of plugins (case-sensitive)
 	foreach ( name in plugins )
 	{
-		Plugins.rawset( name, Plugin( name ) );
-		Plugins.rawget( name ).Load();
+		Plugins.rawset( name, Plugin( name ) );				// Create new plugin instance
+		Plugins.rawget( name ).Load();					// Load plugin
 	}
 }
 
 function FindPlugin ( name )
-	return Plugins.rawin( name ) ? Plugins.rawget( name ) : false;
+	return Plugins.rawin( name ) ? Plugins.rawget( name ) : false;		// Look for plugin by name in Plugins table
 
 function PluginCommand ( name, player, params )
 {
 	foreach ( plugin in Plugins )
 	{
-		if ( !plugin.Enabled ) return;
-		if ( plugin.Commands.rawin( name ) )
+		if ( !plugin.Enabled ) return;					// If plugin disabled, return
+		if ( plugin.Commands.rawin( name ) )				// If command registered for plugin, run associated func
 			return plugin.Commands.rawget( name )( player, params );
-		else if ( plugin.CommandsAllChannels.rawin( name ) )
+		else if ( plugin.CommandsAllChannels.rawin( name ) )		// If command registered for all channels for plugin, run associated func
 			return plugin.CommandsAllChannels.rawget( name )( player, params, config.irc_echo_lower );
 	}
-	return false;
+	return false;								// If no associated func found, return false
 }
 
-function PluginCommandChannels ( name, user, params, channel )
+function PluginCommandChannels ( name, user, params, channel )			// Run for non-echo channels
 {
 	foreach ( plugin in Plugins )
 	{
@@ -47,11 +47,11 @@ function PluginCommandChannels ( name, user, params, channel )
 
 function PluginEvent ( event, ... )
 {
-	vargv.insert( 0, this );
+	vargv.insert( 0, this );						// Insert env object into front of params array
 	foreach ( plugin in Plugins )
 	{
-		if ( plugin.Enabled && plugin.Events.rawin( event ) )
-			plugin.Events.rawget( event ).acall( vargv );
+		if ( plugin.Enabled && plugin.Events.rawin( event ) )		// If plugin enabled and event registered to a func
+			plugin.Events.rawget( event ).acall( vargv );		// Call func with all params passed to this func
 	}
 }
 

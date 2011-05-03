@@ -9,11 +9,8 @@
 
 function cmdRegister ( player, params )
 {
-	if ( params )
-	{
-		local user = GetUser( player );
-		if ( !user.SetPassword( params ) ) mError ( "Your nickname is already registered.", player );
-	}
+	if ( params && !GetUser( player ).SetPassword( params ) )
+		mError ( "Your nickname is already registered.", player );
 	else
 		mFormat ( "/register <Password>", player );
 }

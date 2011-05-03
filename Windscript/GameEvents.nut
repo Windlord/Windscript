@@ -9,7 +9,7 @@
 
 function onPlayerConnect( player )
 {
-	OnlineUsers.rawset( player, User( player ) );
+	local user = GetUser( player );
 	GetUser( player ).UpdateInfo();
 	Echo( iCol( 3, player.Name +" joined the server." ) );
 	if ( config.rawin( "server_motd" ) ) AdminPM( config.server_motd, player );
@@ -19,7 +19,7 @@ function onPlayerConnect( player )
 function onPlayerPart( player, reason )
 {
 	Echo( iCol( 3, player.Name +" left the server. \x028"+ GetPartReason( reason ) +"\x029" ) );
-	OnlineUsers.rawdelete( player );
+	OnlineUsers.rawdelete( player.Name );
 	PluginEvent( onPlayerPart, player, reason );
 }
 

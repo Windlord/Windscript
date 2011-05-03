@@ -15,6 +15,13 @@ function onUserRegister ( user, num )
 	return 1;
 }
 
+function onUserChangePass ( user )
+{
+	AdminPM( "Your password has been successfully changed.", user.Player );
+	PluginEvent( onUserChangePass, user );
+	return 1;
+}
+
 function onUserLogin ( user, lastlogin )
 {
 	AdminPM( "Logged in successfully", player );

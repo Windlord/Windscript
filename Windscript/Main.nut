@@ -87,6 +87,7 @@ function AfterScriptLoad ()
 	EMessage (  iCol( 4, "* Windscript Loaded." ), colRed );
 	debug ( "Loaded Windscript Version "+ cScript_Version );
 	LoadPlugins();
+	NewTimer( "ReloadPlayers", 1000, 1 );
 }
 
 function AttemptLoad ( script )
