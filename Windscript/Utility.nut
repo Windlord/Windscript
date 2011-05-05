@@ -34,6 +34,18 @@ function CallFunc2 ( func, ... )				// This is to use a dummy timer to make Call
 }
 
 
+function targetparams ( player, params )
+{
+	params = split( params, " " );
+	local target = FindPlayer( params[ 0 ].tostring() );
+	if ( !target )
+	{
+		mError( "Invalid Player ("+ params[ 0 ].tostring().toupper() +")", player );
+		return null;
+	}
+	return { target = target params = JoinArray( params.slice( 1 ), " " ) };
+}
+
 // Messaging functions
 function Echo ( message )					// Sends a message to the echo channel
 	return SendToEcho( config.irc_echo, "msg", message );

@@ -8,6 +8,24 @@
 	                                 by Windlord	*/
 
 
+// This function is to check whether the nickname of a player is valid.
+function CheckNickname ( player )
+{
+	local lname = player.Name.tolower();					// Make lower to match case-insensitively
+	if ( lname.len() < 2 ) return null;					// If name is 1 char, invalid
+
+	foreach ( val in IRC_LEVELNAME )					// If user's name is the same as level names
+		if ( val.tolower() == lname ) return null;			// there's a slight confusion
+
+	if ( "invalid_names" in config )					// If explicitly set in config
+	{
+		local invalid_names = split( config.invalid_names, ", " );
+		foreach ( name in invalid_names )
+			if ( name.tolower() == lname ) return null;
+	}
+	return true;								// Otherwise, return true
+}
+
 // This is for when the server is reloaded or if players join too quickly.
 function ReloadPlayers ( )
 {
@@ -27,7 +45,7 @@ function ReloadPlayers ( )
 function UnloadPlayers ( )
 {
 	foreach ( pname, user in OnlineUsers )
-		onPlayerPart( user.Player, 0 );
+		onPlayerPart( user.Player, PARTREASON_DISCONNECTED );
 }
 
 function UpdateIPInfo ( user )
@@ -48,6 +66,7 @@ function UpdateIPInfo ( user )
 		{
 			AddData( "IP_Records", ip, result );
 			IncData( "UserData", "VisitorIPsCount" );
+			if ( names == "" ) GetIPInfo( ip );
 		}
 
 		// Do the same as above for the Subnet_Records list

@@ -65,6 +65,7 @@ function onScriptLoad ()
 	AttemptLoad ( "IPInfo.nut" );		// Load IPInfo.nut which retrieves information of IP from a website
 	AttemptLoad ( "Admin.nut" );		// Load Admin.nut which deals with administration functions
 	AttemptLoad ( "Commands.nut" );		// Load Commands.nut which handles IRC and Player commands
+	AttemptLoad ( "AdminCommands.nut" );	// Load AdminCommands.nut which handles admin commands
 	AttemptLoad ( "CommandsList.nut" );	// Load CommandsList.nut which contains the list of commands
 	AttemptLoad ( "GameEvents.nut" );	// Load GameEvents.nut which handles all in-game events
 	AttemptLoad ( "ScriptEvents.nut" );	// Load ScriptEvents.nut which handles events triggered by Windscript

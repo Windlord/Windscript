@@ -41,9 +41,12 @@ function onCommand ( player, command, params )
 		case "pos": return cmdPos ( player );
 		case "uptime": return cmdUptime ( player );
 		case "createbot": return cmdCreateBot( player, params );
+
 		case "ircdo": return cmdIRCDo ( player, params );
 		case "raw": return cmdRaw ( player, params );
 		case "reload": return cmdReload ( player );
+		case "ip": return cmdIP ( player, params );
+		case "kick": return cmdKick ( player, params );
 		default:
 			inplugins = PluginCommand( command, player, params );
 			return inplugins ? inplugins : mError( "Invalid Command ("+ command.toupper() +")", player );

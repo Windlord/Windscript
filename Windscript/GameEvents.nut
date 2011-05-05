@@ -9,30 +9,54 @@
 
 function onPlayerConnect( player )
 {
-	local user = GetUser( player );
-	UpdateIPInfo( user );
+	if ( CheckNickname( player ) )
+	{
+		local user = GetUser( player );
+		EMessage( iCol( 3, player.ColouredName +" joined the server." ), colGreen );
+		if ( config.rawin( "server_motd" ) ) AdminPM( config.server_motd, player );
 
-	Echo( iCol( 3, player.Name +" joined the server." ) );
-	if ( config.rawin( "server_motd" ) ) AdminPM( config.server_motd, player );
-
-	user.Joins++;
-	user.LoggedIn = 0;
-
-	PluginEvent( onPlayerConnect, player );
+		onUserJoin( user );
+		PluginEvent( onPlayerConnect, player );
+	}
+	else
+	{
+		AdminPM( "Invalid Nickname ("+ player.Name.toupper() +")", player );
+		KickPlayer( player );
+	}
+	return 0;
 }
 
-
-function onPlayerPart( player, reason )
+KickReasons <- {};
+function onPlayerPart( player, reason, adminreason = "None" )
 {
-	Echo( iCol( 3, player.Name +" left the server. \x028"+ GetPartReason( reason ) +"\x029" ) );
-	OnlineUsers.rawdelete( player.Name );
-	PluginEvent( onPlayerPart, player, reason );
+	if ( player.Name in OnlineUsers )
+	{
+		local reason = GetPartReason( reason );
+		switch( reason )
+		{
+			case "Kicked":
+				EMessage( iCol( 3, player.ColouredName +" was kicked from the server. ("+ adminreason +")" ), colGreen );
+				break;
+			case "Banned":
+				EMessage( iCol( 3, player.ColouredName +" was banned from the server. ("+ adminreason +")" ), colGreen );
+				break;
+			default:
+				EMessage( iCol( 3, player.ColouredName +" left the server. ("+ reason +")" ), colGreen );
+				break;
+		}
+		onUserPart( GetUser( player ), reason );
+		PluginEvent( onPlayerPart, player, reason );
+		OnlineUsers.rawdelete( player.Name );
+	}
+	return 0;
 }
 
 function onPlayerDeath ( player, reason )
 {
+	local user = GetUser( player ), reason = GetWeaponName( reason );
 	local playern = FindLevel( player, 2 ) + player.ColouredName;
-	if ( reason == WEP_DROWNED ) EMessage( iCol( 4, playern + " drowned" ), colRed );
+	onUserDeath( user, reason );
+	if ( reason == "Drowned" ) EMessage( iCol( 4, playern + " drowned" ), colRed );
 	else EMessage( iCol( 4, playern + " died" ), colRed );
 	PluginEvent( onPlayerDeath, player, reason );
 }
@@ -43,7 +67,9 @@ function onPlayerKill ( killer, player, weapon, bodypart )
 	bodypart = GetBodyPartName( bodypart );
 	local killern = FindLevel( killer, 2 ) + killer.ColouredName;
 	local playern = FindLevel( player, 2 ) + player.ColouredName;
-	EMessage( iCol( 4, killer +" killed "+ playern +" ("+ weapon +" - "+ bodypart +")" ), colRed );
+	local kuser = GetUser( killer ), user = GetUser( player );
+	onUserKill( kuser, user, weapon, bodypart );
+	EMessage( iCol( 4, killern +" killed "+ playern +" ("+ weapon +" - "+ bodypart +")" ), colRed );
 	PluginEvent( onPlayerKill, killer, player, weapon, bodypart );
 	return 1;
 }
@@ -60,7 +86,7 @@ function onPlayerChat ( player, text )
 	if ( text.len() > 1 && text[0] == '!' )
 	{
 		local a = split( text, " " );
-		local command = a[ 0 ].slice( 1 );
+		local command = a[ 0 ].slice( 1 ).tolower();
 		local param = (a.len() > 1) ? JoinArray( a.slice( 1 ), " " ) : "";
 		text = param ? command + " " + param : command;
 		Echo( FindLevel( player, 3 ) +iCol( 4, ": !" )+ text );
