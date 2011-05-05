@@ -148,6 +148,9 @@ class WindData
 	function debug ( msg )
 		::debug ( "[HASH:"+ Name +"] "+ msg );
 
+	function _typeof ()
+		return "WindData";
+
 	// Some properties
 	Name = null;
 	Hash = null;

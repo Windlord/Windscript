@@ -48,7 +48,7 @@ function RemoveBot ( bot, unloading = false )
 
 	bot.CheckLogin.Delete();
 	bot.Quit( "Windscript Version "+ cScript_Version );			// In case the bot is still connected, send QUIT message
-	if ( bot.Socket ) bot.Socket.Delete;					// Delete socket instance
+	if ( bot.Socket ) bot.Socket.Delete();					// Delete socket instance
 	bot.Debug( "REMOVE", "Removing bot from slot "+ bot.ID );
 	IRCBots.rawdelete( name );						// Remove bot data from IRCBots
 

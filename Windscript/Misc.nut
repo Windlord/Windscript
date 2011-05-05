@@ -83,7 +83,7 @@ function StripIRCCol ( text )
 	return output;
 }
 
-
+// This function strips the LU ingame colour tags: [#XXXXXX][#d] off of any string
 function StripGameCol ( text )
 {
 	local coltrig, output = "";
@@ -167,36 +167,34 @@ function GetSubnet ( ip )
 // This function adds str to strlist if str isn't in strlist
 function AddToList ( strlist, str )
 {
-	if ( strlist.find( str ) == null )					// If str not in strlist
+	strlist = split( strlist, " " );
+	local found = false;
+	foreach ( idx, val in strlist )
 	{
-		strlist = split( strlist, " " );				// Split list into array
-		strlist.push( str );						// Push string into list
-		return JoinArray( strlist, " " );				// Return array as string
+		if ( val == str )
+		{
+			found = true;
+			break;
+		}
 	}
-	else
-		return false;							// If already there, return false
+
+	if ( found ) return false;						// If already there, return false
+	strlist.push( str );							// Push string into list
+	return JoinArray( strlist, " " );					// Return array as string
 }
 
 // This function returns 1st/2nd/3rd/4th from an integer
 function GetNth ( num )
 {
-	local lastdig = num % 10, suffix;
+	local lastdig = num % 10;
+	num = num.tostring();
 	switch ( lastdig )
 	{
-		case 1:
-			suffix = "st";
-			break;
-		case 2:
-			suffix = "nd";
-			break;
-		case 3:
-			suffix = "rd";
-			break;
-		default:
-			suffix = "th";
-			break;
+		case 1: return num +"st";
+		case 2: return num +"nd";
+		case 3: return num +"rd";
+		default: return num +"th";
 	}
-	return num.tostring() + suffix;
 }
 
 // This function returns the name of a month
