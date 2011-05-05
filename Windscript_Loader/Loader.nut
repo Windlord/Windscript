@@ -25,7 +25,6 @@ function onScriptLoad ()
 {
 	print ( "\r       \n- Loading Windscript Loader" );
 
-	LoadModule ( "lu_ini" );
 	dofile ( cScript_Dir + "Settings.nut" );
 	dofile ( cScript_Dir + "Debug.nut" );
 	dofile ( cScript_Dir + "Misc.nut" );

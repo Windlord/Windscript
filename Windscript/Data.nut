@@ -22,10 +22,10 @@ function DelData ( section, item )
 function AddData ( section, item, data )
 	return CheckDataSection( section ).Add( item, data );
 
-function CheckDataSection ( section )
+function CheckDataSection ( section, donotunload = false )
 {
 	if ( !Data_Chunks.rawin( section ) )
-		Data_Chunks.rawset( section, WindData( section ) );
+		Data_Chunks.rawset( section, WindData( section, donotunload ) );
 	return Data_Chunks.rawget( section );
 }
 
@@ -34,11 +34,12 @@ Data_Chunks <- {};
 
 class WindData
 {
-	constructor ( name )
+	constructor ( name, donotunload )
 	{
 		Name = name;
 		fName = cScript_Dir +"Hashes/"+ Name +".hsh";
 		LastSaved = ::GameTimerTicks;
+		keepLoaded = donotunload;
 		GetHash();
 	}
 
@@ -149,7 +150,7 @@ class WindData
 			UnsavedNum = 0;
 			return true;
 		}
-		else return false;
+		else return true;
 	}
 
 	function Load ()
@@ -169,6 +170,7 @@ class WindData
 	{
 		if ( Save() )
 		{
+			if ( keepLoaded ) return false;
 			Hash.Close();
 			debug( "Unloaded" );
 			Data_Chunks.rawdelete( Name );
@@ -192,6 +194,7 @@ class WindData
 	// Some properties
 	Name = null;
 	Hash = null;
+	keepLoaded = false;
 	fName = "";
 	LastSaved = 0;
 	UnsavedNum = 0;
@@ -209,4 +212,14 @@ function UnloadData ()
 	foreach ( key, data in Data_Chunks )
 		data.Unload();
 	return 1;
+}
+
+{
+	CheckDataSection( "UserData", true );
+	CheckDataSection( "IP_Records", true );
+	CheckDataSection( "Subnet_Records", true );
+
+	CheckDataSection( "UserData_IPs" );
+	CheckDataSection( "UserData_Joins" );
+	CheckDataSection( "UserData_LoggedIn" );
 }

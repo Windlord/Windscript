@@ -37,14 +37,16 @@ class User
 
 		ID = ::GetData( "User_Name_To_ID", name );			// Get account ID for this user
 		sID = ID.tostring();
-		if ( !ID ) Add( name );						// If no account entry, create entry
+		if ( !ID )
+		{
+			local num = ::IncData( "UserData", "TotalUsersCount" );
+			Add( name, id );
+		}
 	}
 
-	function Add ( name )
+	function Add ( name, nID )
 	{
-		local next_ID = ::IncData( "UserData", "next_ID" );		// Get next avail account ID (and inc for next use)
-		::IncData( "UserData", "TotalUsersCount" );			// Increase total user count
-		ID = ::AddData( "User_Name_To_ID", name, next_ID );		// Add new data for this user name
+		ID = ::AddData( "User_Name_To_ID", name, nID );		// Add new data for this user name
 		sID = ID.tostring();
 		Name = name;
 		Level = 0;							// Set default user level
@@ -70,14 +72,14 @@ class User
 				::print( ::IncData( "UserData", "VisitorIPsCount" ) );
 			}
 
-			// Do the same as above for the SubIP_Records list
+			// Do the same as above for the Subnet_Records list
 			local subnet = ::GetSubnet( Player.IP )
-			names = ::GetData( "SubIP_Records", subnet );
+			names = ::GetData( "Subnet_Records", subnet );
 			names = names ? names : "";
 			result = ::AddToList( names, Player.Name );
 			::print( result );
 			if ( result )
-				::print( ::AddData( "SubIP_Records", subnet, result ) );
+				::print( ::AddData( "Subnet_Records", subnet, result ) );
 
 			Joins++;
 			LoggedIn = 0;
@@ -116,10 +118,7 @@ class User
 	}
 
 	function _get ( prop )							// For all non-declared properties
-	{
-		local data = ::GetData( "UserData_"+ prop, sID );		// Get data from hash
-		return data ? data : 0;						// Return data
-	}
+		return ::GetData( "UserData_"+ prop, sID );			// Get data from hash
 
 	function _set ( prop, value )						// For all non-declared properties
 		return ::AddData( "UserData_"+ prop, sID, value );		// Set data
