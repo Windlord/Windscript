@@ -186,14 +186,21 @@ function AddToList ( strlist, str )
 // This function returns 1st/2nd/3rd/4th from an integer
 function GetNth ( num )
 {
-	local lastdig = num % 10;
-	num = num.tostring();
-	switch ( lastdig )
+	local lastdigs = num % 100;
+	switch ( lastdigs )
 	{
-		case 1: return num +"st";
-		case 2: return num +"nd";
-		case 3: return num +"rd";
-		default: return num +"th";
+		case 11: return num +"th";					// Catch out 11, 111
+		case 12: return num +"th";					// Catch out 12, 112
+		case 13: return num +"th";					// Catch out 13, 113
+		default:							// Everything else should be normal...
+			lastdigs = num % 10;					// Get last digit
+			switch ( lastdigs )
+			{
+				case 1: return num +"st";
+				case 2: return num +"nd";
+				case 3: return num +"rd";
+				default: return num +"th";
+			}
 	}
 }
 
