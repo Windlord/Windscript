@@ -64,7 +64,7 @@ function UpdateIPInfo ( user )
 function CheckLevel ( player, command, ingame = false )
 {
 	local user = GetUser( player ), userlvl;
-	if ( player.ID > 1000 )
+	if ( typeof( player ) == "IRCUser" )
 	{
 		if ( ingame )
 		{

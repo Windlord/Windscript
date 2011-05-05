@@ -12,7 +12,7 @@ OnlineUsers <- {};								// Store all online player instances and their
 										// associated user instances into a table
 function GetUser ( plr )
 {										// Get user instance from table with player instance
-	if ( plr.ID > 1000 ) return plr;					// If IRC user, return user.
+	if ( typeof ( plr ) == "IRCUser" ) return plr;				// If IRC user, return user.
 
 	local name = plr.Name;
 	if ( OnlineUsers.rawin( name ) ) return OnlineUsers.rawget( name );	// Get user instance from table with player instance

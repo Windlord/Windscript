@@ -20,6 +20,10 @@ class IRCUser2
 		Address	= address;
 		Level	= level;
 	}
+
+	function _typeof()
+		return "IRCUser";
+
 	Name	= "";
 	ID		= 0;
 	Address	= "";

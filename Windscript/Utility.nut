@@ -46,7 +46,7 @@ function EMessage ( message, col = colWhite )			// Sends a message both to the s
 
 function SendMessage ( message, target, col = colWhite )	// Sends a pm ingame if player is ingame. Sends a notice if IRC user.
 {								// Format: SendMessage( message, player/user, Colour() );
-	if ( target.ID > 1000 ) return SendToEcho( target.Name, "notice", StripGameCol( message ) );
+	if ( typeof( target ) == "IRCUser" ) return SendToEcho( target.Name, "notice", StripGameCol( message ) );
 	else return MessagePlayer( StripIRCCol( message ), target, col );
 }
 
@@ -89,7 +89,7 @@ IRC_LEVELCOLO <- ["05", "06", "07", "02", "03", "04" ];
 function FindLevel ( player, type = 1 )
 {
 	local ilevel;
-	if ( player.ID > 1000 ) ilevel = player.Level;
+	if ( typeof( player ) == "IRCUser" ) ilevel = player.Level;
 	else ilevel = GetUser( player ).Level;
 	switch ( type )
 	{
@@ -139,3 +139,4 @@ function GetPartReason ( reasonid )
 			return "Banned";
 	}
 }
+
