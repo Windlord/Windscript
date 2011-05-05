@@ -40,8 +40,12 @@ LUcolBlack	<- "[#000000]";
 LUcolYellow	<- "[#ffff00]";
 LUcolClose	<- "[#d]";
 
+DEBUG <- true;
 function debug ( msg )
-	return NewTimer( "CallFunc", 0, 1, cScript_Loader, "debug", msg );
+{
+	if ( DEBUG ) return NewTimer( "CallFunc", 0, 1, cScript_Loader, "debug", msg );
+	else print( msg );
+}
 
 // Function called when script is loaded.
 function onScriptLoad ()
@@ -118,10 +122,11 @@ function onServerStart ()
 
 function onScriptUnload ()
 {
+	DEBUG = false;								// CallFunc fails onScriptUnload for some reason
 	print ( "\r       \n- Unloading Windscript Version "+ cScript_Version );
-	UnloadPlayers();
 	UnloadData();
 	GameTimer.Delete();
+	UnloadPlayers();
 	debug ( "Unloaded Windscript Version "+ cScript_Version );
 }
 
