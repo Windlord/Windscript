@@ -57,21 +57,19 @@ function onIRCMessage ( user, text )
 {
 	local user = FindIRCUser( user );
 	EMessage( iCol( 4, iBold( "PM from "+ user.Name +": " ) ) + text);
+	PluginEvent( onIRCMessage, user, text );
 }
 
 function onIRCMessage_Desc ( user, text )
-{
-	local user = FindIRCUser( user );
-
-}
+	PluginEvent( onIRCMessage_Desc, FindIRCUser( user ), text );
 
 // This event is called when a user sends a message to a channel bot ID 0 is on.
 function onIRCChat ( channel, user, text )
 {
 	local user = FindIRCUser( user );
+	local prefix = text[ 0 ];						// This gets the ASCII code for the prefix
 	if ( channel.tolower() == config.irc_echo_lower )
 	{
-		local prefix = text[ 0 ];					// This gets the ASCII code for the prefix
 		if ( prefix == '!' )						// Check if prefix is '!'
 		{
 			local a = split( text, " " ), cmd = a[ 0 ].slice( 1 ).tolower();
@@ -91,14 +89,16 @@ function onIRCChat ( channel, user, text )
 	}
 	else									// Commands which can be used outside of echo channel
 	{
-		local a = split( text, " " ), cmd = a[ 0 ].tolower().slice( 1 );
-		local params = JoinArray( a.slice( 1 ), " " );
-		params = ( params == "" ) ? 0 : params;
-		PluginCommandChannels( cmd, user, params, channel );
+		if ( prefix == '!' )
+		{
+			local a = split( text, " " ), cmd = a[ 0 ].slice( 1 ).tolower();
+			local params = JoinArray( a.slice( 1 ), " " );
+			params = ( params == "" ) ? 0 : params;
+			PluginCommandChannels( cmd, user, params, channel );
+		}
+		else PluginEvent( onIRCChat, user, text );
 	}
 }
 
 function onIRCChat_Desc ( channel, user, text )
-{
-
-}
+	PluginEvent( onIRCChat_Desc, FindIRCUser( user ), text );

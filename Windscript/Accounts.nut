@@ -12,78 +12,67 @@ OnlineUsers <- {};								// Store all online player instances and their
 										// associated user instances into a table
 function GetUser ( plr )
 {										// Get user instance from table with player instance
+	if ( plr.ID > 1000 ) return plr;					// If IRC user, return user.
+
 	local name = plr.Name;
 	if ( OnlineUsers.rawin( name ) ) return OnlineUsers.rawget( name );	// Get user instance from table with player instance
 	else									// If entry in table does not exist
 	{
-		OnlineUsers.rawset( name, User( plr ) );			// Create User() entry
+		local user = User( plr );
+		OnlineUsers.rawset( name, user );
 		return OnlineUsers.rawget( name );
 	}
 }
 
 
+function FindUserIDfromName ( name )
+{
+	local id = GetData( "User_Name_To_ID", name );
+	if ( id != 0 ) return id;
+
+	name = name.tolower();
+	local uname, max = GetData( "UserData", "TotalUsersCount" );
+	for ( local i = 1; i <= max; i++ )
+	{
+		uname = GetData( "UserData_Name", i.tostring() );
+		if ( !uname ) continue;
+		if ( uname.tolower().find( name ) != null ) return i;
+	}
+	return 0;
+}
+
 class User
 {
 	constructor ( p_plr )
 	{
-		Player = p_plr;							// Set Player/IRCUser instance
+		Player = p_plr;							// Set Player instance
 		local name, input_type = typeof( Player );
 		if ( input_type == "Player" )					// If p_plr is a Player instance
 		{
 			name = Player.Name;
 			InGame = true;						// It's a player ingame
 		}
-		else if ( input_type == "string" ) name = Player;		// If it's a string, keep InGame false
+		else if ( input_type == "string" )				// If it's a string (nickname), keep InGame false
+		{
+			name = Player;
+			InGame = false;
+		}
 
 		ID = ::GetData( "User_Name_To_ID", name );			// Get account ID for this user
-		sID = ID.tostring();
-		if ( !ID )
+		if ( ID == 0 )
 		{
-			local num = ::IncData( "UserData", "TotalUsersCount" );
-			Add( name, id );
+			if ( !InGame ) ID = ::FindUserIDfromName( name );
+			else Add( name, ::IncData( "UserData", "TotalUsersCount" ) );
 		}
+		sID = ID.tostring();
 	}
 
 	function Add ( name, nID )
 	{
-		ID = ::AddData( "User_Name_To_ID", name, nID );		// Add new data for this user name
+		ID = ::AddData( "User_Name_To_ID", name, nID );			// Add new data for this user name
 		sID = ID.tostring();
 		Name = name;
-		Level = 0;							// Set default user level
-	}
-
-	function UpdateInfo ()
-	{
-		if ( InGame )
-		{
-			// Add current IP to user access list
-			local result = ::AddToList( IPs ? IPs : "", Player.IP );
-			if ( result )
-				IPs = result;
-			::print( IPs );
-
-			// Add nickname to IP_Records list
-			local names = ::GetData( "IP_Records", Player.IP );
-			names = names ? names : "";
-			result = ::AddToList( names, Player.Name );
-			if ( result )
-			{
-				::print( ::AddData( "IP_Records", Player.IP, result ) );
-				::print( ::IncData( "UserData", "VisitorIPsCount" ) );
-			}
-
-			// Do the same as above for the Subnet_Records list
-			local subnet = ::GetSubnet( Player.IP )
-			names = ::GetData( "Subnet_Records", subnet );
-			names = names ? names : "";
-			result = ::AddToList( names, Player.Name );
-			::print( result );
-			if ( result )
-				::print( ::AddData( "Subnet_Records", subnet, result ) );
-
-			Joins++;
-			LoggedIn = 0;
-		}
+		Level = 1;							// Set default user level for unregistered users
 	}
 
 	function SetPassword ( password )
@@ -92,13 +81,14 @@ class User
 		if ( !Pass )							// If not registered
 		{
 			Pass = hash_pass;					// Set password hash
-			Level = 1;						// Set registered user level
-			return onUserRegister( this, ::IncData( "UserData", "RegisteredUsersCount" ) );
+			Level = 2;						// Set registered user level
+			LoggedIn = 1;						// Set as being logged in
+			return ::onUserRegister( this, ::IncData( "UserData", "RegisteredUsersCount" ) );
 		}
 		else if ( LoggedIn )						// If registered and logged in
 		{
 			Pass = hash_pass;					// Set new password hash
-			return onUserChangePass( this );
+			return ::onUserChangePass( this );
 		}
 		else return false;						// Not registered and not logged in
 	}
@@ -108,10 +98,10 @@ class User
 		if ( Pass && ::SHA1( password ) == Pass )			// If password hashes match and user registered
 		{
 			local response = LastLogin;
-			LoggedIn = true;
-			LastLogin = GetTime();					// Update lastlogin time
+			LoggedIn = 1;
+			LastLogin = ::time();					// Update lastlogin time
 			::IncData( "UserData", "LoginsCount" );			// Increase login count
-			return onUserLogin( user, response );
+			return ::onUserLogin( this, response );
 		}
 		if ( Pass ) return -1;						// If registered but pass mismatch
 		return 0;							// Not registered

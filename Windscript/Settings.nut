@@ -10,7 +10,9 @@
 
 function ParseConfig ()
 {
-	local raw = split( config_file.Stream, "\r\n" );			// Split string chunk into lines
+	local fIO = FileIO( "CONFIG.txt", 'w' );
+	local raw = split( fIO.Stream, "\r\n" );				// Split string chunk into lines
+	fIO.File.flush();
 	local lines = raw.len(), line, linelen, li, chr, key, data, strtrig, is_str;
 	for ( local i = 0; i < lines ; i++ )					// Iterate through lines
 	{
@@ -115,7 +117,6 @@ class FileIO
 }
 
 {
-	config_file <- FileIO( "CONFIG.txt", 'w' );
 	config <- {};
 	ParseConfig();
 }

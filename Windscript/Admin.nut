@@ -24,12 +24,46 @@ function ReloadPlayers ( )
 	}
 }
 
-// NEED TO EDIT AND ADD IN COMMANDLEVEL RETRIEVING!!! //
-// Note: This function also checks whether a player is registered
-//       if a command's level is set to 2
+function UnloadPlayers ( )
+{
+	foreach ( pname, user in OnlineUsers )
+		onPlayerPart( user.Player, 0 );
+}
+
+function UpdateIPInfo ( user )
+{
+	if ( user.InGame )
+	{
+		// Add current IP to user access list
+		local name = user.Player.Name, ip = user.Player.IP, ips = user.IPs;
+		local result = AddToList( ips ? ips : "", ip );
+		if ( result )
+			user.IPs = result;
+
+		// Add nickname to IP_Records list
+		local names = GetData( "IP_Records", ip );
+		names = names ? names : "";
+		result = AddToList( names, name );
+		if ( result )
+		{
+			AddData( "IP_Records", ip, result );
+			IncData( "UserData", "VisitorIPsCount" );
+		}
+
+		// Do the same as above for the Subnet_Records list
+		local subnet = GetSubnet( ip )
+		names = GetData( "Subnet_Records", subnet );
+		names = names ? names : "";
+		result = AddToList( names, name );
+		if ( result )
+			AddData( "Subnet_Records", subnet, result );
+	}
+}
+
+// Note: This function also checks whether a player is registered if a command's level is set to 1
 function CheckLevel ( player, command, ingame = false )
 {
-	local userlvl;
+	local user = GetUser( player ), userlvl;
 	if ( player.ID > 1000 )
 	{
 		if ( ingame )
@@ -39,9 +73,9 @@ function CheckLevel ( player, command, ingame = false )
 		}
 		userlvl = player.Level;
 	}
-	else userlvl = GetUser( player ).Level;
+	else userlvl = user.Level;
 
-	local commandlvl = 4;
+	local commandlvl = GetData( "CommandLevels", command );
 	if ( userlvl >= commandlvl ) return true;
 	else
 	{
@@ -50,10 +84,10 @@ function CheckLevel ( player, command, ingame = false )
 	}
 }
 
-
+UptimeLastUpdated <- 0;
 function UpdateUptime()
 {
-	local inctime = GameTimerTicks / 1000 - UptimeLastUpdated;
-	UptimeLastUpdated <- GameTimerTicks / 1000;
+	local inctime = time() - UptimeLastUpdated;
+	UptimeLastUpdated = time();
 	return IncData( "Misc", "TotalUptime", inctime );
 }

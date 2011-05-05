@@ -12,13 +12,14 @@ function onPlayerCommand ( player, command, params )
 	// The following commands are put under this signal while all other commands are
 	// forwarded to the function "onCommand". This is so that the usage of these commands
 	// are not echoed or used with !commands.
-	if ( command == "register" ) return cmdRegister( player, params );
-	else if ( command == "login" 	) return cmdLogin	( player, params );
-	else
+	switch ( command )
 	{
-		if ( params ) Echo( FindLevel( player, 3 ) + iCol( 3, ": /" ) + command +" "+ params );
-		else Echo( FindLevel( player, 3 ) + iCol( 3, ": /" ) + command );
-		return onCommand( player, command, params );		// Forward commands
+		case "register": return cmdRegister ( player, params );
+		case "login": return cmdLogin ( player, params );
+		default:
+			if ( params ) Echo( FindLevel( player, 3 ) + iCol( 3, ": /" ) + command +" "+ params );
+			else Echo( FindLevel( player, 3 ) + iCol( 3, ": /" ) + command );
+			return onCommand( player, command, params );	// Forward commands
 	}
 }
 
@@ -43,9 +44,6 @@ function onCommand ( player, command, params )
 		case "ircdo": return cmdIRCDo ( player, params );
 		case "raw": return cmdRaw ( player, params );
 		case "reload": return cmdReload ( player );
-		//else if ( command == "wep" ) player.SetWeapon( GetWeaponIDFromName( params ) );
-		//else if ( command == "goto" ) player.Pos = FindPlayer( params ).Pos;
-		//else if ( command == "spawn" ) CreateVehicle( GetVehicleIDFromName( IsNum( params ) ? params.tointeger() : params ), player.Pos, 0 );
 		default:
 			inplugins = PluginCommand( command, player, params );
 			return inplugins ? inplugins : mError( "Invalid Command ("+ command.toupper() +")", player );

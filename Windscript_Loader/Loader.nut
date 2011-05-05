@@ -53,6 +53,7 @@ function onScriptUnload ()
 {
 	print ( "\r       \n- Unloading Windscript Loader" );
 	BotTimeoutChecker.Delete();
+	BotSendMsgTimer.Delete();
 	UnloadBots();
 	debug ( "Unloaded Windscript Loader" );
 }

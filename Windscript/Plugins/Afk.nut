@@ -45,8 +45,8 @@ class Afk
 			Time = ::GetData( Hash, Num + ".Time" );
 			Reason = ::GetData( Hash, Num + ".Reason" );
 			LastTime = ::GetData( "AFK", ID + ".LastTime" );
-			LastTime = LastTime ? LastTime : 0;
 		}
+		LastTime = LastTime ? LastTime : 0;
 	}
 
 	function Save ()							// Update info in hash

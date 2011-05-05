@@ -22,52 +22,34 @@ function DelData ( section, item )
 function AddData ( section, item, data )
 	return CheckDataSection( section ).Add( item, data );
 
-function CheckDataSection ( section, donotunload = false )
+function CheckDataSection ( section, keeploaded = false )
 {
-	if ( !Data_Chunks.rawin( section ) )
-		Data_Chunks.rawset( section, WindData( section, donotunload ) );
-	return Data_Chunks.rawget( section );
+	if ( !Data.rawin( section ) )
+		Data.rawset( section, WindData( section, keeploaded ) );
+	return Data.rawget( section );
 }
 
 // Table where hashtable data is stored
-Data_Chunks <- {};
+Data <- {};
 
 class WindData
 {
-	constructor ( name, donotunload )
+	constructor ( name, keeploaded )
 	{
 		Name = name;
 		fName = cScript_Dir +"Hashes/"+ Name +".hsh";
-		LastSaved = ::GameTimerTicks;
-		keepLoaded = donotunload;
-		GetHash();
-	}
-
-	function GetHash ()
-	{
+		LastSaved = time();
+		UnsavedNum = 0;
+		keepLoaded = keeploaded;
 		local findhash = ::FindHashTable( Name );
-		if ( typeof( findhash ) == "HashTable" )
-		{
-			Hash = findhash;
-			debug( "Found Hash Table. Loading." );
-			Load();
-		}
-		else if ( findhash ) debug( "Oh noes, FindHashTable is being a woman and spitting out strings" );
-		else
-		{
-			Hash = ::HashTable( Name );
-			Load();
-		}
+		if ( findhash ) Hash = findhash;
+		else Hash = ::HashTable( Name );
+		Load();
 	}
 
 	function Add ( item, data )
 	{
 		local result = Hash.Add( item.tostring(), data );
-		if ( result == false )
-		{
-			GetHash();
-			result = Hash.Add( item.tostring(), data );
-		}
 		Changed();
 		return result ? data : false;
 	}
@@ -75,11 +57,6 @@ class WindData
 	function Del ( item )
 	{
 		local result = Hash.Del( item.tostring() );
-		if ( result == false )
-		{
-			GetHash();
-			result = Hash.Del( item.tostring() );
-		}
 		Changed();
 		return result;
 	}
@@ -88,11 +65,6 @@ class WindData
 	{
 		item = item.tostring();
 		local result = Hash.Inc( item, amount );
-		if ( result == false )
-		{
-			GetHash();
-			result = Hash.Inc( item, amount );
-		}
 		Changed();
 		return result != null ? Hash.Get( item ) : false;
 	}
@@ -102,11 +74,6 @@ class WindData
 		item = item.tostring();
 		Hash.Dec( item, amount );
 		local result = Hash.Get( item );
-		if ( result == false )
-		{
-			GetHash();
-			result = Hash.Get( item );
-		}
 		if ( result.tointeger() < 0 )
 		{
 			Hash.Add( item, 0 );
@@ -127,17 +94,12 @@ class WindData
 	{
 		item = item.tostring();
 		local data = Hash.Get( item );
-		if ( data == false )
-		{
-			GetHash();
-			data = Hash.Get( item )
-		}
 		return data ? data : 0;
 	}
 
 	function Save ()
 	{
-		if ( UnsavedNum )
+		if ( UnsavedNum > 0 )
 		{
 			local result = Hash.Save( fName );
 			if ( !result ) 
@@ -146,7 +108,7 @@ class WindData
 				return false;
 			}
 			debug( "Saved to "+ fName );
-			LastSaved = ::GameTimerTicks;
+			LastSaved = time();
 			UnsavedNum = 0;
 			return true;
 		}
@@ -156,13 +118,8 @@ class WindData
 	function Load ()
 	{
 		local result = Hash.Load( fName );
-		if ( !result )
-		{
-			debug( "Hash file does not exist: "+ fName );
-			debug( "File will be made on next save." );
-		}
-		else debug( "Loaded "+ fName +". Ready." );
-		LastSaved = ::GameTimerTicks;
+		if ( result ) debug( "Loaded "+ fName +". Ready." );
+		else debug( fName +" will be created on next save." );
 		return true;
 	}
 
@@ -173,7 +130,7 @@ class WindData
 			if ( keepLoaded ) return false;
 			Hash.Close();
 			debug( "Unloaded" );
-			Data_Chunks.rawdelete( Name );
+			Data.rawdelete( Name );
 			return true;
 		}
 		else debug( "Aborting unload due to save failure" );
@@ -181,10 +138,10 @@ class WindData
 
 	function Check ()
 	{
-		local dtime = ::GameTimerTicks - LastSaved;
-		if ( UnsavedNum > 0 && ( UnsavedNum > 19 || dtime > 600000 ))
+		local dtime = time() - LastSaved;
+		if ( UnsavedNum > 0 && ( UnsavedNum > 19 || dtime > 600 ))
 			return Save();
-		else if ( UnsavedNum == 0 && dtime > 900000 )
+		else if ( UnsavedNum == 0 && dtime > 900 )
 			return Unload();
 	}
 
@@ -202,24 +159,14 @@ class WindData
 
 function SyncData ()
 {
-	foreach ( key, data in Data_Chunks )
+	foreach ( key, data in Data )
 		data.Check();
 	return 1;
 }
 
 function UnloadData ()
 {
-	foreach ( key, data in Data_Chunks )
+	foreach ( key, data in Data )
 		data.Unload();
 	return 1;
-}
-
-{
-	CheckDataSection( "UserData", true );
-	CheckDataSection( "IP_Records", true );
-	CheckDataSection( "Subnet_Records", true );
-
-	CheckDataSection( "UserData_IPs" );
-	CheckDataSection( "UserData_Joins" );
-	CheckDataSection( "UserData_LoggedIn" );
 }

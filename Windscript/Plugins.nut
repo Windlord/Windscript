@@ -58,11 +58,16 @@ function PluginEvent ( event, ... )
 class Plugin
 {
 	constructor ( name )
+	{
 		Name = name;
+		Enabled = true;
+		Commands = {};
+		CommandsAllChannels = {};
+		Events = {};
+	}
 
 	function Load ()
 	{
-		debug ( "Loading plugin..." );
 		try { ::dofile ( cScript_Dir +"Plugins/"+ Name +".nut" ); } catch ( ex )
 		if ( ex )
 		{

@@ -44,16 +44,16 @@ function CreateBot ( name )
 
 function RemoveBot ( bot, unloading = false )
 {
-	local name = bot.lName;						// Cache bot's name and id for the print below
+	local name = bot.lName;							// Cache bot's name and id for the print below
 
 	bot.CheckLogin.Delete();
-	bot.Quit( "Windscript Version "+ cScript_Version );		// In case the bot is still connected, send QUIT message
-	if ( bot.Socket ) bot.Socket.Delete;				// Delete socket instance
+	bot.Quit( "Windscript Version "+ cScript_Version );			// In case the bot is still connected, send QUIT message
+	if ( bot.Socket ) bot.Socket.Delete;					// Delete socket instance
 	bot.Debug( "REMOVE", "Removing bot from slot "+ bot.ID );
-	IRCBots.rawdelete( name );					// Remove bot data from IRCBots
+	IRCBots.rawdelete( name );						// Remove bot data from IRCBots
 
 	if ( !unloading )
-		foreach ( a in IRCChannels ) UpdateAvailBots( a );	// Update pool of available bots per channel
+		foreach ( a in IRCChannels ) UpdateAvailBots( a );		// Update pool of available bots per channel
 }
 
 function RecoverBot ( bot )
@@ -69,8 +69,8 @@ function RecoverBot ( bot )
 function FindBot ( socket )
 {
 	foreach ( bot in IRCBots )
-		if ( bot.Socket.ID == socket.ID ) return bot;		// If socket ids match return bot instance
-	return false;							// If bot not found, return false
+		if ( bot.Socket.ID == socket.ID ) return bot;			// If socket ids match return bot instance
+	return false;								// If bot not found, return false
 }
 
 // Find a bot from a partial name (partname) and send raw string (raw)
@@ -96,32 +96,34 @@ class EchoBot
 		Name		= name;
 		ID			= ::IRCBots.len();
 		lName		= name.tolower();
-		Channels	= {};				// List of channels which the bot is on
-		Init		= time();			// Record when bot was created
+		Channels	= {};						// List of channels which the bot is on
+		Init		= time();					// Record when bot was created
 		Debug( "CREATED", "Bot created in slot "+ ID );
-		Socket		= ::NewSocket( "onIRCData" );	// This creates a new socket connection
-		Socket.SetLostConnFunc( onIRCDisconnected );	// This sets a function for the socket to call when disconnected
-		Socket.SetNewConnFunc( onIRCConnected );	// This sets a function for the connected socket to call
+		Socket		= ::NewSocket( "onIRCData" );			// This creates a new socket connection
+		Socket.SetLostConnFunc( onIRCDisconnected );			// This sets a function for the socket to call when disconnected
+		Socket.SetNewConnFunc( onIRCConnected );			// This sets a function for the connected socket to call
 		Socket.Connect( ::config.irc_server,
-				::config.irc_port );		// This connects the socket to the IRC server
+				::config.irc_port );				// This connects the socket to the IRC server
 		CheckLogin	= ::NewTimer( "CheckBotLogin", 7000, 1, lName );
 		LastPing	= Init;
 		NickServ	= false;
+		SendQueue	= [];
 		Used		= 1;
 
 		if ( ID == 0 ) ::MainBot <- this;
 	}
 
-	Name = null;						// This stores the name of the bot
+	Name = null;								// This stores the name of the bot
 	lName = null;
 	ID = null;
-	Socket = null;						// This stores the instance pointer for the socket created for the bot
-	Channels = null;					// This stores the channel names which the bot is on
-	NickServ = null;					// This is a check to see if the bot has been through NickServ
-	Init = null;						// This stores the tick count when the bot was created (Can be used in bot uptime checking)
+	Socket = null;								// This stores the instance pointer for the socket created for the bot
+	Channels = null;							// This stores the channel names which the bot is on
+	NickServ = null;							// This is a check to see if the bot has been through NickServ
+	Init = null;								// This stores the tick count when the bot was created (Can be used in bot uptime checking)
 	CheckLogin = null;
 	Used = null;
 	LastPing = null;
+	SendQueue = [];
 
 	function IsOn( channel )
 	{
@@ -137,18 +139,25 @@ class EchoBot
 		return true;
 	}
 	function Login		() { return Send( "PRIVMSG NickServ identify "+ config.irc_password ); }
+	function Send		( message ) { return AddToQueue( message +"\r\n" ); }
+	function AddToQueue	( msg ) { SendQueue.push( msg ); return true; }
+	function ProcessQueue	( ) {
+		local msg = ::JoinArray( SendQueue, "" )
+		if ( msg == "" ) return;
+		Socket.Send( msg );
+		SendQueue = [];
+	}
 	function Join		( channel, key = "" ) {
 		local lchannel = channel.tolower();
 		if ( !IRCChannels.rawin( lchannel ) ) IRCChannels.rawset( lchannel, IRCChannel( channel, key ) );
 		return Send( "JOIN "+ channel +" "+ key );
 	}
-	function Send		( message ) { Socket.Send( message +"\r\n" ); return true; }
 	function Part		( channel, msg = "Good bye" ) { return Send( "PART "+ channel +" "+ msg ); }
 	function Quit		( message ) { return Send( "QUIT :"+ message ); }
-	function Msg		( target, message ) { return Send( "PRIVMSG " + target + " :" + message ); }					// For sending messages to channel/user
-	function Adminmsg	( target, message ) { return Send( "PRIVMSG %" + target + ":" + message ); }					// For sending messages to all halfops on a channel
-	function Notice		( target, message ) { return Send( "NOTICE " + target + " :" + message ); }					// For sending notices to channel/user
-	function Me			( target, message ) { return Send( "PRIVMSG " + target + " :\x0001ACTION "+ message +"\x0001" ); }	// For sending /me text
+	function Msg		( target, message ) { return Send( "PRIVMSG " + target + " :" + message ); }		// For sending messages to channel/user
+	function Adminmsg	( target, message ) { return Send( "PRIVMSG %" + target + ":" + message ); }		// For sending messages to all halfops on a channel
+	function Notice		( target, message ) { return Send( "NOTICE " + target + " :" + message ); }		// For sending notices to channel/user
+	function Me		( target, message ) { return Msg( target, "\x0001ACTION "+ message +"\x0001" ); }	// For sending /me text
 	function Rejoin		( channel ) { Part( channel ); return Join( channel, FindChannel( channel ).Key ); }
 	function Autojoin	() {
 		local channels = split( config.irc_channels, ", " ), info, key;
@@ -267,26 +276,26 @@ function onIRCDisconnected ( socket )
 // This function is triggered when the sockets receive data from the IRC server
 function onIRCData ( socket, raw )
 {
-	local bot = FindBot( socket );					// This process is the equivalent to FindPlayer()
-	local raw = split( raw, "\r\n" );				// This process splits multiple line strings the IRC server sends out
-									// This occurs when the server tries to send more than one line.
-									// In such a case, the different lines are sent in one line, delimited with \r\n, aka a crlf
-	bot.LastPing = time();						// This records the last time the bot was pinged. The value is used in CheckBotTimeout()
-									// Strictly speaking receiving data isn't pinging but this serves its purpose.
+	local bot = FindBot( socket );						// This process is the equivalent to FindPlayer()
+	local raw = split( raw, "\r\n" );					// This process splits multiple line strings the IRC server sends out
+										// This occurs when the server tries to send more than one line.
+										// In such a case, the different lines are sent in one line, delimited with \r\n, aka a crlf
+	bot.LastPing = time();							// This records the last time the bot was pinged. The value is used in CheckBotTimeout()
+										// Strictly speaking receiving data isn't pinging but this serves its purpose.
 
 	local ntemp, nick, address, words;
-	foreach ( rawline in raw )					// This loops through the raw string to make sure all IRC lines are processed
+	foreach ( rawline in raw )						// This loops through the raw string to make sure all IRC lines are processed
 	{
 		/* UNCOMMENT FOR IRC RAW OUTPUT */
-		//bot.Debug( "RAW", rawline );				// Uncomment this line to see all raw output from the server
+		//bot.Debug( "RAW", rawline );					// Uncomment this line to see all raw output from the server
 		/* UNCOMMENT FOR IRC RAW OUTPUT */
 
 		if ( rawline.len() < 2 ) continue;
 
 		rawline = split( rawline, " " );
 		words = rawline.len();
-		ntemp	= split( rawline[ 0 ], "!:" );			// A user is identified as :Nickname!Username@Address
-		if ( ntemp.len() > 1 )					// Make sure the format has both ! and : and two elements
+		ntemp	= split( rawline[ 0 ], "!:" );				// A user is identified as :Nickname!Username@Address
+		if ( ntemp.len() > 1 )						// Make sure the format has both ! and : and two elements
 		{
 			nick = ntemp[ 0 ];
 			address = ntemp[ 1 ];
@@ -300,16 +309,16 @@ function onIRCData ( socket, raw )
 function ProcessRaw ( bot, raw, nick, address )
 {
 	local words = raw.len();
-	if ( raw[ 1 ] == "001" )			// Bot has connected to the network.
+	if ( raw[ 1 ] == "001" )						// Bot has connected to the network.
 	{
 		bot.Debug( "CONNECTED", "Connected to "+ raw[ 6 ] );
-		bot.Login();				// Proceed to logging into the network.
+		bot.Login();							// Proceed to logging into the network.
 	}
 
 	else if ( raw[ 0 ] == "ERROR" )
 	{
 		bot.Debug( "ERROR", JoinArray( raw.slice( 1 ), " " ).slice( 1 ) );
-		if ( raw[ 1 ] == ":Closing" && raw[2] == "Link:" )	// For some reason the bot is losing its connection
+		if ( raw[ 1 ] == ":Closing" && raw[2] == "Link:" )		// For some reason the bot is losing its connection
 		{
 			if ( raw[ 4 ] == "\x0028Ping" && raw[ 5 ] == "timeout\x0029" )
 				RecoverBot ( bot );
@@ -321,16 +330,16 @@ function ProcessRaw ( bot, raw, nick, address )
 
 
 
-	else if ( raw[ 1 ] == "433" )		// If there is a nickname clash
+	else if ( raw[ 1 ] == "433" )						// If there is a nickname clash
 	{
-		bot.Name = bot.Name + "_";	// Append '_' to current name
-		bot.Identify();			// Try re-identifying with server
+		bot.Name = bot.Name + "_";					// Append '_' to current name
+		bot.Identify();							// Try re-identifying with server
 	}
 
 	else if ( raw[ 1 ] == "KICK" )
 	{
-		if ( raw[ 3 ] == bot.Name )	// Update the list of channels the bot is in
-		{				// The data is stored as "#Chan1 #Chan2 #Chan3"
+		if ( raw[ 3 ] == bot.Name )					// Update the list of channels the bot is in
+		{								// The data is stored as "#Chan1 #Chan2 #Chan3"
 			local chan = AddUpdateChannel( raw[ 2 ] );
 			bot.Channels.rawdelete( chan.Name );
 			bot.Join( chan.Name, chan.Key );
@@ -554,8 +563,7 @@ function DealWithNickServ ( bot, text )
 
 // This is a function which checks if the bots are still connected.
 // This is done by checking when the last strings were received from the server.
-// This function is run every 10 seconds from Background.nut
-BotTimeoutChecker <- NewTimer( "CheckBotTimeout", 20000, 0 );
+BotTimeoutChecker <- NewTimer( "CheckBotTimeout", 30000, 0 );
 function CheckBotTimeout ( )
 {
 	local deadbot, deadbotid, dur;
@@ -609,4 +617,13 @@ function BotMessage ( target, type, text )
 		return true;
 	}
 	return false;
+}
+
+// This bit is a timer which runs every 200ms to send out messages stored in the queue.
+// This is to allow the bot to get throttled less while still being able to spam.
+BotSendMsgTimer <- NewTimer( "ProcessBotMsgQueues", 100, 0 );
+function ProcessBotMsgQueues ()
+{
+	foreach ( bot in IRCBots )
+		bot.ProcessQueue();
 }

@@ -37,10 +37,11 @@ LUcolRed	<- "[#ff0000]";
 LUcolBlue	<- "[#0000ff]";
 LUcolWhite	<- "[#ffffff]";
 LUcolBlack	<- "[#000000]";
+LUcolYellow	<- "[#ffff00]";
 LUcolClose	<- "[#d]";
 
 function debug ( msg )
-	return CallFunc( cScript_Loader, "debug", msg );
+	return NewTimer( "CallFunc", 0, 1, cScript_Loader, "debug", msg );
 
 // Function called when script is loaded.
 function onScriptLoad ()
@@ -49,7 +50,6 @@ function onScriptLoad ()
 	print ( "\r       \n- Loading Windscript Version "+ cScript_Version );
 
 	// Load necessary modules
-	LoadModule( "lu_ini" );
 	LoadModule( "lu_hashing" );
 
 	// Load component scripts
@@ -67,6 +67,7 @@ function onScriptLoad ()
 	AttemptLoad ( "Commands.nut" );		// Load Commands.nut which handles IRC and Player commands
 	AttemptLoad ( "CommandsList.nut" );	// Load CommandsList.nut which contains the list of commands
 	AttemptLoad ( "GameEvents.nut" );	// Load GameEvents.nut which handles all in-game events
+	AttemptLoad ( "ScriptEvents.nut" );	// Load ScriptEvents.nut which handles events triggered by Windscript
 	AttemptLoad ( "Plugins.nut" );		// Load Plugins.nut which deals with load/unloading plugins
 
 	print ( "\r- Completed Loading All Scripts.\n" );
@@ -76,7 +77,7 @@ function onScriptLoad ()
 function AfterScriptLoad ()
 {
 	cInit_Ticks <- CallFunc( cScript_Loader, "GetInitTicks" );
-	UptimeLastUpdated <- cInit_Ticks;
+	UptimeLastUpdated = time();
 	if ( Load_Errors )
 	{
 		print	( Load_Errors +" Error(s) Encountered.\n" );
@@ -117,8 +118,9 @@ function onServerStart ()
 function onScriptUnload ()
 {
 	print ( "\r       \n- Unloading Windscript Version "+ cScript_Version );
-	GameTimer.Delete();
+	UnloadPlayers();
 	UnloadData();
+	GameTimer.Delete();
 	debug ( "Unloaded Windscript Version "+ cScript_Version );
 }
 

@@ -10,11 +10,17 @@
 function onPlayerConnect( player )
 {
 	local user = GetUser( player );
-	GetUser( player ).UpdateInfo();
+	UpdateIPInfo( user );
+
 	Echo( iCol( 3, player.Name +" joined the server." ) );
 	if ( config.rawin( "server_motd" ) ) AdminPM( config.server_motd, player );
+
+	user.Joins++;
+	user.LoggedIn = 0;
+
 	PluginEvent( onPlayerConnect, player );
 }
+
 
 function onPlayerPart( player, reason )
 {
@@ -25,9 +31,9 @@ function onPlayerPart( player, reason )
 
 function onPlayerDeath ( player, reason )
 {
-	local playern = FindLevel( player, 3 );
-	if ( reason == WEP_DROWNED ) EMessage( playern + iCol( 4, " drowned" ), colRed );
-	else EMessage( playern + iCol( 4, " died" ), colRed );
+	local playern = FindLevel( player, 2 ) + player.ColouredName;
+	if ( reason == WEP_DROWNED ) EMessage( iCol( 4, playern + " drowned" ), colRed );
+	else EMessage( iCol( 4, playern + " died" ), colRed );
 	PluginEvent( onPlayerDeath, player, reason );
 }
 
@@ -35,9 +41,9 @@ function onPlayerKill ( killer, player, weapon, bodypart )
 {
 	weapon = GetWeaponName( weapon );
 	bodypart = GetBodyPartName( bodypart );
-	local killern = FindLevel( killer, 3 );
-	local playern = FindLevel( player, 3 );
-	EMessage( killern + iCol( 4, " killed " ) + playern + iCol( 4, " ("+ weapon +" - "+ bodypart +")" ), colRed );
+	local killern = FindLevel( killer, 2 ) + killer.ColouredName;
+	local playern = FindLevel( player, 2 ) + player.ColouredName;
+	EMessage( iCol( 4, killer +" killed "+ playern +" ("+ weapon +" - "+ bodypart +")" ), colRed );
 	PluginEvent( onPlayerKill, killer, player, weapon, bodypart );
 	return 1;
 }
@@ -58,14 +64,14 @@ function onPlayerChat ( player, text )
 		local param = (a.len() > 1) ? JoinArray( a.slice( 1 ), " " ) : "";
 		text = param ? command + " " + param : command;
 		Echo( FindLevel( player, 3 ) +iCol( 4, ": !" )+ text );
-		onCommand( player, command, param );
-		//NewTimer( "onCommand", 200, 1, player, command, param );
+		Message( FindLevel( player, 2 ) + player.ColouredName +": "+ LUcolRed +"!"+ LUcolClose + text, colWhite );
+		NewTimer( "onCommand", 200, 1, player, command, param );
 		return 0;
 	}
 	else
 	{
 		Echo( FindLevel( player, 3 ) +iCol( 5, ":" )+ " " + text );
-		Message( FindLevel( player, 2 ) + player.ColouredName + ": " + text, colWhite );
+		Message( FindLevel( player, 2 ) + player.ColouredName +": "+ text, colWhite );
 		PluginEvent( onPlayerChat, player, text );
 		return 0;
 	}

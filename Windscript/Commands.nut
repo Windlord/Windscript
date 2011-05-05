@@ -9,51 +9,56 @@
 
 function cmdRegister ( player, params )
 {
-	if ( params && !GetUser( player ).SetPassword( params ) )
-		mError ( "Your nickname is already registered.", player );
-	else
-		mFormat ( "/register <Password>", player );
+	if ( !params ) return mFormat ( "/register <Password>", player );
+	if ( !GetUser( player ).SetPassword( params ) )
+		return mError ( "Your nickname is already registered.", player );
 }
 
 function cmdLogin ( player, params )
 {
-	if ( params )
+	local user = GetUser( player )
+	if ( user.LoggedIn ) return mError ( "You are already logged in.", player );
+	if ( !params ) return mFormat ( "/login <Password>", player );
+
+	local success = user.Login( params );
+	switch ( success )
 	{
-		local user = GetUser( player ), success = user.Login( params );
-		switch ( success )
-		{
-			case 1:
-				return true;
-			case 0:
-				return mError ( "Your Nickname is not registered.", player );
-			case -1:
-				return mError ( "Invalid Password", player );
-		}
+		case 1:
+			return true;
+		case 0:
+			return mError ( "Your Nickname is not registered.", player );
+		case -1:
+			return mError ( "Invalid Password", player );
 	}
-	else
-		mFormat ( "/login <Password>", player );
+}
+
+function cmdChangePass ( player, params )
+{
+	local user = GetUser( player );
+	if ( !user.Pass ) return mError ( "Please register first using /register", player );
+	if ( !param ) return mError ( );
 }
 
 function cmdSay ( player, params )
 {
-	if ( params )
-		EMessage ( FindLevel( player, 3 ) + iCol( 6, ": " ) + params, colWhite );
-	else
-		mError ( "No text to send.", player );
-	return 1;
+	if ( !params ) return mError ( "No text to send.", player );
+	return EMessage ( FindLevel( player, 3 ) + iCol( 6, ": " ) + params, colWhite );
 }
 
 function cmdMe ( player, params )
 {
 	if ( params )
-		EMessage ( iCol( 7, "* "+ FindLevel( player, 2 ) + player.Name + " " + params ), colYellow );
+		return EMessage ( iCol( 7, "* "+ FindLevel( player, 2 ) + player.Name + " " + params ), colYellow );
 	else
-		mError ( "No text to send.", player );
-	return 1;
+		return mError ( "No text to send.", player );
 }
 
 function cmdKill ( player )
+{
+	local user = GetUser( player );
+	user.SuicideCount++;
 	player.Health = 0;
+}
 
 function cmdPos ( plr )
 	EMessage( plr.Name +" - "+ plr.Pos.x +" "+ plr.Pos.y +" "+ plr.Pos.z +" "+ plr.Angle );
@@ -63,7 +68,7 @@ function cmdUptime ( player )
 	local svr = ( GameTimerTicks - cInit_Ticks ) / 1000;
 	local tot_uptime = GetData( "Misc", "TotalUptime" );
 	tot_uptime = tot_uptime ? tot_uptime : 0;
-	tot_uptime += GameTimerTicks / 1000 - UptimeLastUpdated;
+	tot_uptime += time() - UptimeLastUpdated;
 	SendMessage( iCol( 2, "Server Uptime: " ) + iCol( 6, Duration( svr ) ), player );
 	if ( tot_uptime ) SendMessage( iCol( 2, "Total Uptime: " ) + iCol( 6, Duration( tot_uptime ) ), player );
 	return 1;
@@ -124,7 +129,7 @@ function cmdReload ( player )
 			EMessage( iCol( 4, "* Reloading Windscript..." ), colRed );
 			CallFunc2( "ReloadScript" );
 		}
-		else mError( "Wait "+ Duration( 60000 - dur ) +" more to use this command.", player );
+		else mError( "Wait "+ Duration( ( 60000 - dur ) / 1000 ) +" more to use this command.", player );
 	}
 	return 1;
 }

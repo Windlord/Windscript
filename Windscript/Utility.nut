@@ -40,14 +40,14 @@ function Echo ( message )					// Sends a message to the echo channel
 
 function EMessage ( message, col = colWhite )			// Sends a message both to the server and the echo channel
 {								// Format: EMessage ( message, Colour() );
-	Message( StripCol( message ), col );
-	return SendToEcho( config.irc_echo, "msg", message );
+	Message( StripIRCCol( message ), col );
+	return SendToEcho( config.irc_echo, "msg", StripGameCol( message ) );
 }
 
 function SendMessage ( message, target, col = colWhite )	// Sends a pm ingame if player is ingame. Sends a notice if IRC user.
 {								// Format: SendMessage( message, player/user, Colour() );
-	if ( target.ID > 1000 ) return SendToEcho( target.Name, "notice", message );
-	else return MessagePlayer( StripCol( message ), target, col );
+	if ( target.ID > 1000 ) return SendToEcho( target.Name, "notice", StripGameCol( message ) );
+	else return MessagePlayer( StripIRCCol( message ), target, col );
 }
 
 function AdminMessage ( message )
@@ -82,7 +82,6 @@ IRC_LEVELNAME <- ["Unregistered", "Player", "Moderator", "Admin", "Manager", "Ow
 IRC_LEVELSYML <- ["", "+", "%", "@", "&", "~"];
 IRC_LEVELCOLO <- ["05", "06", "07", "02", "03", "04" ];
 
-// NEED TO ADD IN PLAYERLEVEL RETRIEVING!!!! //
 // If the optional second argument is 0, it will return the level number as an int
 // If it is 1, it will return the name of the level of the player
 // If it is 2, it will return the IRC level prefix (ie. + % @ & ~ )
@@ -91,9 +90,7 @@ function FindLevel ( player, type = 1 )
 {
 	local ilevel;
 	if ( player.ID > 1000 ) ilevel = player.Level;
-	else {
-		ilevel = 4;
-	}
+	else ilevel = GetUser( player ).Level;
 	switch ( type )
 	{
 		case 1:

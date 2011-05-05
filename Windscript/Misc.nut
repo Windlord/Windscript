@@ -68,7 +68,7 @@ function iColnumToString( colnum )
 
 // This function strips the IRC colours off of a string
 // Good to use with the IRC echo
-function StripCol ( text )
+function StripIRCCol ( text )
 {
 	local a, z = text.len(), l;
 	local coltrig = false, comtrig = false, num = 0, output = "";
@@ -83,6 +83,32 @@ function StripCol ( text )
 	return output;
 }
 
+
+function StripGameCol ( text )
+{
+	local coltrig, output = "";
+	foreach ( idx, chr in text )
+	{
+		switch ( chr )
+		{
+			case '[':
+				if ( text[ idx + 1 ] == '#' )
+				{
+					coltrig = true;
+					break;
+				}
+			case ']':
+				if ( coltrig )
+				{
+					coltrig = false;
+					break;
+				}
+			default:
+				if ( !coltrig ) output += chr.tochar();
+		}
+	}
+	return output;
+}
 
 // This function generates random integers depending on the arguments.
 // If you supply one argument, it'll return a number between 1 and the provided number
