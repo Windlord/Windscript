@@ -168,19 +168,37 @@ function GetSubnet ( ip )
 function AddToList ( strlist, str )
 {
 	strlist = split( strlist, " " );
-	local found = false;
+	foreach ( idx, val in strlist )
+		if ( val == str )
+			return strlist;
+
+	strlist.push( str );							// Push string into list
+	return JoinArray( strlist, " " );					// Return array as string
+}
+
+function RemFromList ( strlist, str )
+{
+	strlist = split( strlist, " " );
 	foreach ( idx, val in strlist )
 	{
 		if ( val == str )
 		{
-			found = true;
-			break;
+			strlist.remove( idx );
+			return JoinArray( strlist, " " );
 		}
 	}
+	return strlist;
+}
 
-	if ( found ) return false;						// If already there, return false
-	strlist.push( str );							// Push string into list
-	return JoinArray( strlist, " " );					// Return array as string
+function IsinList ( strlist, str )
+{
+	strlist = split( strlist, " " );
+	foreach ( idx, val in strlist )
+	{
+		if ( val == str )
+			return true;
+	}
+	return false;
 }
 
 // This function returns 1st/2nd/3rd/4th from an integer

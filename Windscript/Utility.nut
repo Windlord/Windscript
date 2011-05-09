@@ -101,7 +101,7 @@ IRC_LEVELCOLO <- ["05", "06", "07", "02", "03", "04" ];
 function FindLevel ( player, type = 1 )
 {
 	local ilevel;
-	if ( typeof( player ) == "IRCUser" ) ilevel = player.Level;
+	if ( typeof( player ) == "IRCUser" ) ilevel = player.Level();
 	else ilevel = GetUser( player ).Level;
 	switch ( type )
 	{

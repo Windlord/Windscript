@@ -24,6 +24,13 @@ function GetUser ( plr )
 	}
 }
 
+// This is to get an ingame user from their account id
+function GetUserFromID ( aID )
+{
+	foreach ( user in OnlineUsers )
+		if ( user.ID == aID ) return user;
+	return null;
+}
 
 function FindUserIDfromName ( name )
 {

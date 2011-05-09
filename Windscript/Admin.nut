@@ -90,7 +90,7 @@ function CheckLevel ( player, command, ingame = false )
 			mError( "InGame Command ("+ command.toupper() +")", player );
 			return false;
 		}
-		userlvl = player.Level;
+		userlvl = player.Level();
 	}
 	else userlvl = user.Level;
 

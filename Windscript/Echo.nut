@@ -9,52 +9,116 @@
 
 config.rawset( "irc_echo_lower", config.irc_echo.tolower() );
 
-// Array of IRCUser2 objects for storing info in this script.
-IRCUsers2 <- [];
-class IRCUser2
+// Array of IRCUser objects for storing info in this script.
+IRCUsers <- {};
+class IRCUser
 {
-	constructor ( id, name, address, level )
+	constructor ( name, address )
 	{
-		Name	= name;
-		ID		= id;
-		Address	= address;
-		Level	= level;
+		Name = name;
+		Address = address;
+	}
+
+	function Level ( channel = null )
+	{
+		if ( !channel ) channel = ::FindIRCChannel( config.irc_echo );
+		if ( !channel ) return false;
+		return channel.Users.rawget( Name );
+	}
+
+	function IsOn ( channeln )
+	{
+		local chan = ::FindIRCChannel( channeln );
+		if ( !chan ) return false;
+		if ( Level( chan ) ) return true;
+		return false;
 	}
 
 	function _typeof()
 		return "IRCUser";
 
-	Name	= "";
-	ID		= 0;
-	Address	= "";
-	Level	= 0;
+	Name = "";
+	Address = "";
 }
 
 // This function is called from Windscript_Loader/IRC.nut to update local information about IRC users.
 // This is the best method I know of since LU's implementation of Squirrel is limited and thus allows
 // for only one thread to run at a time. (ie. I can't CallFunc back to a script which I CallFunc-ed)
-function UpdateUsers ( ID, Name, Address, Level )
+function UpdateIRCUser ( name, address )
 {
-	local aID = ID - 1001;
-	if ( IRCUsers2.len() <= aID ) IRCUsers2.resize( aID+1 );
-	if ( !IRCUsers2[ aID ] )
-		IRCUsers2[ aID ] = IRCUser2( ID, Name, Address, Level );
-	else
+	if ( IRCUsers.rawin( name ) )
 	{
-		IRCUsers2[ aID ].Address = Address;
-		IRCUsers2[ aID ].Level = Level;
+		local user = IRCUsers.rawget( name );
+		user.Address = address;
 	}
-	local user = IRCUsers2[ aID ];
+	else IRCUsers.rawset( name, IRCUser( name, address ) );
+}
+
+function UpdateIRCUserNickname ( old, new )
+{
+	local newuser = IRCUser( new, IRCUsers.rawget( old ).Address );
+	IRCUsers.rawset( new, newuser );
+	IRCUsers.rawdelete( old );
+	foreach ( chan in IRCChannels )
+	{
+		if ( chan.Users.rawin( old ) )
+		{
+			chan.Users.rawset( new, chan.Users.rawget( old ) );
+			chan.Users.rawdelete( old );
+		}
+	}
 }
 
 function FindIRCUser ( name )
 {
-	foreach ( a, user in IRCUsers2 )
+	foreach ( uname, user in IRCUsers )
 	{
-		if ( user && user.Name == name ) return user;
+		if ( uname.find( name ) != null ) return user;
 	}
+	return null;
+}
+
+function FindIRCUserbyAddress ( address )
+{
+	foreach ( user in IRCUsers )
+		if ( user.Address == address ) return user;
 	return false;
 }
+
+IRCChannels <- {};
+class IRCChannel
+{
+	constructor ( name )
+	{
+		Name = name;
+		lName = name.tolower();
+		Users = {};
+	}
+
+	function _tostring ()
+		return Name;
+
+	Name = "";
+	lName = "";
+	Users = {};
+}
+
+function UpdateIRCChannel ( cname, uname, level )
+{
+	if ( !IRCChannels.rawin( cname ) )
+		IRCChannels.rawset( cname, IRCChannel( cname ) );
+	IRCChannels.rawget( cname ).Users.rawset( uname, level );
+}
+
+function FindIRCChannel ( name )
+{
+	if ( IRCChannels.rawin( name ) )
+		return IRCChannels.rawget( name );
+	foreach ( cname, chan in IRCChannels )
+		if ( name == cname || name == chan.lName ) return chan;
+	return null;
+}
+
 
 // This event is called when a user sends a personal message to the bots
 function onIRCMessage ( user, text )

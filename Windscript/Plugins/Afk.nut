@@ -14,12 +14,33 @@ function cmdAway ( player, reason, channel )
 function cmdBack ( player, dummyparams, channel )
 {
 	local awaydata = Afk( player, channel );				// Get away data instance
-	if ( awaydata.Num ) return awaydata.Del();				// If entry exists for this user delete entry
+	if ( awaydata.IsAway ) return awaydata.Del();				// If entry exists for this user delete entry
 	else return mError( "You are not away", player );
 }
 
 function cmdAfk ( player, params, channel )
-	return Afk( player, channel ).List();
+	return Afk( player, channel ).Afk();
+
+
+function AfkString ( hash, name, id )
+{
+	local atime, reason, msg, dur, dt;
+	reason = GetData( hash, id + ".Reason" );
+	atime = GetData( hash, id + ".Time" );
+	dur = time() - atime;
+	if ( dur > 86400 )					// If more than a day ago
+	{
+		dt = date( atime );
+		if ( dt.month == date().month )			// If left on current month
+			msg = " left on the "+ GetNth( dt.day );
+		else						// If left on another month
+			msg = " left on "+ GetNth( dt.day ) +" "+ GetMonth( dt.month );
+		msg += format( " at %02i:%02i", dt.hour, dt.min );
+	}
+	else msg = " has been away for "+ Duration( dur );
+	return iCol( 3, iBold( name ) + msg + " ("+ reason +")" );
+}
+
 
 class Afk
 {
@@ -28,42 +49,45 @@ class Afk
 		Player = player;
 		Channel = channel;
 
-		if ( Player.ID > 1000 )						// If player is an IRC user
+		if ( typeof( Player ) == "IRCUser" )				// If player is an IRC user
 		{
 			Hash = "AFK_"+ Channel;
 			ID = player.Address;					// Set IRC user address as identification string
+			if ( Channel == config.irc_echo_lower )
+			{
+				Other = "AFK_InGame";
+				IsEcho = true;
+			}
 		}
 		else								// If player is ingame player
 		{
-			Ingame = true;
+			IsEcho = true;
 			Hash = "AFK_InGame";
+			Other = "AFK_"+ config.irc_echo_lower;
 			ID = ::GetUser( Player ).ID;				// Set ingame user account ID as identification
 		}
-		Num = ::GetData( Hash, ID );					// Get away data number
-		if ( Num )
-		{
-			Time = ::GetData( Hash, Num + ".Time" );
-			Reason = ::GetData( Hash, Num + ".Reason" );
-			LastTime = ::GetData( "AFK", ID + ".LastTime" );
-		}
+
+		Time = ::GetData( Hash, ID + ".Time" );
+		Reason = ::GetData( Hash, ID + ".Reason" );
+		LastTime = ::GetData( "AFK", ID + ".LastTime" );
 		LastTime = LastTime ? LastTime : 0;
+		List = ::GetData( Hash, "List" );
+		List = List ? List : "";
+		IsAway = ::IsinList( List, ID );
 	}
 
 	function Save ()							// Update info in hash
 	{
-		::AddData( "AFK", ID, ::GetTime() );
-		::AddData( Hash, ID, Num );
-		::AddData( Hash, Num + ".Name", Player.Name );
-		::AddData( Hash, Num + ".Time", Time );
-		::AddData( Hash, Num + ".Reason", Reason );
+		::AddData( Hash, "List", ::AddToList( List, ID ) );
+		::AddData( Hash, ID + ".Time", Time );
+		::AddData( Hash, ID + ".Reason", Reason );
 		return true;
 	}
 
 	function Add ( reason )
 	{
-		if ( Num ) return Update( reason );				// If away entry exists
+		if ( IsAway ) return Update( reason );				// If away entry exists
 
-		Num = ::IncData( Hash, "Total" );				// Inc total number of away entries
 		Time = ::GetTime();						// Set current time as away time
 		Reason = reason;						// Set reason
 		if ( !SpamCheck() ) Msg( ::iCol( 3, ::iBold( Player.Name ) +" is away ("+ Reason +")" ), ::colGreen );
@@ -74,8 +98,9 @@ class Afk
 	function Del ()
 	{
 		local dur = GetTime() - Time, tot = ::IncData( "AFK", ID + ".TotalTime", dur );
-		::DecData( Hash, "Total" )					// Reduce total number of away entries
-		::DelData( Hash, ID );						// Remove away data number associated with ID
+		local newlist = ::RemFromList( List, ID );
+		if ( newlist == "" ) ::DelData( Hash, "List" );
+		else ::AddData( Hash, "List", newlist );
 		if ( !SpamCheck() ) Msg( ::iCol( 3, ::iBold( Player.Name ) +" returned from \""+ Reason +"\" after "+ ::Duration( dur ) ), ::colGreen );
 		else ::SendMessage( ::iCol( 3, "You returned from \""+ Reason +"\" after "+ ::Duration( dur ) ), Player, ::colGreen );
 		::SendMessage( ::iCol( 3, "You have so far logged a total AFK time of: "+ ::Duration( tot ) ), Player, ::colGreen );
@@ -84,7 +109,7 @@ class Afk
 
 	function Update ( reason )
 	{
-		if ( !Num ) return Add( reason );				// If away entry doesn't exist
+		if ( !IsAway ) return Add( reason );				// If away entry doesn't exist
 
 		if ( Reason == reason )						// If reason hasn't changed,
 		{								// do nothing apart from reminding
@@ -104,33 +129,53 @@ class Afk
 		}
 	}
 
-	function List ()
+	function Afk ()
 	{
-		local name, time, reason, max = ::GetData( Hash, "Total" ).tointeger(), now = ::GetTime();
-		if ( !max ) return ::SendMessage( iCol( 3, "No one is currently away." ), Player, ::colGreen );
-		for ( local i = 1; i <= max; i++ )				// For all away data entries in hash
+		local id, list = ::GetData( Hash, "List" ), total = 0, result;
+		list = list ? list : "";
+		foreach ( id in split( list, " " ) )				// For all away data entries in hash
 		{
-			name = ::GetData( Hash, i + ".Name" );
-			reason = ::GetData( Hash, i + ".Reason" );
-			time = ::GetData( Hash, i + ".Time" );
-			if ( now - time > 86400 )				// If more than a day ago
+			result = ShowAfks( Hash, id );
+			if ( result ) total++;
+		}
+		if ( IsEcho )
+		{
+			list = ::GetData( Other, "List" );
+			list = list ? list : "";
+			if ( list )
 			{
-				local dt = date( time );
-				if ( dt.month == date().month )			// If left on current month
-					time = " left on the "+ ::GetNth( dt.day );
-				else						// If left on another month
-					time = " left on "+ ::GetNth( dt.day ) +" "+ ::GetMonth( dt.month );
-				time += format( " at %02i:%02i", dt.hour, dt.min );
+				foreach ( id in split( list, " " ) )
+				{
+					result = ShowAfks( Other, id );
+					if ( result ) total++;
+				}
 			}
-			else time = " has been away for "+ ::Duration( now - time );
-			return ::SendMessage( iCol( 3, iBold( name ) + time + " ("+ reason +")" ), Player, ::colGreen );
+		}
+		if ( total ) return true;
+		return ::SendMessage( iCol( 3, "No one is currently away." ), Player, ::colGreen );
+	}
+
+	function ShowAfks ( hash, id )
+	{
+		if ( Hash == "AFK_Ingame" )
+		{
+			if ( !GetUserFromID( id ) ) return;
+			::SendMessage( ::AfkString( hash, ::GetData( "UserData_Name", id ), i ), Player, ::colGreen );
+		}
+		else
+		{
+			local user = ::FindIRCUserbyAddress( id );
+			if ( user )
+			{
+				if ( !user.IsOn( Channel ) ) return;
+				return ::SendMessage( ::AfkString( hash, user.Name, id ), Player, ::colGreen );
+			}
 		}
 	}
 
 	function Msg ( msg, col )
 	{
-		if ( Ingame || Channel == config.irc_echo_lower )		// If on echo channel or ingame send message to both
-			return ::EMessage( msg, col );
+		if ( IsEcho ) return ::EMessage( msg, col );			// If on echo channel or ingame send message to both
 		else								// Otherwise, send message to channel only
 		{
 			::CallFunc2( "BotMessage", Channel, "msg", msg );
@@ -149,16 +194,17 @@ class Afk
 		}
 	}
 
-	Ingame = false;
+	IsEcho = false;
+	Other = false;
 	Hash = null;
 	Player = null;
 	ID = null;
-	Num = null;
 	Channel = null;
-	Name = null;
 	Time = null;
 	Reason = null;
 	LastTime = null;
+	List = null;
+	IsAway = null;
 }
 
 {	// Register commands for all IRC channels.

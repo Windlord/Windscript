@@ -93,22 +93,22 @@ class EchoBot
 	//			SomeVariable <- EchoBot( botname );
 	constructor ( name )
 	{
-		Name		= name;
-		ID			= ::IRCBots.len();
-		lName		= name.tolower();
-		Channels	= {};						// List of channels which the bot is on
-		Init		= time();					// Record when bot was created
+		Name = name;
+		ID = ::IRCBots.len();
+		lName = name.tolower();
+		Channels = {};							// List of channels which the bot is on
+		Init = time();							// Record when bot was created
 		Debug( "CREATED", "Bot created in slot "+ ID );
-		Socket		= ::NewSocket( "onIRCData" );			// This creates a new socket connection
+		Socket = ::NewSocket( "onIRCData" );				// This creates a new socket connection
 		Socket.SetLostConnFunc( onIRCDisconnected );			// This sets a function for the socket to call when disconnected
 		Socket.SetNewConnFunc( onIRCConnected );			// This sets a function for the connected socket to call
 		Socket.Connect( ::config.irc_server,
 				::config.irc_port );				// This connects the socket to the IRC server
-		CheckLogin	= ::NewTimer( "CheckBotLogin", 7000, 1, lName );
-		LastPing	= Init;
-		NickServ	= false;
-		SendQueue	= [];
-		Used		= 1;
+		CheckLogin = ::NewTimer( "CheckBotLogin", 7000, 1, lName );
+		LastPing = Init;
+		NickServ = false;
+		SendQueue = [];
+		Used = 1;
 
 		if ( ID == 0 ) ::MainBot <- this;
 	}
@@ -181,15 +181,17 @@ class IRCChannel
 		Name = channel;
 		lName = channel.tolower();
 		Key = key;
-		Users = 0;
+		Users = {};
 		Bots = [];
 	}
-	ID = null;
+
+	function _tostring ()
+		return Name;
+
 	Name = null;
 	lName = null;
 	Key = null;
 	Users = null;
-	Userlist = null;
 	Bots = [];
 }
 
@@ -212,47 +214,70 @@ function AddUpdateChannel ( channame )
 	return chan;
 }
 
+function UpdateMainScriptIRCChannel ( channel, user, level )
+	CallFunc( cScript_Main, "UpdateIRCChannel", channel.Name, user.Name, level );
+
+function PushIRCData ()
+{
+	foreach ( chan in IRCChannels )
+	{
+		foreach ( user, level in chan.Users )
+			NewTimer( "CallFunc", 0, 1, cScript_Main, "UpdateIRCChannel", chan.Name, user.Name, level );
+	}
+	foreach ( user in IRCUsers )
+		NewTimer( "CallFunc", 0, 1, cScript_Main, "UpdateIRCUser", user.Name, user.Address );
+}
+
 IRCUsers <- {};
 class IRCUser
 {
 	constructor( nickname, address )
 	{
-		ID = 1001 + ::IRCUsers.len();
 		Name = nickname;
 		Address = address;
-		Level = 1;
 	}
 
-	ID = null;
+	function Level ( channel, newlevel = 0 )
+	{
+		if ( !channel.Users.rawin( this ) ) channel.Users.rawset( this, 1 );
+		if ( !newlevel ) return channel.Users.rawget( this );
+		else channel.Users.rawset( this, newlevel );
+		::UpdateMainScriptIRCChannel( channel, this, newlevel );
+		return true;
+	}
+
+	function _tostring ()
+		return Name;
+
 	Name = null;
 	Address = null;
-	Level = null;
 }
-
-function GetIRCUserID ( name ) { return FindUser( name ).ID; }
-function GetIRCUserName ( ID ) { return IRCUsers[ ID - 1001 ].Name; }
-function GetIRCUserAddress ( ID ) { return IRCUsers[ ID - 1001 ].Address; }
-function GetIRCUserLevel ( ID ) { return IRCUsers[ ID - 1001 ].Level; }
 
 // This function updates user info or adds a new user's information
 // every time a user's name and address is parsed.
 function AddUpdateUser ( name, address )
 {
 	local user = IRCUsers.rawin( name ) ? IRCUsers.rawget( name ) : false;
-	if ( user ) user.Address = address;
+	if ( user )
+	{
+		if ( address != user.Address )
+		{
+			user.Address = address;
+			UpdateMainScriptIRCUser( user );
+		}
+	}
 	else
 	{
 		IRCUsers.rawset( name, IRCUser( name, address ) );
 		user = IRCUsers.rawget( name );
+		UpdateMainScriptIRCUser( user );
 	}
-	UpdateUsers2( user );
 	return user;
 }
 
-function UpdateUsers2 ( user )
-{
-	CallFunc( cScript_Main, "UpdateUsers", user.ID, user.Name, user.Address, user.Level );
-}
+function UpdateMainScriptIRCUser ( user )
+	CallFunc( cScript_Main, "UpdateIRCUser", user.Name, user.Address );
+
 
 function FindUser ( name )
 	return IRCUsers.rawin( name ) ? IRCUsers.rawget( name ) : false;
@@ -262,6 +287,7 @@ function IsUserBot ( name )
 	name = name.tolower();
 	return IRCBots.rawin( name ) ? IRCBots.rawget( name ) : false;
 }
+
 
 // This function is triggered when the sockets connect to the IRC server
 function onIRCConnected ( socket )
@@ -322,8 +348,7 @@ function ProcessRaw ( bot, raw, nick, address )
 		{
 			if ( raw[ 4 ] == "\x0028Ping" && raw[ 5 ] == "timeout\x0029" )
 				RecoverBot ( bot );
-			else
-				RemoveBot ( bot );
+			else RemoveBot ( bot );
 		}
 	}
 	else if ( raw[ 0 ] == "PING" ) { bot.Send( "PONG " + raw[ 1 ] ); }	// Reply to server PING events to keep bot alive
@@ -345,6 +370,23 @@ function ProcessRaw ( bot, raw, nick, address )
 			bot.Join( chan.Name, chan.Key );
 			UpdateAvailBots( chan );
 		}
+	}
+
+	else if ( raw[ 1 ] == "NICK" )
+	{
+		local newnick = raw[ 2 ].slice( 1 );
+		local newuser = IRCUser( newnick, address );
+		IRCUsers.rawset( newnick, newuser );
+		IRCUsers.rawdelete( nick );
+		foreach ( chan in IRCChannels )
+		{
+			if ( chan.Users.rawin( nick ) )
+			{
+				chan.Users.rawset( newnick, chan.Users.rawget( nick ) );
+				chan.Users.rawdelete( nick );
+			}
+		}
+		CallFunc( cScript_Main, "UpdateIRCUserNickname", nick, newnick );
 	}
 
 	else if	( raw[ 1 ] == "PRIVMSG" )
@@ -381,7 +423,7 @@ function ProcessRaw ( bot, raw, nick, address )
 		if ( nick == "NickServ" ) DealWithNickServ( bot, text );	// The notice was sent by NickServ!
 	}
 
-	else if ( nick == bot.Name )
+	if ( nick == bot.Name )
 	{
 		if ( raw[ 1 ] == "JOIN" )
 		{
@@ -402,22 +444,22 @@ function ProcessRaw ( bot, raw, nick, address )
 
 	if ( bot.ID == 0 )
 	{
-		if ( raw[ 1 ] == "353" && raw[ 4 ].tolower() == config.irc_echo )	// If a NAMES event is received to botID 0 on the echo,
+		if ( raw[ 1 ] == "353" )						// If a NAMES event is received to botID 0,
 		{
 			raw[ 5 ] = raw[ 5 ].slice( 1 );
-			ProcessNAMES( raw[ 4 ], raw.slice( 5 ) );			// Process the output (Update user levels)
+			ProcessNAMES( FindChannel( raw[ 4 ] ), raw.slice( 5 ) );	// Process the output (Update user levels)
 		}
 
-		else if ( raw[ 1 ] == "MODE" && raw[ 2 ].tolower() == config.irc_echo )	// If a MODE event is received to botID 0 on the echo,
-			ProcessModes( raw.slice( 3 ) );					// Process the output (Update user levels)
+		else if ( raw[ 1 ] == "MODE" && words > 4 )				// If a MODE event is received to botID 0,
+			ProcessModes( FindChannel( raw[ 2 ] ), raw.slice( 3 ) );	// Process the output (Update user levels)
 	}
 
 	if ( words > 2 )
 	{
 		if ( raw[ 2 ] == bot.Name )
 		{
-			if ( raw[ 1 ] == "324" && raw.len() > 5 )		// If channel mode has something after the +modes bit
-			FindChannel( raw[ 3 ] ).Key = raw[ 5 ];			// Assume it is channel key and store
+			if ( raw[ 1 ] == "324" && raw.len() > 5 )			// If channel mode has something after the +modes bit
+				FindChannel( raw[ 3 ] ).Key = raw[ 5 ];			// Assume it is channel key and store
 
 			else if ( raw[ 1 ] == "401" && raw[ 3 ] == "NickServ" )
 				bot.Autojoin();
@@ -458,13 +500,13 @@ function ProcessNAMES ( channel, names )
 		if ( level > 1 ) name = name.slice( 1 );
 
 		user = FindUser( name );
-		if ( user ) user.Level = level;
-		else AddUpdateUser( name, "" ).Level = level;
+		if ( user ) user.Level( channel, level );
+		else AddUpdateUser( name, "None" ).Level( channel, level );
 	}
 }
 
 // This processes usermodes and updates the user levels accordingly
-function ProcessModes ( changes )
+function ProcessModes ( channel, changes )
 {
 	local mode, user, level, num = 1;
 	foreach ( idx, char in changes[ 0 ] )
@@ -497,8 +539,8 @@ function ProcessModes ( changes )
 		user = FindUser( changes[ num ] );
 		if ( level && user )
 		{
-			if ( mode == '+' && user.Level < level ) user.Level = level;
-			else if ( mode == '-' && user.Level >= level ) MainBot.Send( "NAMES "+ config.irc_echo );
+			if ( mode == '+' && user.Level( channel ) < level ) user.Level( channel, level );
+			else if ( mode == '-' && user.Level( channel ) >= level ) MainBot.Send( "NAMES "+ channel );
 		}
 		num++;
 	}
