@@ -9,6 +9,8 @@
 
 function onPlayerCommand ( player, command, params )
 {
+	params = ( params == "" ) ? 0 : params;
+
 	// The following commands are put under this signal while all other commands are
 	// forwarded to the function "onCommand". This is so that the usage of these commands
 	// are not echoed or used with !commands.
@@ -26,15 +28,16 @@ function onPlayerCommand ( player, command, params )
 
 function onCommand ( player, command, params )
 {
+
 	local a = "", inplugins;
 	foreach( val in command )					// For each character in the variable command
 		if ( val != '!' && val != '/' ) a += val.tochar();	// Only write char if value isn't "!" or "/"
 	command = (a == "") ? null : a;					// This strips command of "!" and "/"
 									// Note that this bit of code also makes it impossible for command names with "!" or "/" in them to work.
-
-	params = ( params == "" ) ? 0 : params;
 	switch ( command )
 	{
+		case "suggest": return cmdSuggest( player, params );
+
 		case "say": return cmdSay ( player, params );
 		case "me": return cmdMe ( player, params );
 		case "kill": return cmdKill ( player );

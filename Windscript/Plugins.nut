@@ -26,7 +26,7 @@ function PluginCommand ( name, player, params )
 {
 	foreach ( plugin in Plugins )
 	{
-		if ( !plugin.Enabled ) return;					// If plugin disabled, return
+		if ( !plugin.Enabled ) continue;				// If plugin disabled, skip plugin
 		if ( plugin.Commands.rawin( name ) )				// If command registered for plugin, run associated func
 			return plugin.Commands.rawget( name )( player, params );
 		else if ( plugin.CommandsAllChannels.rawin( name ) )		// If command registered for all channels for plugin, run associated func

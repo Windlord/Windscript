@@ -38,6 +38,15 @@ function IsPlayerNear ( player1, player2, range )
 	return PlayerDistance( player1, player2 ) <= range ? true : false;
 
 
+function CmdParamsfromText ( text )
+{
+	local cloc = text.find(" "), cmd, params = "";
+	if ( cloc == null ) cmd = text.slice( 1 );
+	else cmd = text.slice( 1, cloc ).tolower(), params = text.slice( cloc + 1 );
+	params = ( params == "" ) ? 0 : params;
+	return { cmd = cmd, params = params };
+}
+
 // This function joins all elements in a 'target' array
 // where the elements are delimited with a 'delimit' string
 function JoinArray ( array, delimit )

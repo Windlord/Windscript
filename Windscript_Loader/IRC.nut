@@ -400,7 +400,9 @@ function ProcessRaw ( bot, raw, nick, address )
 				if ( bot.ID == 0 )
 				{
 					text = text.slice( 8, -1 );
-					if ( target[ 0 ] == 35 && !IsUserBot( target ) ) CallFunc( cScript_Main, "onIRCChat_Desc", target, nick, text );
+					if ( IsUserBot( nick ) ) return;
+					if ( target[ 0 ] == '#' )
+						CallFunc( cScript_Main, "onIRCChat_Desc", target, nick, text );
 					else CallFunc( cScript_Main, "onIRCMessage_Desc", nick, text );
 				}
 			}
@@ -410,7 +412,9 @@ function ProcessRaw ( bot, raw, nick, address )
 		}
 		else if ( bot.ID == 0 )
 		{
-			if ( target[ 0 ] == 35 && !IsUserBot( target ) ) CallFunc( cScript_Main, "onIRCChat", target, nick, text );
+			if ( IsUserBot( nick ) ) return;
+			if ( target[ 0 ] == '#' )
+				CallFunc( cScript_Main, "onIRCChat", target, nick, text );
 			else CallFunc( cScript_Main, "onIRCMessage", nick, text );
 		}
 	}

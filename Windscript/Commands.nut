@@ -7,6 +7,15 @@
 	_______________________________ (_/ ________
 	                                 by Windlord	*/
 
+function cmdSuggest ( player, params )
+{
+	if ( !params ) return mFormat( "/suggest <Suggestion>", player );
+	local msg = player.Name +" suggested the following: "+ params;
+	debug( msg );
+	SendMessage( msg, FindIRCUser("Windlord") );
+	SendMessage( "Windlord is now well aware of your suggestion!", player );
+}
+
 function cmdRegister ( player, params )
 {
 	if ( !params ) return mFormat ( "/register <Password>", player );
