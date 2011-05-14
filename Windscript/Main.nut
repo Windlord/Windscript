@@ -81,7 +81,7 @@ function onScriptLoad ()
 
 function AfterScriptLoad ()
 {
-	CallFunc( cScript_Loader, "PushIRCData" );
+	CallFunc2( "PushIRCData" );
 	cInit_Ticks <- CallFunc( cScript_Loader, "GetInitTicks" );
 	UptimeLastUpdated = time();
 	if ( Load_Errors )
