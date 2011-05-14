@@ -37,7 +37,12 @@ function AfkString ( hash, name, id )
 			msg = " left on "+ GetNth( dt.day ) +" "+ GetMonth( dt.month );
 		msg += format( " at %02i:%02i", dt.hour, dt.min );
 	}
-	else msg = " has been away for "+ Duration( dur );
+	else
+	{
+		if ( name == "You" ) msg = " have ";
+		else msg = " has ";
+		msg += "been away for "+ Duration( dur );
+	}
 	return iCol( 3, iBold( name ) + msg + " ("+ reason +")" );
 }
 
@@ -51,19 +56,15 @@ class Afk
 
 		if ( typeof( Player ) == "IRCUser" )				// If player is an IRC user
 		{
-			Hash = "AFK_"+ Channel;
+			Hash = "AFK_IRC";
 			ID = player.Address;					// Set IRC user address as identification string
 			if ( Channel == config.irc_echo_lower )
-			{
 				Other = "AFK_InGame";
-				IsEcho = true;
-			}
 		}
 		else								// If player is ingame player
 		{
-			IsEcho = true;
 			Hash = "AFK_InGame";
-			Other = "AFK_"+ config.irc_echo_lower;
+			Other = "AFK_IRC";
 			ID = ::GetUser( Player ).ID;				// Set ingame user account ID as identification
 		}
 
@@ -138,7 +139,7 @@ class Afk
 			result = ShowAfks( Hash, id );
 			if ( result ) total++;
 		}
-		if ( IsEcho )
+		if ( Other )
 		{
 			list = ::GetData( Other, "List" );
 			list = list ? list : "";
@@ -157,25 +158,27 @@ class Afk
 
 	function ShowAfks ( hash, id )
 	{
-		if ( Hash == "AFK_Ingame" )
+		if ( Hash == "AFK_InGame" )
 		{
+			local name = id == ID ? "You" : ::GetData( "UserData_Name", id );
 			if ( !GetUserFromID( id ) ) return;
-			::SendMessage( ::AfkString( hash, ::GetData( "UserData_Name", id ), i ), Player, ::colGreen );
+			::SendMessage( ::AfkString( hash, name, i ), Player, ::colGreen );
 		}
 		else
 		{
 			local user = ::FindIRCUserbyAddress( id );
 			if ( user )
 			{
+				local name = id == ID ? "You" : user.Name;
 				if ( !user.IsOn( Channel ) ) return;
-				return ::SendMessage( ::AfkString( hash, user.Name, id ), Player, ::colGreen );
+				return ::SendMessage( ::AfkString( hash, name, id ), Player, ::colGreen );
 			}
 		}
 	}
 
 	function Msg ( msg, col )
 	{
-		if ( IsEcho ) return ::EMessage( msg, col );			// If on echo channel or ingame send message to both
+		if ( Other ) return ::EMessage( msg, col );			// If on echo channel or ingame send message to both
 		else								// Otherwise, send message to channel only
 		{
 			::CallFunc2( "BotMessage", Channel, "msg", msg );
@@ -194,7 +197,6 @@ class Afk
 		}
 	}
 
-	IsEcho = false;
 	Other = false;
 	Hash = null;
 	Player = null;

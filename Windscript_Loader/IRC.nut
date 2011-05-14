@@ -47,8 +47,11 @@ function RemoveBot ( bot, unloading = false )
 	local name = bot.lName;							// Cache bot's name and id for the print below
 
 	bot.CheckLogin.Delete();
-	bot.Quit( "Windscript Version "+ cScript_Version );			// In case the bot is still connected, send QUIT message
-	if ( bot.Socket ) bot.Socket.Delete();					// Delete socket instance
+	if ( bot.Socket )
+	{
+		bot.Quit( "Windscript Version "+ cScript_Version );		// In case the bot is still connected, send QUIT message
+		bot.Socket.Delete();						// Delete socket instance
+	}
 	bot.Debug( "REMOVE", "Removing bot from slot "+ bot.ID );
 	IRCBots.rawdelete( name );						// Remove bot data from IRCBots
 
