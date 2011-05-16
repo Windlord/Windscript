@@ -618,11 +618,11 @@ function UpdateAvailBots ( chan )
 function BotMessage ( target, type, text )
 {
 	local max, min, botlist = IRCBots;
-	if ( target[ 0 ] == '#' ) botlist = FindChannel( target ) ? FindChannel( target ).Bots : false;
+	if ( target[ 0 ] == '#' ) botlist = FindChannel( target ) ? FindChannel( target ).Bots : IRCBots;
 
 	if ( botlist )
 	{
-		foreach ( idx, bot in botlist )
+		foreach ( bot in botlist )
 		{
 			if ( !max ) { max = bot; min = bot; }
 			else
@@ -631,6 +631,7 @@ function BotMessage ( target, type, text )
 				else if ( bot.Used < min.Used ) min = bot;
 			}
 		}
+		if ( !min ) return false;
 		min.Used = time();
 
 		if ( type.tolower() == "notice" ) min.Notice( target, text );
