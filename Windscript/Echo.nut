@@ -23,7 +23,7 @@ class IRCUser
 	function Level ( channel = null )
 	{
 		if ( !channel ) channel = ::FindIRCChannel( config.irc_echo );
-		if ( !channel ) return false;
+		if ( !channel || !channel.Users.rawin( Name ) ) return false;
 		return channel.Users.rawget( Name );
 	}
 
@@ -68,6 +68,18 @@ function UpdateIRCUserNickname ( old, new )
 			chan.Users.rawset( new, chan.Users.rawget( old ) );
 			chan.Users.rawdelete( old );
 		}
+	}
+}
+
+function RemoveIRCUser ( name, cname = null )
+{
+	local chan = FindIRCChannel( cname );
+	if ( chan ) chan.Users.rawdelete( name );
+	else
+	{
+		foreach ( chan in IRCChannels )
+			if ( chan.Users.rawin( name ) )
+				chan.Users.rawdelete( name );
 	}
 }
 

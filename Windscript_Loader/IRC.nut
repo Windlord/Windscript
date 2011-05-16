@@ -278,6 +278,18 @@ function AddUpdateUser ( name, address )
 	return user;
 }
 
+function RemoveUser ( user, chan = null )
+{
+	if ( chan ) chan.Users.rawdelete( user );
+	else
+	{
+		foreach ( chan in IRCChannels )
+			if ( chan.Users.rawin( user ) )
+				chan.Users.rawdelete( user );
+	}
+	CallFunc2( "RemoveIRCUser", user.Name, chan ? chan.Name : null );
+}
+
 function UpdateMainScriptIRCUser ( user )
 	CallFunc2( "UpdateIRCUser", user.Name, user.Address );
 
@@ -366,14 +378,24 @@ function ProcessRaw ( bot, raw, nick, address )
 
 	else if ( raw[ 1 ] == "KICK" )
 	{
+		local chan = AddUpdateChannel( raw[ 2 ] );
 		if ( raw[ 3 ] == bot.Name )					// Update the list of channels the bot is in
 		{								// The data is stored as "#Chan1 #Chan2 #Chan3"
-			local chan = AddUpdateChannel( raw[ 2 ] );
 			bot.Channels.rawdelete( chan.Name );
 			bot.Join( chan.Name, chan.Key );
 			UpdateAvailBots( chan );
 		}
+		RemoveUser( FindUser( raw[ 3 ] ), chan );
 	}
+
+	else if ( raw[ 1 ] == "PART" )
+	{
+		local chan = AddUpdateChannel( raw[ 2 ] );
+		RemoveUser( FindUser( nick ), chan );
+	}
+
+	else if ( raw[ 1 ] == "QUIT" )
+		RemoveUser( FindUser( nick ) );
 
 	else if ( raw[ 1 ] == "NICK" )
 	{
