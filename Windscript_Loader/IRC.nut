@@ -459,6 +459,9 @@ function ProcessRaw ( bot, raw, nick, address )
 
 		else if ( raw[ 1 ] == "MODE" && words > 4 )				// If a MODE event is received to botID 0,
 			ProcessModes( FindChannel( raw[ 2 ] ), raw.slice( 3 ) );	// Process the output (Update user levels)
+
+		else if ( raw[ 1 ] == "311" && words > 7 )
+			AddUpdateUser( raw[ 3 ], raw[ 4 ] +"@"+ raw[ 5 ] );
 	}
 
 	if ( words > 2 )

@@ -16,6 +16,7 @@ class IRCUser
 	constructor ( name, address )
 	{
 		Name = name;
+		lName = name.tolower();
 		Address = address;
 	}
 
@@ -38,6 +39,7 @@ class IRCUser
 		return "IRCUser";
 
 	Name = "";
+	lName = "";
 	Address = "";
 }
 
@@ -161,6 +163,7 @@ function onIRCChat ( channel, user, text )
 				EMessage( leveln + iCol( 6, ": " ) + text, colWhite );
 			}
 		}
+		else PluginEvent( onIRCChat, user, channel, text );
 	}
 	else									// Commands which can be used outside of echo channel
 	{
@@ -169,7 +172,7 @@ function onIRCChat ( channel, user, text )
 			local p = CmdParamsfromText( text );
 			if ( p.cmd > "" ) PluginCommandChannels( p.cmd, user, p.params, channel );
 		}
-		else PluginEvent( onIRCChat, user, text );
+		else PluginEvent( onIRCChat, user, channel, text );
 	}
 }
 

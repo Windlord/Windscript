@@ -11,16 +11,85 @@
 function cmdAway ( player, reason, channel )
 	return Afk( player, channel ).Add( reason ? reason : "No Reason" );	// Add player to away data with default reason: "No Reason"
 
-function cmdBack ( player, dummyparams, channel )
+function cmdBack ( player, params, channel )
 {
 	local awaydata = Afk( player, channel );				// Get away data instance
-	if ( awaydata.IsAway ) return awaydata.Del();				// If entry exists for this user delete entry
+	if ( awaydata.IsAway ) return awaydata.Del( params );			// If entry exists for this user delete entry
 	else return mError( "You are not away", player );
 }
 
 function cmdAfk ( player, params, channel )
-	return Afk( player, channel ).Afk();
+{
+	local found = FindAfk( params, channel );
+	if ( found ) return SendMessage( found, player, colGreen );
+	if ( !params ) return Afk( player, channel ).Afk();
+	else return SendMessage( iBold( iCol( 3, params +" is not away" ) ), player, colGreen );
+}
 
+function textAfk ( user, channel, text )
+{
+	local found = FindAfk( text, channel );
+	if ( found ) return SendMessage( found, user, colGreen );
+}
+
+function igtextAfk ( player, text )
+	return textAfk( player, config.irc_echo_lower, text );
+
+function FindAfk ( params, channel )
+{
+	if ( !params ) return null;
+	local words = split( params.tolower(), " " ), target, user;
+	switch( words.len() )
+	{
+		case 1:
+			target = words[ 0 ];
+			break;
+		case 2:
+			if ( words[ 0 ] == "where's" ) target = words[ 1 ];
+			break;
+		case 3:
+			if ( words[ 0 ] + words[ 1 ] == "whereis" ) target = words[ 2 ];
+			break;
+	}
+	if ( !target ) return null;
+	if ( target[ target.len() - 1 ] == '?' ) target = target.slice( 0, -1 );
+	local plr = FindPlayer( target ), list;
+	if ( plr && plr.Name.tolower() == target )
+	{
+		user = GetUser( plr );
+		if ( IsinList( GetData( "AFK_InGame", "List" ), user.ID ) )
+			return AfkString( "AFK_InGame", user.Name, user.ID );
+		else return null;
+	}
+	else
+	{
+		list = GetData( "AFK_IRC", "List" );
+		if ( list )
+		{
+			foreach ( id in split( list, " " ) )
+			{
+				user = FindIRCUserbyAddress( id );
+				if ( user && user.lName == target )
+				{
+					if ( !user.IsOn( channel ) ) return;
+					return AfkString( "AFK_IRC", user.Name, id );
+				}
+			}
+		}
+		if ( channel == config.irc_echo_lower )
+		{
+			list = GetData( "AFK_InGame", "List" );
+			if ( !list ) return null;
+			foreach ( id in split( list, " " ) )
+			{
+				user = GetUserFromID( id );
+				if ( !user ) continue;
+				return AfkString( "AFK_InGame", user.Name, id );
+			}
+		}
+	}
+	return null;
+}
 
 function AfkString ( hash, name, id )
 {
@@ -96,14 +165,16 @@ class Afk
 		return Save();							// Update data in hash
 	}
 
-	function Del ()
+	function Del ( reason )
 	{
 		local dur = GetTime() - Time, tot = ::IncData( "AFK", ID + ".TotalTime", dur );
 		local newlist = ::RemFromList( List, ID );
+		reason = reason ? " because of "+ reason : "";
+		dur = "\" after "+ ::Duration( dur ) + reason;
 		if ( newlist == "" ) ::DelData( Hash, "List" );
 		else ::AddData( Hash, "List", newlist );
-		if ( !SpamCheck() ) Msg( ::iCol( 3, ::iBold( Player.Name ) +" returned from \""+ Reason +"\" after "+ ::Duration( dur ) ), ::colGreen );
-		else ::SendMessage( ::iCol( 3, "You returned from \""+ Reason +"\" after "+ ::Duration( dur ) ), Player, ::colGreen );
+		if ( !SpamCheck() ) Msg( ::iCol( 3, ::iBold( Player.Name ) +" returned from \""+ Reason + dur ), ::colGreen );
+		else ::SendMessage( ::iCol( 3, "You returned from \""+ Reason + dur ), Player, ::colGreen );
 		::SendMessage( ::iCol( 3, "You have so far logged a total AFK time of: "+ ::Duration( tot ) ), Player, ::colGreen );
 		return true;
 	}
@@ -132,9 +203,8 @@ class Afk
 
 	function Afk ()
 	{
-		local id, list = ::GetData( Hash, "List" ), total = 0, result;
-		list = list ? list : "";
-		foreach ( id in split( list, " " ) )				// For all away data entries in hash
+		local id, total = 0, result, list;
+		foreach ( id in split( List, " " ) )				// For all away data entries in hash
 		{
 			result = ShowAfks( Hash, id );
 			if ( result ) total++;
@@ -158,11 +228,12 @@ class Afk
 
 	function ShowAfks ( hash, id )
 	{
-		if ( Hash == "AFK_InGame" )
+		if ( hash == "AFK_InGame" )
 		{
-			local name = id == ID ? "You" : ::GetData( "UserData_Name", id );
-			if ( !GetUserFromID( id ) ) return;
-			::SendMessage( ::AfkString( hash, name, i ), Player, ::colGreen );
+			local user = GetUserFromID( id );
+			if ( !user ) return;
+			local name = id == ID ? "You" : user.Name;
+			::SendMessage( ::AfkString( hash, name, id ), Player, ::colGreen );
 		}
 		else
 		{
@@ -213,4 +284,6 @@ class Afk
 	Plugins.Afk.RegisterCommandAllChannels( "away", cmdAway );
 	Plugins.Afk.RegisterCommandAllChannels( "back", cmdBack );
 	Plugins.Afk.RegisterCommandAllChannels( "afk", cmdAfk );
+	Plugins.Afk.RegisterEvent( onPlayerChat, igtextAfk );
+	Plugins.Afk.RegisterEvent( onIRCChat, textAfk );
 }
