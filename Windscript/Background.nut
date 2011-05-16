@@ -16,7 +16,10 @@
 // I could have easily calculated modulii (%) repeatedly but dividing repeatedly is more efficient.
 
 function StartBackground()
+{
 	GameTimer <- NewTimer ( "Background", 500, 0 );
+	ReloadPlayers();
+}
 local GameTimerNum = 0.0;
 
 GameTimerTicks <- GetTickCount();
@@ -107,12 +110,12 @@ function BackgroundTenSeconds ()
 // EXECUTED: EVERY 20 SECONDS.
 function BackgroundTwentySeconds ()
 {
-	SyncData();
 	PluginEvent( BackgroundTwentySeconds );
 }
 
 function BackgroundThirtySeconds ()
 {
+	SyncData();
 	PluginEvent( BackgroundThirtySeconds );
 }
 

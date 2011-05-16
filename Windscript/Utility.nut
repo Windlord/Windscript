@@ -8,16 +8,6 @@
 	                                 by Windlord	*/
 
 
-function CallFunc2 ( funcn, ... )				// This is to use a dummy timer to make CallFunc work properly
-{
-	local callparams = [ this, "CallFunc", 0, 1, cScript_Loader, funcn ];
-	foreach ( arg in vargv )
-		callparams.append( arg );
-	local result = NewTimer.acall( callparams );
-	return result ? result : true;
-}
-
-
 function targetparams ( player, params )
 {
 	params = split( params, " " );

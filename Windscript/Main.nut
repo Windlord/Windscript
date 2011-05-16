@@ -7,14 +7,14 @@
 	_______________________________ (_/ ________
 	                                 by Windlord	*/
 
-// MAKE SURE YOU READ README.txt BEFORE YOU DO ANYTHING!! //
-
 // Set constants for details used in all dofile-ed scripts
-const cScript_Dir	= "Scripts/Windscript/";// Use this to access files in script directory
+const cScript_Dir	= "Scripts/Windscript/";
+const cScript_LoaderDir	= "Scripts/Windscript_Loader/";
 const cScript_Author	= "Windlord";
 const cScript_Version	= "1.0";
 const cScript_Is_Awesome= "true";		// This is the most important line!
-const cScript_Config	= "./Scripts/Windscript/config.ini";
+const cScript_Type	= "Main";
+const cScript_Main	= "Scripts/Windscript/Main.nut";
 const cScript_Loader	= "Scripts/Windscript_Loader/Loader.nut";
 const ircCol		= "\x0003";		// Equavalent to ctrl+k in mIRC (Colour Brace)
 const ircCol2		= "\x0003\x0003";	// Two ircCols
@@ -43,7 +43,7 @@ LUcolClose	<- "[#d]";
 DEBUG <- true;
 function debug ( msg )
 {
-	if ( DEBUG ) return NewTimer( "CallFunc", 0, 1, cScript_Loader, "debug", msg );
+	if ( DEBUG ) return CallFunc2( "debug", msg );
 	else print( msg );
 }
 
@@ -81,7 +81,7 @@ function onScriptLoad ()
 
 function AfterScriptLoad ()
 {
-	CallFunc2( "PushIRCData" );
+	CallFunc( cScript_Loader, "PushIRCData" );
 	cInit_Ticks <- CallFunc( cScript_Loader, "GetInitTicks" );
 	UptimeLastUpdated = time();
 	if ( Load_Errors )
@@ -91,10 +91,9 @@ function AfterScriptLoad ()
 	}
 
 	NewTimer ( "StartBackground", 1000, 1 );
+	LoadPlugins();
 	EMessage (  iCol( 4, "* Windscript Loaded." ), colRed );
 	debug ( "Loaded Windscript Version "+ cScript_Version );
-	LoadPlugins();
-	NewTimer( "ReloadPlayers", 1000, 1 );
 }
 
 function AttemptLoad ( script )

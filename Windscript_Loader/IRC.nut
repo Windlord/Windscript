@@ -218,17 +218,17 @@ function AddUpdateChannel ( channame )
 }
 
 function UpdateMainScriptIRCChannel ( channel, user, level )
-	CallFunc( cScript_Main, "UpdateIRCChannel", channel.Name, user.Name, level );
+	CallFunc2( "UpdateIRCChannel", channel.Name, user.Name, level );
 
 function PushIRCData ()
 {
 	foreach ( chan in IRCChannels )
 	{
 		foreach ( user, level in chan.Users )
-			NewTimer( "CallFunc", 0, 1, cScript_Main, "UpdateIRCChannel", chan.Name, user.Name, level );
+			CallFunc2( "UpdateIRCChannel", chan.Name, user.Name, level );
 	}
 	foreach ( user in IRCUsers )
-		NewTimer( "CallFunc", 0, 1, cScript_Main, "UpdateIRCUser", user.Name, user.Address );
+		CallFunc2( "UpdateIRCUser", user.Name, user.Address );
 }
 
 IRCUsers <- {};
@@ -279,7 +279,7 @@ function AddUpdateUser ( name, address )
 }
 
 function UpdateMainScriptIRCUser ( user )
-	CallFunc( cScript_Main, "UpdateIRCUser", user.Name, user.Address );
+	CallFunc2( "UpdateIRCUser", user.Name, user.Address );
 
 
 function FindUser ( name )
@@ -389,7 +389,7 @@ function ProcessRaw ( bot, raw, nick, address )
 				chan.Users.rawdelete( nick );
 			}
 		}
-		CallFunc( cScript_Main, "UpdateIRCUserNickname", nick, newnick );
+		CallFunc2( "UpdateIRCUserNickname", nick, newnick );
 	}
 
 	else if	( raw[ 1 ] == "PRIVMSG" )
@@ -405,8 +405,8 @@ function ProcessRaw ( bot, raw, nick, address )
 					text = text.slice( 8, -1 );
 					if ( IsUserBot( nick ) ) return;
 					if ( target[ 0 ] == '#' )
-						CallFunc( cScript_Main, "onIRCChat_Desc", target, nick, text );
-					else CallFunc( cScript_Main, "onIRCMessage_Desc", nick, text );
+						CallFunc2( "onIRCChat_Desc", target, nick, text );
+					else CallFunc2( "onIRCMessage_Desc", nick, text );
 				}
 			}
 			else if	( raw[ 3 ] == "\x0001VERSION\x0001" ) bot.Notice( nick, CTCP_VERSION_REPLY );
@@ -417,8 +417,8 @@ function ProcessRaw ( bot, raw, nick, address )
 		{
 			if ( IsUserBot( nick ) ) return;
 			if ( target[ 0 ] == '#' )
-				CallFunc( cScript_Main, "onIRCChat", target, nick, text );
-			else CallFunc( cScript_Main, "onIRCMessage", nick, text );
+				CallFunc2( "onIRCChat", target, nick, text );
+			else CallFunc2( "onIRCMessage", nick, text );
 		}
 	}
 
@@ -478,6 +478,7 @@ function ProcessRaw ( bot, raw, nick, address )
 }
 
 // This function processes the NAMES request result, which is a list of users with their top levels prefixed
+// NAMES are in the following format: ~User1 &User2 @User3 %User4
 function ProcessNAMES ( channel, names )
 {
 	local level, user;
@@ -485,19 +486,19 @@ function ProcessNAMES ( channel, names )
 	{
 		switch ( name[ 0 ] )
 		{
-			case 126:
+			case '~':
 				level = 6;
 				break;
-			case 38:
+			case '&':
 				level = 5;
 				break;
-			case 64:
+			case '@':
 				level = 4;
 				break;
-			case 37:
+			case '%':
 				level = 3;
 				break;
-			case 43:
+			case '+':
 				level = 2;
 				break;
 			default:
@@ -507,18 +508,23 @@ function ProcessNAMES ( channel, names )
 		if ( level > 1 ) name = name.slice( 1 );
 
 		user = FindUser( name );
-		if ( user ) user.Level( channel, level );
-		else AddUpdateUser( name, "None" ).Level( channel, level );
+		if ( user ) user.Level( channel, level );					// If user exists, update level
+		else
+		{
+			AddUpdateUser( name, "None" ).Level( channel, level );			// Create user and add level
+			MainBot.Send( "WHOIS "+ name );						// whois the IRC user if address isn't saved
+		}
 	}
 }
 
 // This processes usermodes and updates the user levels accordingly
+// MODES are in the following format: +ao-hv User1 User2 User3 User4
 function ProcessModes ( channel, changes )
 {
 	local mode, user, level, num = 1;
 	foreach ( idx, char in changes[ 0 ] )
 	{
-		if ( char == '-' || char == '+' )
+		if ( char == '-' || char == '+' )						// Check if char is indicating addition/deletion of mode
 		{
 			mode = char;
 			continue;
@@ -526,19 +532,19 @@ function ProcessModes ( channel, changes )
 		if ( !mode ) continue;
 		switch ( char )
 		{
-			case 113:
+			case 'q':
 				level = 6;
 				break;
-			case 97:
+			case 'a':
 				level = 5;
 				break;
-			case 111:
+			case 'o':
 				level = 4;
 				break;
-			case 104:
+			case 'h':
 				level = 3;
 				break;
-			case 118:
+			case 'v':
 				level = 2;
 				break;
 		}

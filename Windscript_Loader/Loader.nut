@@ -13,7 +13,9 @@ const cScript_LoaderDir	= "Scripts/Windscript_Loader/";
 const cScript_Author	= "Windlord";
 const cScript_Version	= "1.0";
 const cScript_Is_Awesome= "true";			// This is the most important line!
+const cScript_Type	= "Loader";
 const cScript_Main	= "Scripts/Windscript/Main.nut";
+const cScript_Loader	= "Scripts/Windscript_Loader/Loader.nut";
 const ircCol		= "\x0003";			// Equavalent to ctrl+k in mIRC (Colour Brace)
 const ircCol2		= "\x0003\x0003";		// Two ircCols
 const ircBold		= "\x0002";			// Equivalent to ctrl+b in mIRC (Boldness Brace)
@@ -26,9 +28,9 @@ function onScriptLoad ()
 	print ( "\r       \n- Loading Windscript Loader" );
 
 	dofile ( cScript_Dir + "Settings.nut" );
-	dofile ( cScript_Dir + "Debug.nut" );
 	dofile ( cScript_Dir + "Misc.nut" );
 
+	AttemptLoad ( "Debug.nut" );
 	AttemptLoad ( "IRC.nut" );
 	debug ( "Loaded Windscript Loader" );
 

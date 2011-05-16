@@ -139,9 +139,9 @@ class WindData
 	function Check ()
 	{
 		local dtime = time() - LastSaved;
-		if ( UnsavedNum > 0 && ( UnsavedNum > 19 || dtime > 600 ))
+		if ( UnsavedNum > 0 && ( UnsavedNum > 19 || dtime > 60 ))
 			return Save();
-		else if ( UnsavedNum == 0 && dtime > 900 )
+		else if ( UnsavedNum == 0 && dtime > 600 )
 			return Unload();
 	}
 

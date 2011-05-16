@@ -11,6 +11,16 @@
 	This is because the functions included in this file are used in
 	nearly every other script file as if they are internal functions. */
 
+function CallFunc2 ( funcn, ... )				// This is to use a dummy timer to make CallFunc work properly
+{
+	local target = cScript_Type == "Main" ? cScript_Loader : cScript_Main;
+	local callparams = [ this, "CallFunc", 0, 1, target, funcn ];
+	foreach ( arg in vargv )
+		callparams.append( arg );
+	NewTimer.acall( callparams );
+	return true;
+}
+
 
 // Distance checking functions
 function CalcDistance ( vector1, vector2 )
