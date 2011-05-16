@@ -62,6 +62,19 @@ function ParseConfig ()
 			config.rawset( key, data );				// Set key in the table 'config'
 		}
 	}
+	ConfigDefaults();
+}
+
+function ConfigDefaults()
+{
+	ConfigSetIfNone( "server_motd", "Welcome to Windscript "+ cScript_Version );
+	ConfigSetIfNone( "debug", true );
+}
+
+function ConfigSetIfNone ( item, setting )
+{
+	if ( !config.rawin( item ) )
+		config.rawset( item, setting );
 }
 
 // This class deals with writing to files
