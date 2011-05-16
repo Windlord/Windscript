@@ -439,6 +439,7 @@ function ProcessRaw ( bot, raw, nick, address )
 			bot.Send( "MODE "+ chan.Name );
 			bot.Debug( "JOIN", chan.Name );
 			UpdateAvailBots( chan );
+			if ( bot.ID == 0 ) bot.Send( "WHO :"+ chan.Name );		// If MainBot send WHO request to retrieve user addresses
 		}
 		else if ( raw[ 1 ] == "PART" )
 		{
@@ -460,8 +461,11 @@ function ProcessRaw ( bot, raw, nick, address )
 		else if ( raw[ 1 ] == "MODE" && words > 4 )				// If a MODE event is received to botID 0,
 			ProcessModes( FindChannel( raw[ 2 ] ), raw.slice( 3 ) );	// Process the output (Update user levels)
 
-		else if ( raw[ 1 ] == "311" && words > 7 )
+		else if ( raw[ 1 ] == "311" && words > 7 )				// Response to WHOIS request for user address
 			AddUpdateUser( raw[ 3 ], raw[ 4 ] +"@"+ raw[ 5 ] );
+
+		else if ( raw[ 1 ] == "352" && words > 7 )				// Response to WHO request
+			AddUpdateUser( raw[ 7 ], raw[ 4 ] +"@"+ raw[ 5 ] );
 	}
 
 	if ( words > 2 )
@@ -487,36 +491,12 @@ function ProcessNAMES ( channel, names )
 	local level, user;
 	foreach ( name in names )
 	{
-		switch ( name[ 0 ] )
-		{
-			case '~':
-				level = 6;
-				break;
-			case '&':
-				level = 5;
-				break;
-			case '@':
-				level = 4;
-				break;
-			case '%':
-				level = 3;
-				break;
-			case '+':
-				level = 2;
-				break;
-			default:
-				level = 1;
-				break;
-		}
+		level = IRCSymltoLevel( name[ 0 ] );
 		if ( level > 1 ) name = name.slice( 1 );
 
 		user = FindUser( name );
 		if ( user ) user.Level( channel, level );					// If user exists, update level
-		else
-		{
-			AddUpdateUser( name, "None" ).Level( channel, level );			// Create user and add level
-			MainBot.Send( "WHOIS "+ name );						// whois the IRC user if address isn't saved
-		}
+		else AddUpdateUser( name, "None" ).Level( channel, level );			// Create user and add level
 	}
 }
 
@@ -533,24 +513,7 @@ function ProcessModes ( channel, changes )
 			continue;
 		}
 		if ( !mode ) continue;
-		switch ( char )
-		{
-			case 'q':
-				level = 6;
-				break;
-			case 'a':
-				level = 5;
-				break;
-			case 'o':
-				level = 4;
-				break;
-			case 'h':
-				level = 3;
-				break;
-			case 'v':
-				level = 2;
-				break;
-		}
+		level = IRCModetoLevel ( char );
 
 		user = FindUser( changes[ num ] );
 		if ( level && user )

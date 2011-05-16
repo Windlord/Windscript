@@ -85,6 +85,32 @@ function iColnumToString( colnum )
 	else return format( "%02i", colnum );
 }
 
+// IRC level, symbol etc conversion
+function IRCSymltoLevel ( syml )
+{
+	switch ( syml )
+	{
+		case '~': return 6;
+		case '&': return 5;
+		case '@': return 4;
+		case '%': return 3;
+		case '+': return 2;
+		default: return 1;
+	}
+}
+
+function IRCModetoLevel ( mode )
+{
+	switch ( mode )
+	{
+		case 'q': return 6;
+		case 'a': return 5;
+		case 'o': return 4;
+		case 'h': return 3;
+		case 'v': return 2;
+	}
+}
+
 // This function strips the IRC colours off of a string
 // Good to use with the IRC echo
 function StripIRCCol ( text )
