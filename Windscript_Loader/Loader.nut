@@ -36,7 +36,7 @@ function onScriptLoad ()
 
 	InitialiseBots();
 
-	NewTimer( "LoadMainScript", 0, 1 );
+	LoadMainScript();
 }
 
 function AttemptLoad ( script )
@@ -72,11 +72,11 @@ function ReloadScriptDo ()
 }
 
 function UnloadMainScript()
-	UnloadScript( "Windscript" );
+	NewTimer( "UnloadScript", 0, 1, "Windscript" );
 
 function LoadMainScript()
 {
-	LoadScript( "Windscript" );
+	NewTimer( "LoadScript", 0, 1, "Windscript" );
 	PushIRCData();
 }
 

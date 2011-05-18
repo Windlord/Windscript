@@ -125,9 +125,7 @@ function AfkString ( hash, name, id )
 	local atime, reason, msg;
 	reason = GetData( hash, id + ".Reason" );
 	atime = GetData( hash, id + ".Time" );
-	if ( name == "You" ) msg = " have ";
-	else msg = " has ";
-	msg = name + ( name == "You" ? " have" : " has" ) +" left "+ TimeDiff( atime );
+	msg = ( name == "You" ? " have" : " has" ) +" left "+ TimeDiff( atime );
 	return iCol( 3, iBold( name ) + msg + " ("+ reason +")" );
 }
 
