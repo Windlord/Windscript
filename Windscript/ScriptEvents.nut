@@ -9,11 +9,15 @@
 
 function onUserJoin ( user )
 {
+	if ( user.IP == user.Player.IP )
+		user.Login( "", true );
+
 	UpdateIPInfo( user );
 	user.Joins++;
 	user.JoinTime = time();
 	user.LoggedIn = 0;
 	user.Spree = 0;
+
 	PluginEvent( onUserJoin, user );
 	return 1;
 }
@@ -46,13 +50,21 @@ function onUserChangePass ( user )
 	return 1;
 }
 
-function onUserLogin ( user, lastlogin )
+function onUserLogin ( user, autologin = false )
 {
-	AdminPM( "Logged in successfully", user.Player );
-	if ( lastlogin )
-		AdminPM( "Last Logged in "+ TimeDiff( lastlogin ), user.Player );
-	Echo( iCol( 6, ":: "+ user.Player.Name +" has logged in" ) );
-	PluginEvent( onUserLogin, user, lastlogin );
+	if ( autologin )
+	{
+		AdminPM( "Auto-logged in successfully", user.Player );
+		Echo( iCol( 6, ":: "+ user.Player.Name +" has auto-logged in" ) );
+	}
+	else
+	{
+		AdminPM( "Logged in successfully", user.Player );
+		Echo( iCol( 6, ":: "+ user.Player.Name +" has logged in" ) );
+	}
+	if ( user.LastLogin )
+		AdminPM( "Last Logged in "+ TimeDiff( user.LastLogin ), user.Player );
+	PluginEvent( onUserLogin, user );
 	return 1;
 }
 

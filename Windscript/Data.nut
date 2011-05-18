@@ -49,7 +49,9 @@ class WindData
 
 	function Add ( item, data )
 	{
-		local result = Hash.Add( item.tostring(), data );
+		item = item.tostring();
+		if ( Hash.Get( item ) == data ) return data;
+		local result = Hash.Add( item, data );
 		Changed();
 		return result ? data : false;
 	}

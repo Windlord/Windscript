@@ -105,15 +105,14 @@ class User
 		else return false;						// Not registered and not logged in
 	}
 
-	function Login ( password )
+	function Login ( password, autologin = false )
 	{
+		if ( autologin ) return ::onUserLogin( this, true );
 		if ( Registered && ::SHA1( password ) == Pass )			// If password hashes match and user registered
 		{
-			local response = LastLogin;
 			LoggedIn = 1;
-			LastLogin = ::time();					// Update lastlogin time
 			::IncData( "UserData", "LoginsCount" );			// Increase login count
-			return ::onUserLogin( this, response );
+			return ::onUserLogin( this );
 		}
 		if ( Pass ) return -1;						// If registered but pass mismatch
 		return 0;							// Not registered
