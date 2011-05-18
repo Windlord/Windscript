@@ -34,9 +34,9 @@ function onScriptLoad ()
 	AttemptLoad ( "IRC.nut" );
 	debug ( "Loaded Windscript Loader" );
 
-	LoadScript ( "Windscript" );
-
 	InitialiseBots();
+
+	NewTimer( "LoadMainScript", 0, 1 );
 }
 
 function AttemptLoad ( script )
@@ -67,8 +67,17 @@ function ReloadScript ()
 	NewTimer( "ReloadScriptDo", 0, 1 );
 function ReloadScriptDo ()
 {
+	UnloadMainScript();
+	LoadMainScript();
+}
+
+function UnloadMainScript()
 	UnloadScript( "Windscript" );
+
+function LoadMainScript()
+{
 	LoadScript( "Windscript" );
+	PushIRCData();
 }
 
 function GetInitTicks ()

@@ -107,7 +107,7 @@ class WindData
 				debug( "Error while saving to "+ fName );
 				return false;
 			}
-			debug( "Saved to "+ fName );
+			//debug( "Saved." );
 			LastSaved = time();
 			UnsavedNum = 0;
 			return true;
@@ -118,7 +118,7 @@ class WindData
 	function Load ()
 	{
 		local result = Hash.Load( fName );
-		if ( result ) debug( "Loaded "+ fName +". Ready." );
+		if ( result ) debug( "Loaded. Ready." );
 		else debug( fName +" will be created on next save." );
 		return true;
 	}

@@ -35,6 +35,7 @@ function ReloadPlayers ( )
 		plr = FindPlayer( i );
 		if ( plr )
 		{
+			debug( "Re-adding player "+ plr.Name );
 			onPlayerConnect( plr );
 			p++;
 		}
@@ -55,8 +56,7 @@ function UpdateIPInfo ( user )
 		// Add current IP to user access list
 		local name = user.Player.Name, ip = user.Player.IP, ips = user.IPs;
 		local result = AddToList( ips ? ips : "", ip );
-		if ( result )
-			user.IPs = result;
+		if ( result ) user.IPs = result;
 
 		// Add nickname to IP_Records list
 		local names = GetData( "IP_Records", ip );
@@ -74,8 +74,7 @@ function UpdateIPInfo ( user )
 		names = GetData( "Subnet_Records", subnet );
 		names = names ? names : "";
 		result = AddToList( names, name );
-		if ( result )
-			AddData( "Subnet_Records", subnet, result );
+		if ( result ) AddData( "Subnet_Records", subnet, result );
 	}
 }
 

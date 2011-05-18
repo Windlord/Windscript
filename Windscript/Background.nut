@@ -15,13 +15,8 @@
 // The reason the code is messy is because I deemed this to be the more efficient way of doing things
 // I could have easily calculated modulii (%) repeatedly but dividing repeatedly is more efficient.
 
-function StartBackground()
-{
-	GameTimer <- NewTimer ( "Background", 500, 0 );
-	ReloadPlayers();
-}
 local GameTimerNum = 0.0;
-
+GameTimer <- 0;
 GameTimerTicks <- GetTickCount();
 
 

@@ -111,7 +111,7 @@ function FindAfk ( params, channel )
 			if ( !list ) return;
 			foreach ( id in split( list, " " ) )
 			{
-				user = GetUserFromID( id );
+				user = GetUserFromID( split( id, ":" )[ 0 ].tointeger() );
 				if ( !user ) continue;
 				return AfkString( "AFK_InGame", user.Name, id );
 			}
@@ -122,25 +122,12 @@ function FindAfk ( params, channel )
 
 function AfkString ( hash, name, id )
 {
-	local atime, reason, msg, dur, dt;
+	local atime, reason, msg;
 	reason = GetData( hash, id + ".Reason" );
 	atime = GetData( hash, id + ".Time" );
-	dur = time() - atime;
-	if ( dur > 86400 )					// If more than a day ago
-	{
-		dt = date( atime );
-		if ( dt.month == date().month )			// If left on current month
-			msg = " left on the "+ GetNth( dt.day );
-		else						// If left on another month
-			msg = " left on "+ GetNth( dt.day ) +" "+ GetMonth( dt.month );
-		msg += format( " at %02i:%02i", dt.hour, dt.min );
-	}
-	else
-	{
-		if ( name == "You" ) msg = " have ";
-		else msg = " has ";
-		msg += "been away for "+ Duration( dur );
-	}
+	if ( name == "You" ) msg = " have ";
+	else msg = " has ";
+	msg = name + ( name == "You" ? " have" : " has" ) +" left "+ TimeDiff( atime );
 	return iCol( 3, iBold( name ) + msg + " ("+ reason +")" );
 }
 
@@ -161,9 +148,10 @@ class Afk
 		}
 		else								// If player is ingame player
 		{
+			local user = ::GetUser( Player );
 			Hash = "AFK_InGame";
 			Other = "AFK_IRC";
-			ID = ::GetUser( Player ).ID;				// Set ingame user account ID as identification
+			ID = user.ID +":"+ user.Name;				// Set ingame user account ID as identification
 		}
 
 		Time = ::GetData( Hash, ID + ".Time" );
@@ -190,7 +178,7 @@ class Afk
 		Time = ::GetTime();						// Set current time as away time
 		Reason = reason;						// Set reason
 		if ( !SpamCheck() ) Msg( ::iCol( 3, ::iBold( Player.Name ) +" is away ("+ Reason +")" ) );
-		else ::SendMessage( ::iCol( 3, "You are away ("+ Reason +")" ), Player );
+		else PM( ::iCol( 3, "You are away ("+ Reason +")" ), Player );
 		return Save();							// Update data in hash
 	}
 
@@ -203,8 +191,8 @@ class Afk
 		if ( newlist == "" ) ::DelData( Hash, "List" );
 		else ::AddData( Hash, "List", newlist );
 		if ( !SpamCheck() ) Msg( ::iCol( 3, ::iBold( Player.Name ) +" returned from \""+ Reason + dur ) );
-		else ::SendMessage( ::iCol( 3, "You returned from \""+ Reason + dur ), Player );
-		::SendMessage( ::iCol( 3, "You have so far logged a total AFK time of: "+ ::Duration( tot ) ), Player );
+		else PM( ::iCol( 3, "You returned from \""+ Reason + dur ), Player );
+		PM( ::iCol( 3, "You have so far logged a total AFK time of: "+ ::Duration( tot ) ), Player );
 		return true;
 	}
 
@@ -216,7 +204,7 @@ class Afk
 		{								// do nothing apart from reminding
 			local dur = ( GetTime() - Time );
 			if ( !SpamCheck() ) Msg( ::iCol( 3, ::iBold( Player.Name ) +" is still away for \""+ Reason +"\" ("+ ::Duration( dur ) +")" ) );
-			else ::SendMessage( ::iCol( 3, "You are still away for \""+ Reason +"\" ("+ ::Duration( dur ) +")" ), Player );
+			else PM( ::iCol( 3, "You are still away for \""+ Reason +"\" ("+ ::Duration( dur ) +")" ), Player );
 			return true;
 		}
 		else								// If reason has changed
@@ -225,7 +213,7 @@ class Afk
 			Time = ::GetTime();					// Update time
 			Reason = reason;					// Update reason
 			if ( !SpamCheck() ) Msg( ::iCol( 3, ::iBold( Player.Name ) +" is now away ("+ Reason +")" ) );
-			else ::SendMessage( ::iCol( 3, "You are now away ("+ Reason +")" ), Player );
+			else PM( ::iCol( 3, "You are now away ("+ Reason +")" ), Player );
 			return Save();						// Update data in hash
 		}
 	}
@@ -252,17 +240,17 @@ class Afk
 			}
 		}
 		if ( total ) return true;
-		return ::SendMessage( iCol( 3, "No one is currently away." ), Player );
+		return PM( iCol( 3, "No one is currently away." ), Player );
 	}
 
 	function ShowAfks ( hash, id )
 	{
 		if ( hash == "AFK_InGame" )
 		{
-			local user = GetUserFromID( id );
+			local user = GetUserFromID( split( id, ":" )[ 0 ].tointeger() );
 			if ( !user ) return;
 			local name = id == ID ? "You" : user.Name;
-			::SendMessage( ::AfkString( hash, name, id ), Player );
+			return PM( ::AfkString( hash, name, id ), Player );
 		}
 		else
 		{
@@ -271,20 +259,23 @@ class Afk
 			{
 				local name = id == ID ? "You" : user.Name;
 				if ( !user.IsOn( Channel ) ) return;
-				return ::SendMessage( ::AfkString( hash, name, id ), Player );
+				return PM( ::AfkString( hash, name, id ), Player );
 			}
 		}
 	}
 
 	function Msg ( msg )
 	{
-		if ( Other ) return ::EMessage( msg, ::colGreen );		// If on echo channel or ingame send message to both
+		if ( Other ) return ::EMessage( msg, colGreen );		// If on echo channel or ingame send message to both
 		else								// Otherwise, send message to channel only
 		{
 			::CallFunc2( "BotMessage", Channel, "msg", msg );
 			return true;
 		}
 	}
+
+	function PM ( msg, plr )
+		return ::SendMessage( msg, plr, colGreen );
 
 	function SpamCheck ()
 	{

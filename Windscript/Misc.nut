@@ -11,29 +11,29 @@
 	This is because the functions included in this file are used in
 	nearly every other script file as if they are internal functions. */
 
-function CallFunc2 ( funcn, ... )				// This is to use a dummy timer to make CallFunc work properly
-{
-	local target = cScript_Type == "Main" ? cScript_Loader : cScript_Main;
-	local callparams = [ this, "CallFunc", 0, 1, target, funcn ];
-	foreach ( arg in vargv )
-		callparams.append( arg );
-	NewTimer.acall( callparams );
+function CallFunc2 ( funcn, ... )						// This is to use a dummy timer to make CallFunc work properly
+{										// This calls the equivalent of NewTimer( "CallFunc", 0, 1, cScript_Whatever, param1, param2 );
+	local target = cScript_Type == "Main" ? cScript_Loader : cScript_Main;	// Choose script to call
+	local callparams = [ this, "CallFunc", 0, 1, target, funcn ];		// Set params to send
+	foreach ( arg in vargv )						// For all optional parameters given
+		callparams.append( arg );					// Append to callparams
+	NewTimer.acall( callparams );						// Call NewTimer with params from callparams
 	return true;
 }
 
 
 // Distance checking functions
-function CalcDistance ( vector1, vector2 )
-	return DistanceFunc( vector1.x, vector1.y, vector1.z, vector2.x, vector2.y, vector2.z )
+function CalcDistance ( v1, v2 )
+	return DistanceFunc( v1.x, v1.y, v1.z, v2.x, v2.y, v2.z )
 
 function CalcDistance ( x1, y1, z1, x2, y2, z2 )
 	return DistanceFunc( x1, y1, z1, x2, y2, z2 );
 
-function PlayerDistance ( player1, player2 )
-	return DistanceFunc( player1.Pos.x, player1.Pos.y, player1.Pos.z, player2.Pos.x, player2.Pos.y, player2.Pos.z )
+function PlayerDistance ( plr1, plr2 )
+	return DistanceFunc( plr1.Pos.x, plr1.Pos.y, plr1.Pos.z, plr2.Pos.x, plr2.Pos.y, plr2.Pos.z )
 
-function PlayerDistance ( player, xcoord, ycoord, zcoord )
-	return DistanceFunc( player.Pos.x, player.Pos.y, player.Pos.z, xcoord, ycoord, zcoord )
+function PlayerDistance ( plr, xcoord, ycoord, zcoord )
+	return DistanceFunc( plr.Pos.x, plr.Pos.y, plr.Pos.z, xcoord, ycoord, zcoord )
 
 function DistanceFunc ( x1, y1, z1, x2, y2, z2 )
 {
@@ -41,11 +41,11 @@ function DistanceFunc ( x1, y1, z1, x2, y2, z2 )
 	return sqrt( x1 * x1 + y1 * y1 + z1 * z1 );
 }
 
-function IsPlayerNear ( player, range, xcoord, ycoord, zcoord )
-	return PlayerDistance( player, xcoord, ycoord, zcoord ) <= range ? true : false;
+function IsPlayerNear ( plr, range, xcoord, ycoord, zcoord )
+	return PlayerDistance( plr, xcoord, ycoord, zcoord ) <= range ? true : false;
 
-function IsPlayerNear ( player1, player2, range )
-	return PlayerDistance( player1, player2 ) <= range ? true : false;
+function IsPlayerNear ( plr1, plr2, range )
+	return PlayerDistance( plr1, plr2 ) <= range ? true : false;
 
 
 function CmdParamsfromText ( text )
@@ -182,6 +182,19 @@ function Duration ( num )
 	return JoinArray( a, " " );
 }
 
+function TimeDiff ( saved )
+{
+	local dt = date( saved ), now = date(), msg;
+	if ( dt.day == now.day )			// If left today
+		return Duration( time() - saved ) +" ago";
+	if ( dt.month == now.month )			// If left on current month
+		msg = "on the "+ GetNth( dt.day );
+	else						// If left on another month
+		msg = "on "+ GetNth( dt.day ) +" "+ GetMonth( dt.month );
+	msg += format( " at %02i:%02i", dt.hour, dt.min );
+	return msg;
+}
+
 // This function adds commas every 3 digits for outputs like 12,345,678
 function ToThousands ( num )
 {
@@ -212,24 +225,28 @@ function GetSubnet ( ip )
 // This function adds str to strlist if str isn't in strlist
 function AddToList ( strlist, str )
 {
-	strlist = split( strlist, " " );
-	foreach ( idx, val in strlist )
+	if ( !strlist ) return;
+	str = str.tostring();
+	local items = split( strlist.tostring(), " " );
+	foreach ( idx, val in items )
 		if ( val == str )
 			return strlist;
 
-	strlist.push( str );							// Push string into list
-	return JoinArray( strlist, " " );					// Return array as string
+	items.push( str );							// Push string into list
+	return JoinArray( items, " " );						// Return array as string
 }
 
 function RemFromList ( strlist, str )
 {
-	strlist = split( strlist, " " );
-	foreach ( idx, val in strlist )
+	if ( !strlist ) return;
+	str = str.tostring();
+	local items = split( strlist.tostring(), " " );
+	foreach ( idx, val in items )
 	{
 		if ( val == str )
 		{
-			strlist.remove( idx );
-			return JoinArray( strlist, " " );
+			items.remove( idx );
+			return JoinArray( items, " " );
 		}
 	}
 	return strlist;
@@ -237,7 +254,9 @@ function RemFromList ( strlist, str )
 
 function IsinList ( strlist, str )
 {
-	strlist = split( strlist, " " );
+	if ( !strlist ) return;
+	str = str.tostring();
+	strlist = split( strlist.tostring(), " " );
 	foreach ( idx, val in strlist )
 	{
 		if ( val == str )

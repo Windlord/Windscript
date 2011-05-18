@@ -102,7 +102,7 @@ function FindPlayer2 ( text )
 		if ( id < cMax_Players )
 			return Players.rawget( id.tostring() );
 		else if ( id > 1000 )
-			return IRCUser2( CallFunc( cScript_Loader, GetIRCUserName, id ) );
+			return IRCUser( CallFunc2( "GetIRCUserName", id ) );
 	}
 	else
 	{
@@ -115,14 +115,9 @@ function GetPartReason ( reasonid )
 {
 	switch ( reasonid )
 	{
-		case PARTREASON_TIMEOUT:
-			return "Lost Connection";
-		case PARTREASON_DISCONNECTED:
-			return "Quit";
-		case PARTREASON_KICKED:
-			return "Kicked";
-		case PARTREASON_BANNED:
-			return "Banned";
+		case PARTREASON_TIMEOUT: return "Lost Connection";
+		case PARTREASON_DISCONNECTED: return "Quit";
+		case PARTREASON_KICKED: return "Kicked";
+		case PARTREASON_BANNED: return "Banned";
 	}
 }
-

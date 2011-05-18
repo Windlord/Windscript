@@ -21,6 +21,7 @@ const ircCol2		= "\x0003\x0003";	// Two ircCols
 const ircBold		= "\x0002";		// Equivalent to ctrl+b in mIRC (Boldness Brace)
 
 // Set global variable to store some details
+cInit_Ticks	<- 0;
 cMax_Players	<- GetMaxPlayers();		// Maximum number of players
 Load_Errors	<- 0;
 colPink		<- Colour( 255, 20, 147 );	// The following are all predefined colours
@@ -76,24 +77,26 @@ function onScriptLoad ()
 	AttemptLoad ( "Plugins.nut" );		// Load Plugins.nut which deals with load/unloading plugins
 
 	print ( "\r- Completed Loading All Scripts.\n" );
-	NewTimer ( "AfterScriptLoad", 1000, 1 );
-}
 
-function AfterScriptLoad ()
-{
-	CallFunc( cScript_Loader, "PushIRCData" );
-	cInit_Ticks <- CallFunc( cScript_Loader, "GetInitTicks" );
-	UptimeLastUpdated = time();
+	// Report encountered number of errors so one can check the console
 	if ( Load_Errors )
 	{
 		print	( Load_Errors +" Error(s) Encountered.\n" );
 		mErrorG ( Load_Errors +" Error(s) Encountered." );
 	}
 
-	NewTimer ( "StartBackground", 1000, 1 );
+	NewTimer( "AfterScriptLoad", 1000, 1 );
+}
+
+function AfterScriptLoad()
+{
+	cInit_Ticks = CallFunc( cScript_Loader, "GetInitTicks" );
+	UptimeLastUpdated = time();
 	LoadPlugins();
 	EMessage (  iCol( 4, "* Windscript Loaded." ), colRed );
 	debug ( "Loaded Windscript Version "+ cScript_Version );
+	GameTimer = NewTimer( "Background", 500, 0 );
+	NewTimer( "ReloadPlayers", 1000, 1 );
 }
 
 function AttemptLoad ( script )
@@ -124,9 +127,9 @@ function onScriptUnload ()
 {
 	DEBUG = false;								// CallFunc fails onScriptUnload for some reason
 	print ( "\r       \n- Unloading Windscript Version "+ cScript_Version );
-	UnloadData();
-	GameTimer.Delete();
 	UnloadPlayers();
+	UnloadData();
+	if ( GameTimer ) GameTimer.Delete();
 	debug ( "Unloaded Windscript Version "+ cScript_Version );
 }
 

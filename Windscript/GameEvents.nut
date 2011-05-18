@@ -77,30 +77,28 @@ function onPlayerKill ( killer, player, weapon, bodypart )
 function onPlayerAction ( player, text )
 {
 	Echo( iCol( 7, "* " ) + FindLevel( player, 3 ) + iCol( 7, " " + text ) );
+	Message( "* "+ FindLevel( player, 2 ) + player.ColouredName +" "+ text, colYellow );
 	PluginEvent( onPlayerAction, player, text );
-	return 1;
+	return 0;
 }
 
 function onPlayerChat ( player, text )
 {
-	if ( text.len() > 1 && text[0] == '!' )
+	if ( text.len() > 1 && text[ 0 ] == '!' )
 	{
-		local a = split( text, " " );
-		local command = a[ 0 ].slice( 1 ).tolower();
-		local param = (a.len() > 1) ? JoinArray( a.slice( 1 ), " " ) : "";
-		text = param ? command + " " + param : command;
+		local p = CmdParamsfromText( text );
+		text = p.params ? p.cmd +" "+ p.params : p.cmd;
 		Echo( FindLevel( player, 3 ) +iCol( 4, ": !" )+ text );
 		Message( FindLevel( player, 2 ) + player.ColouredName +": "+ LUcolRed +"!"+ LUcolClose + text, colWhite );
-		NewTimer( "onCommand", 200, 1, player, command, param );
-		return 0;
+		NewTimer( "onCommand", 200, 1, player, p.cmd, p.params );
 	}
 	else
 	{
 		Echo( FindLevel( player, 3 ) +iCol( 5, ":" )+ " " + text );
 		Message( FindLevel( player, 2 ) + player.ColouredName +": "+ text, colWhite );
 		PluginEvent( onPlayerChat, player, text );
-		return 0;
 	}
+	return 0;
 }
 
 

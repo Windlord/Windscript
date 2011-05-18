@@ -50,7 +50,7 @@ function onUserLogin ( user, lastlogin )
 {
 	AdminPM( "Logged in successfully", user.Player );
 	if ( lastlogin )
-		AdminPM( "Last Logged in "+ Duration( ( time() - lastlogin ) ) +" ago.", user.Player );
+		AdminPM( "Last Logged in "+ TimeDiff( lastlogin ), user.Player );
 	Echo( iCol( 6, ":: "+ user.Player.Name +" has logged in" ) );
 	PluginEvent( onUserLogin, user, lastlogin );
 	return 1;

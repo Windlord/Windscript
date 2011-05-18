@@ -39,14 +39,17 @@ function CreateBot ( name )
 {
 	local lname = name.tolower();
 	if ( IRCBots.rawin( lname ) ) return false;
-	else return IRCBots.rawset( lname, EchoBot( name ) );
+	else
+	{
+		IRCBots.rawset( lname, EchoBot( name ) );
+		NewTimer( "CheckBotLogin", 7000, 1, lname );
+	}
 }
 
 function RemoveBot ( bot, unloading = false )
 {
 	local name = bot.lName;							// Cache bot's name and id for the print below
 
-	bot.CheckLogin.Delete();
 	if ( bot.Socket )
 	{
 		bot.Quit( "Windscript Version "+ cScript_Version );		// In case the bot is still connected, send QUIT message
@@ -107,7 +110,6 @@ class EchoBot
 		Socket.SetNewConnFunc( onIRCConnected );			// This sets a function for the connected socket to call
 		Socket.Connect( ::config.irc_server,
 				::config.irc_port );				// This connects the socket to the IRC server
-		CheckLogin = ::NewTimer( "CheckBotLogin", 7000, 1, lName );
 		LastPing = Init;
 		NickServ = false;
 		SendQueue = [];
@@ -123,7 +125,6 @@ class EchoBot
 	Channels = null;							// This stores the channel names which the bot is on
 	NickServ = null;							// This is a check to see if the bot has been through NickServ
 	Init = null;								// This stores the tick count when the bot was created (Can be used in bot uptime checking)
-	CheckLogin = null;
 	Used = null;
 	LastPing = null;
 	SendQueue = [];
@@ -161,7 +162,7 @@ class EchoBot
 	function Adminmsg	( target, message ) { return Send( "PRIVMSG %" + target + ":" + message ); }		// For sending messages to all halfops on a channel
 	function Notice		( target, message ) { return Send( "NOTICE " + target + " :" + message ); }		// For sending notices to channel/user
 	function Me		( target, message ) { return Msg( target, "\x0001ACTION "+ message +"\x0001" ); }	// For sending /me text
-	function Rejoin		( channel ) { Part( channel ); return Join( channel, FindChannel( channel ).Key ); }
+	function Rejoin		( channel ) { Part( channel ); return Join( channel, FindIRCChannel( channel ).Key ); }
 	function Autojoin	() {
 		local channels = split( config.irc_channels, ", " ), info, key;
 		foreach ( chanstr in channels )
@@ -172,7 +173,7 @@ class EchoBot
 		}
 		return true;
 	}
-	function Debug ( item, msg ) { debug( "[IRC:"+ Name +":"+ item +"] "+ msg ); return true; }
+	function Debug ( item, msg ) { ::debug( "[IRC:"+ Name +":"+ item +"] "+ msg ); return true; }
 }
 function SendMessageToIRC ( botname, message ) { return FindBot( botname ).Send( message ); }
 
@@ -198,7 +199,7 @@ class IRCChannel
 	Bots = [];
 }
 
-function FindChannel ( channame )
+function FindIRCChannel ( channame )
 {
 	local n = channame.tolower();
 	return IRCChannels.rawin( n ) ? IRCChannels.rawget( n ) : false;
@@ -206,7 +207,7 @@ function FindChannel ( channame )
 
 function AddUpdateChannel ( channame )
 {
-	local chan = FindChannel( channame );
+	local chan = FindIRCChannel( channame );
 	if ( chan ) chan.Name = channame;
 	else
 	{
@@ -294,7 +295,7 @@ function UpdateMainScriptIRCUser ( user )
 	CallFunc2( "UpdateIRCUser", user.Name, user.Address );
 
 
-function FindUser ( name )
+function FindIRCUser ( name )
 	return IRCUsers.rawin( name ) ? IRCUsers.rawget( name ) : false;
 
 function IsUserBot ( name )
@@ -385,17 +386,17 @@ function ProcessRaw ( bot, raw, nick, address )
 			bot.Join( chan.Name, chan.Key );
 			UpdateAvailBots( chan );
 		}
-		RemoveUser( FindUser( raw[ 3 ] ), chan );
+		RemoveUser( FindIRCUser( raw[ 3 ] ), chan );
 	}
 
 	else if ( raw[ 1 ] == "PART" )
 	{
 		local chan = AddUpdateChannel( raw[ 2 ] );
-		RemoveUser( FindUser( nick ), chan );
+		RemoveUser( FindIRCUser( nick ), chan );
 	}
 
 	else if ( raw[ 1 ] == "QUIT" )
-		RemoveUser( FindUser( nick ) );
+		RemoveUser( FindIRCUser( nick ) );
 
 	else if ( raw[ 1 ] == "NICK" )
 	{
@@ -422,7 +423,7 @@ function ProcessRaw ( bot, raw, nick, address )
 		{
 			if ( raw[ 3 ] == "\x0001ACTION" )
 			{
-				if ( bot.ID == 0 )
+				if ( bot == MainBot )
 				{
 					text = text.slice( 8, -1 );
 					if ( IsUserBot( nick ) ) return;
@@ -435,7 +436,7 @@ function ProcessRaw ( bot, raw, nick, address )
 			else if ( raw[ 3 ] == "\x0001PING" ) bot.Notice( nick, "\x0001PING "+ raw[ 4 ] );
 			else if ( raw[ 3 ] == "\x0001FINGER\x0001" ) bot.Notice( nick, CTCP_FINGER_REPLY );
 		}
-		else if ( bot.ID == 0 )
+		else if ( bot == MainBot )
 		{
 			if ( IsUserBot( nick ) ) return;
 			if ( target[ 0 ] == '#' )
@@ -449,7 +450,7 @@ function ProcessRaw ( bot, raw, nick, address )
 		raw[ 3 ] = raw[ 3 ].slice( 1 );
 		local target = raw[ 2 ], text = JoinArray( raw.slice( 3 ), " " );
 
-		if ( nick == "NickServ" ) DealWithNickServ( bot, text );	// The notice was sent by NickServ!
+		if ( nick == "NickServ" ) DealWithNickServ( bot, text );		// The notice was sent by NickServ!
 	}
 
 	if ( nick == bot.Name )
@@ -461,7 +462,7 @@ function ProcessRaw ( bot, raw, nick, address )
 			bot.Send( "MODE "+ chan.Name );
 			bot.Debug( "JOIN", chan.Name );
 			UpdateAvailBots( chan );
-			if ( bot.ID == 0 ) bot.Send( "WHO :"+ chan.Name );		// If MainBot send WHO request to retrieve user addresses
+			if ( bot == MainBot ) bot.Send( "WHO :"+ chan.Name );		// If MainBot send WHO request to retrieve user addresses
 		}
 		else if ( raw[ 1 ] == "PART" )
 		{
@@ -472,16 +473,16 @@ function ProcessRaw ( bot, raw, nick, address )
 		}
 	}
 
-	if ( bot.ID == 0 )
+	if ( bot == MainBot )
 	{
 		if ( raw[ 1 ] == "353" )						// If a NAMES event is received to botID 0,
 		{
 			raw[ 5 ] = raw[ 5 ].slice( 1 );
-			ProcessNAMES( FindChannel( raw[ 4 ] ), raw.slice( 5 ) );	// Process the output (Update user levels)
+			ProcessNAMES( FindIRCChannel( raw[ 4 ] ), raw.slice( 5 ) );	// Process the output (Update user levels)
 		}
 
 		else if ( raw[ 1 ] == "MODE" && words > 4 )				// If a MODE event is received to botID 0,
-			ProcessModes( FindChannel( raw[ 2 ] ), raw.slice( 3 ) );	// Process the output (Update user levels)
+			ProcessModes( FindIRCChannel( raw[ 2 ] ), raw.slice( 3 ) );	// Process the output (Update user levels)
 
 		else if ( raw[ 1 ] == "311" && words > 7 )				// Response to WHOIS request for user address
 			AddUpdateUser( raw[ 3 ], raw[ 4 ] +"@"+ raw[ 5 ] );
@@ -495,7 +496,7 @@ function ProcessRaw ( bot, raw, nick, address )
 		if ( raw[ 2 ] == bot.Name )
 		{
 			if ( raw[ 1 ] == "324" && raw.len() > 5 )			// If channel mode has something after the +modes bit
-				FindChannel( raw[ 3 ] ).Key = raw[ 5 ];			// Assume it is channel key and store
+				FindIRCChannel( raw[ 3 ] ).Key = raw[ 5 ];			// Assume it is channel key and store
 
 			else if ( raw[ 1 ] == "401" && raw[ 3 ] == "NickServ" )
 				bot.Autojoin();
@@ -516,7 +517,7 @@ function ProcessNAMES ( channel, names )
 		level = IRCSymltoLevel( name[ 0 ] );
 		if ( level > 1 ) name = name.slice( 1 );
 
-		user = FindUser( name );
+		user = FindIRCUser( name );
 		if ( user ) user.Level( channel, level );					// If user exists, update level
 		else AddUpdateUser( name, "None" ).Level( channel, level );			// Create user and add level
 	}
@@ -537,7 +538,7 @@ function ProcessModes ( channel, changes )
 		if ( !mode ) continue;
 		level = IRCModetoLevel ( char );
 
-		user = FindUser( changes[ num ] );
+		user = FindIRCUser( changes[ num ] );
 		if ( level && user )
 		{
 			if ( mode == '+' && user.Level( channel ) < level ) user.Level( channel, level );
@@ -640,7 +641,7 @@ function UpdateAvailBots ( chan )
 function BotMessage ( target, type, text )
 {
 	local max, min, botlist = IRCBots;
-	if ( target[ 0 ] == '#' ) botlist = FindChannel( target ) ? FindChannel( target ).Bots : IRCBots;
+	if ( target[ 0 ] == '#' ) botlist = FindIRCChannel( target ) ? FindIRCChannel( target ).Bots : IRCBots;
 
 	if ( botlist )
 	{

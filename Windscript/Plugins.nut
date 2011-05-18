@@ -11,12 +11,15 @@ Plugins <- {};									// A table to store all Plugin instances into
 
 function LoadPlugins ()
 {
-	local plugins = split( config.plugins, ", " );				// Get config list of plugins (case-sensitive)
+	local plugins = split( config.plugins, ", " ), result, count = 0;	// Get config list of plugins (case-sensitive)
 	foreach ( name in plugins )
 	{
 		Plugins.rawset( name, Plugin( name ) );				// Create new plugin instance
-		Plugins.rawget( name ).Load();					// Load plugin
+		result = Plugins.rawget( name ).Load();				// Load plugin
+		if ( result ) count++;
 	}
+	if ( count )
+		debug( "Loaded "+ count + ( count > 1 ? " plugins." : " plugin." ) );
 }
 
 function FindPlugin ( name )
@@ -72,24 +75,24 @@ class Plugin
 		if ( ex )
 		{
 			debug ( "Error: "+ ex );
-			debug ( "Failed to load plugin.");
+			debug ( "Failed to load.");
 			return false;
 		}
-		debug ( "Loaded plugin." );
+		return debug ( "Loaded." );
 	}
 
 	function Enable ()
 	{
 		if ( Enabled ) return;
 		Enabled = true;
-		debug ( "Enabled plugin." );
+		debug ( "Enabled." );
 	}
 
 	function Disable ()
 	{
 		if ( !Enabled ) return;
 		Enabled = false;
-		debug ( "Disabled plugin." );
+		debug ( "Disabled." );
 	}
 
 	function RegisterCommand ( command, fn )
