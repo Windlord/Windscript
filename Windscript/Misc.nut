@@ -26,23 +26,18 @@ function CallFunc2 ( funcn, ... )						// This is to use a dummy timer to make C
 function CalcDistance ( v1, v2 )
 	return DistanceFunc( v1.x, v1.y, v1.z, v2.x, v2.y, v2.z )
 
-function CalcDistance ( x1, y1, z1, x2, y2, z2 )
-	return DistanceFunc( x1, y1, z1, x2, y2, z2 );
-
 function PlayerDistance ( plr1, plr2 )
-	return DistanceFunc( plr1.Pos.x, plr1.Pos.y, plr1.Pos.z, plr2.Pos.x, plr2.Pos.y, plr2.Pos.z )
-
-function PlayerDistance ( plr, xcoord, ycoord, zcoord )
-	return DistanceFunc( plr.Pos.x, plr.Pos.y, plr.Pos.z, xcoord, ycoord, zcoord )
+{
+	if ( typeof( plr1 ) == "Player" ) plr1 = plr1.Pos;			// This allows people to provide Vector vars as args
+	if ( typeof( plr2 ) == "Player" ) plr2 = plr2.Pos;
+	return DistanceFunc( plr1.x, plr1.y, plr1.z, plr2.x, plr2.y, plr2.z )
+}
 
 function DistanceFunc ( x1, y1, z1, x2, y2, z2 )
 {
 	x1 -= x2; y1 -= y2; z1 -= z2;
 	return sqrt( x1 * x1 + y1 * y1 + z1 * z1 );
 }
-
-function IsPlayerNear ( plr, range, xcoord, ycoord, zcoord )
-	return PlayerDistance( plr, xcoord, ycoord, zcoord ) <= range ? true : false;
 
 function IsPlayerNear ( plr1, plr2, range )
 	return PlayerDistance( plr1, plr2 ) <= range ? true : false;
