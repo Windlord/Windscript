@@ -57,17 +57,18 @@ function UpdateIRCUser ( name, address )
 	else IRCUsers.rawset( name, IRCUser( name, address ) );
 }
 
-function UpdateIRCUserNickname ( old, new )
+function UpdateIRCUserNickname ( oldname, newname )
 {
-	local newuser = IRCUser( new, IRCUsers.rawget( old ).Address );
-	IRCUsers.rawset( new, newuser );
-	IRCUsers.rawdelete( old );
+	local oldaddr = IRCUsers.rawin( oldname ) ? IRCUsers.rawget( oldname ).Address : "";
+	IRCUsers.rawset( newname, IRCUser( newname, oldaddr ) );
+	IRCUsers.rawdelete( oldname );
+	local newuser = IRCUsers.rawget( newname );
 	foreach ( chan in IRCChannels )
 	{
-		if ( chan.Users.rawin( old ) )
+		if ( chan.Users.rawin( oldname ) )
 		{
-			chan.Users.rawset( new, chan.Users.rawget( old ) );
-			chan.Users.rawdelete( old );
+			chan.Users.rawset( newname, chan.Users.rawget( oldname ) );
+			chan.Users.rawdelete( oldname );
 		}
 	}
 }

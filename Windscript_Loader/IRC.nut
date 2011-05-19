@@ -407,9 +407,9 @@ function ProcessRaw ( bot, raw, nick, address )
 	else if ( raw[ 1 ] == "NICK" )
 	{
 		local newnick = raw[ 2 ].slice( 1 );
-		local newuser = IRCUser( newnick, address );
-		IRCUsers.rawset( newnick, newuser );
+		IRCUsers.rawset( newnick, IRCUser( newnick, address ) );
 		IRCUsers.rawdelete( nick );
+		local newuser = IRCUsers.rawget( newnick )
 		foreach ( chan in IRCChannels )
 		{
 			if ( chan.Users.rawin( nick ) )
