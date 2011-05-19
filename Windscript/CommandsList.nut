@@ -50,6 +50,10 @@ function onCommand ( player, command, params )
 		case "reload": return cmdReload ( player );
 		case "ip": return cmdIP ( player, params );
 		case "kick": return cmdKick ( player, params );
+
+		case "help": return cmdHelp ( player, params );
+		case "set": return cmdSet ( player, params );
+
 		default:
 			inplugins = PluginCommand( command, player, params );
 			return inplugins ? inplugins : mError( "Invalid Command ("+ command.toupper() +")", player );

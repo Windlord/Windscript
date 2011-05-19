@@ -93,7 +93,7 @@ function CheckLevel ( player, command, ingame = false )
 	}
 	else userlvl = user.Level;
 
-	local commandlvl = GetData( "CommandLevels", command );
+	local commandlvl = CommandLevel( command );
 	if ( userlvl >= commandlvl ) return true;
 	else
 	{
@@ -101,6 +101,9 @@ function CheckLevel ( player, command, ingame = false )
 		return false;
 	}
 }
+
+function CommandLevel ( command )
+	return GetData( "CommandLevels", command );
 
 UptimeLastUpdated <- 0;
 function UpdateUptime()

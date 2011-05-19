@@ -48,6 +48,11 @@ function cmdChangePass ( player, params )
 	if ( !param ) return mError ( );
 }
 
+function cmdHelp ( player, params )
+{
+	return mError ( "Not Available", player );
+}
+
 function cmdSay ( player, params )
 {
 	if ( !params ) return mError ( "No text to send.", player );

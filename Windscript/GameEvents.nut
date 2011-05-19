@@ -86,7 +86,7 @@ function onPlayerChat ( player, text )
 {
 	if ( text.len() > 1 && text[ 0 ] == '!' )
 	{
-		local p = CmdParamsfromText( text );
+		local p = CmdParamsfromText( text.slice( 1 ) );
 		text = p.params ? p.cmd +" "+ p.params : p.cmd;
 		Echo( FindLevel( player, 3 ) +iCol( 4, ": !" )+ text );
 		Message( FindLevel( player, 2 ) + player.ColouredName +": "+ LUcolRed +"!"+ LUcolClose + text, colWhite );

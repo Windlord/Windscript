@@ -140,7 +140,7 @@ function onIRCMessage ( user, text )
 	local user = FindIRCUser( user );
 	if ( text[ 0 ] == '!' )
 	{
-		local p = CmdParamsfromText( text );
+		local p = CmdParamsfromText( text.slice( 1 ) );
 		if ( p.cmd > "" ) onCommand ( user, p.cmd, p.params );
 	}
 	else
@@ -162,7 +162,7 @@ function onIRCChat ( channel, user, text )
 	{
 		if ( prefix == '!' )						// Check if prefix is '!'
 		{
-			local p = CmdParamsfromText( text );
+			local p = CmdParamsfromText( text.slice( 1 ) );
 			if ( p.cmd > "" ) onCommand ( user, p.cmd, p.params );
 		}
 		else if ( prefix == '.' && text.len() > 1 )			// Check if prefix is '.' and text exists after .
@@ -181,7 +181,7 @@ function onIRCChat ( channel, user, text )
 	{
 		if ( prefix == '!' )
 		{
-			local p = CmdParamsfromText( text );
+			local p = CmdParamsfromText( text.slice( 1 ) );
 			if ( p.cmd > "" ) PluginCommandChannels( p.cmd, user, p.params, channel );
 		}
 		else PluginEvent( onIRCChat, user, channel, text );

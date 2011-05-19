@@ -43,11 +43,13 @@ function IsPlayerNear ( plr1, plr2, range )
 	return PlayerDistance( plr1, plr2 ) <= range ? true : false;
 
 
+// Get command and params and return as table
 function CmdParamsfromText ( text )
 {
+	if ( !text ) return { cmd = null, params = null };
 	local cloc = text.find(" "), cmd, params = "";
-	if ( cloc == null ) cmd = text.slice( 1 );
-	else cmd = text.slice( 1, cloc ).tolower(), params = text.slice( cloc + 1 );
+	if ( cloc == null ) cmd = text;
+	else cmd = text.slice( 0, cloc ).tolower(), params = text.slice( cloc + 1 );
 	params = ( params == "" ) ? 0 : params;
 	return { cmd = cmd, params = params };
 }
