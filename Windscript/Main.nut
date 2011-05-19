@@ -93,10 +93,10 @@ function AfterScriptLoad()
 	cInit_Ticks = CallFunc( cScript_Loader, "GetInitTicks" );
 	UptimeLastUpdated = time();
 	LoadPlugins();
-	EMessage (  iCol( 4, "* Windscript Loaded." ), colRed );
-	debug ( "Loaded Windscript Version "+ cScript_Version );
 	GameTimer = NewTimer( "Background", 500, 0 );
 	NewTimer( "ReloadPlayers", 1000, 1 );
+	EMessage ( iCol( 4, "* Windscript Loaded." ), colRed );
+	debug ( "Loaded Windscript Version "+ cScript_Version );
 }
 
 function AttemptLoad ( script )
@@ -109,18 +109,6 @@ function AttemptLoad ( script )
 		print ( "\r["+script+":ERROR]\t "+ ex );
 		print ( "Failed to load "+ script );
 	}
-}
-
-function onServerStart ()
-{
-	print( "\r  __       __)                               " );
-	print( "\r (, )  |  /  ,       /)             ,        " );
-	print( "\r    | /| /    __   _(/  _   _  __    __  _/_ " );
-	print( "\r    |/ |/  _(_/ (_(_(_ /_)_(__/ (__(_/_)_(__ " );
-	print( "\r    /  |                          .-/        " );
-	print( "\r _______________________________ (_/ ________" );
-	print( "\r                                  version "+ cScript_Version );
-	print( "\r                                  by "+ cScript_Author +"\n" );
 }
 
 function onScriptUnload ()

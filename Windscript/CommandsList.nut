@@ -9,6 +9,7 @@
 
 function onPlayerCommand ( player, command, params )
 {
+	params = StripGameCol( params );
 	params = ( params == "" ) ? 0 : params;
 
 	// The following commands are put under this signal while all other commands are

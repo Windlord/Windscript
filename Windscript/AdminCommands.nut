@@ -9,19 +9,17 @@
 
 function cmdIP ( player, params )
 {
-	if ( !params ) return mFormat ( "/ip <Player>", player );
+	local p = targetparams( player, params );
+	if ( !p ) return mFormat ( "/ip <Player>", player );
+	if ( p == -1 ) return;
 	if ( CheckLevel( player, "ip" ) )
 	{
-		local p = targetparams( player, params );
 		local tuser = GetUser( p.target );
-		if ( p )
-		{
-			local ipf = IPInfo( tuser.IP );
-			AdminPM( "Information for "+ ipf.IP, player );
-			AdminPM( "rDNS: "+ ipf.rDNS, player );
-			AdminPM( "Country: "+ ipf.Country, player );
-			AdminPM( "City: "+ ipf.City, player );
-		}
+		local ipf = IPInfo( tuser.IP );
+		AdminPM( "Information for "+ ipf.IP, player );
+		AdminPM( "rDNS: "+ ipf.rDNS, player );
+		AdminPM( "Country: "+ ipf.Country, player );
+		AdminPM( "City: "+ ipf.City, player );
 	}
 }
 

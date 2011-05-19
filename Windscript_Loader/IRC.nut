@@ -219,17 +219,23 @@ function AddUpdateChannel ( channame )
 }
 
 function UpdateMainScriptIRCChannel ( channel, user, level )
-	CallFunc2( "UpdateIRCChannel", channel.Name, user.Name, level );
+	CallFunc( cScript_Main, "UpdateIRCChannel", channel.Name, user.Name, level );
 
 function PushIRCData ()
 {
 	foreach ( chan in IRCChannels )
 	{
 		foreach ( user, level in chan.Users )
-			CallFunc2( "UpdateIRCChannel", chan.Name, user.Name, level );
+		{
+			//print( "Pushing IRCChannel "+ chan.Name );
+			UpdateMainScriptIRCChannel( chan, user, level );
+		}
 	}
 	foreach ( user in IRCUsers )
-		CallFunc2( "UpdateIRCUser", user.Name, user.Address );
+	{
+		//print( "Pushing IRCUser "+ user.Name );
+		UpdateMainScriptIRCUser( user );
+	}
 }
 
 IRCUsers <- {};
@@ -288,11 +294,11 @@ function RemoveUser ( user, chan = null )
 			if ( chan.Users.rawin( user ) )
 				chan.Users.rawdelete( user );
 	}
-	CallFunc2( "RemoveIRCUser", user.Name, chan ? chan.Name : null );
+	CallFunc( cScript_Main, "RemoveIRCUser", user.Name, chan ? chan.Name : null );
 }
 
 function UpdateMainScriptIRCUser ( user )
-	CallFunc2( "UpdateIRCUser", user.Name, user.Address );
+	CallFunc( cScript_Main, "UpdateIRCUser", user.Name, user.Address );
 
 
 function FindIRCUser ( name )
@@ -428,8 +434,8 @@ function ProcessRaw ( bot, raw, nick, address )
 					text = text.slice( 8, -1 );
 					if ( IsUserBot( nick ) ) return;
 					if ( target[ 0 ] == '#' )
-						CallFunc2( "onIRCChat_Desc", target, nick, text );
-					else CallFunc2( "onIRCMessage_Desc", nick, text );
+						CallFunc( cScript_Main, "onIRCChat_Desc", target, nick, text );
+					else CallFunc( cScript_Main, "onIRCMessage_Desc", nick, text );
 				}
 			}
 			else if	( raw[ 3 ] == "\x0001VERSION\x0001" ) bot.Notice( nick, CTCP_VERSION_REPLY );
@@ -440,8 +446,8 @@ function ProcessRaw ( bot, raw, nick, address )
 		{
 			if ( IsUserBot( nick ) ) return;
 			if ( target[ 0 ] == '#' )
-				CallFunc2( "onIRCChat", target, nick, text );
-			else CallFunc2( "onIRCMessage", nick, text );
+				CallFunc( cScript_Main, "onIRCChat", target, nick, text );
+			else CallFunc( cScript_Main, "onIRCMessage", nick, text );
 		}
 	}
 

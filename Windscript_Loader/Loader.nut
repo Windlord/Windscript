@@ -36,7 +36,7 @@ function onScriptLoad ()
 
 	InitialiseBots();
 
-	LoadMainScript();
+	NewTimer( "LoadMainScript", 0, 1 );
 }
 
 function AttemptLoad ( script )
@@ -60,24 +60,34 @@ function onScriptUnload ()
 	debug ( "Unloaded Windscript Loader" );
 }
 
+function onServerStart ()
+{
+	print( "\r  __       __)                               " );
+	print( "\r (, )  |  /  ,       /)             ,        " );
+	print( "\r    | /| /    __   _(/  _   _  __    __  _/_ " );
+	print( "\r    |/ |/  _(_/ (_(_(_ /_)_(__/ (__(_/_)_(__ " );
+	print( "\r    /  |                          .-/        " );
+	print( "\r _______________________________ (_/ ________" );
+	print( "\r                                  version "+ cScript_Version );
+	print( "\r                                  by "+ cScript_Author +"\n" );
+}
+
 // This dummy timer bit is necessary so that the server does not crash.
 // The server crashes because the server will try to return a boolean to the script
 // where CallFunc was called from. Of course, that script will have been unloaded by then.
 function ReloadScript ()
-	NewTimer( "ReloadScriptDo", 0, 1 );
-function ReloadScriptDo ()
-{
-	UnloadMainScript();
-	LoadMainScript();
-}
+	NewTimer( "ReloadMainScript", 0, 1 );
 
-function UnloadMainScript()
+function ReloadMainScript()
+{
 	NewTimer( "UnloadScript", 0, 1, "Windscript" );
+	NewTimer( "LoadMainScript", 500, 1 );
+}
 
 function LoadMainScript()
 {
 	NewTimer( "LoadScript", 0, 1, "Windscript" );
-	PushIRCData();
+	NewTimer( "PushIRCData", 500, 1 );
 }
 
 function GetInitTicks ()

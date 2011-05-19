@@ -10,14 +10,16 @@
 
 function targetparams ( player, params )
 {
-	params = split( params, " " );
-	local target = FindPlayer( params[ 0 ].tostring() );
+	if ( !params ) return null;
+	local cloc = params.find( " " );
+	local tstring = cloc ? params.slice( 0, cloc ) : params;
+	local target = FindPlayer( tstring );
 	if ( !target )
 	{
-		mError( "Invalid Player ("+ params[ 0 ].tostring().toupper() +")", player );
-		return null;
+		mError( "Invalid Player ("+ tstring.toupper() +")", player );
+		return -1;
 	}
-	return { target = target params = JoinArray( params.slice( 1 ), " " ) };
+	return { target = target, params = cloc ? params.slice( cloc + 1 ) : 0 };
 }
 
 // Messaging functions
@@ -33,7 +35,7 @@ function EMessage ( message, col = colWhite )			// Sends a message both to the s
 function SendMessage ( message, target, col = colWhite )	// Sends a pm ingame if player is ingame. Sends a notice if IRC user.
 {								// Format: SendMessage( message, player/user, Colour() );
 	if ( typeof( target ) == "IRCUser" ) return SendToEcho( target.Name, "notice", StripGameCol( message ) );
-	else return MessagePlayer( StripIRCCol( message ), target, col );
+	else return MessagePlayer( StripIRCCol( message ), typeof( target ) == "Windscript User" ? target.Player : target, col );
 }
 
 function AdminMessage ( message )

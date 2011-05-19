@@ -48,6 +48,7 @@ class IRCUser
 // for only one thread to run at a time. (ie. I can't CallFunc back to a script which I CallFunc-ed)
 function UpdateIRCUser ( name, address )
 {
+	//print( "Updating IRCUser "+ name );
 	if ( IRCUsers.rawin( name ) )
 	{
 		local user = IRCUsers.rawget( name );
@@ -119,6 +120,7 @@ class IRCChannel
 
 function UpdateIRCChannel ( cname, uname, level )
 {
+	//print( "Updating IRCChannel "+cname );
 	if ( !IRCChannels.rawin( cname ) )
 		IRCChannels.rawset( cname, IRCChannel( cname ) );
 	IRCChannels.rawget( cname ).Users.rawset( uname, level );

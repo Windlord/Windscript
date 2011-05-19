@@ -112,6 +112,7 @@ function IRCModetoLevel ( mode )
 // Good to use with the IRC echo
 function StripIRCCol ( text )
 {
+	if ( !text ) return text;
 	local a, z = text.len(), l;
 	local coltrig = false, comtrig = false, num = 0, output = "";
 	for ( a = 0; a < z; a++ )
@@ -128,6 +129,7 @@ function StripIRCCol ( text )
 // This function strips the LU ingame colour tags: [#XXXXXX][#d] off of any string
 function StripGameCol ( text )
 {
+	if ( !text ) return text;
 	local coltrig, output = "";
 	foreach ( idx, chr in text )
 	{

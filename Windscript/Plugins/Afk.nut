@@ -86,8 +86,8 @@ function FindAfk ( params, channel )
 	if ( plr && plr.Name.tolower() == target )
 	{
 		user = GetUser( plr );
-		if ( IsinList( GetData( "AFK_InGame", "List" ), user.ID ) )
-			return AfkString( "AFK_InGame", user.Name, user.ID );
+		if ( IsinList( GetData( "AFK_InGame", "List" ), user.ID +":"+ user.Name ) )
+			return AfkString( "AFK_InGame", user.Name, user.ID +":"+ user.Name );
 		else return;
 	}
 	else
@@ -112,8 +112,8 @@ function FindAfk ( params, channel )
 			foreach ( id in split( list, " " ) )
 			{
 				user = GetUserFromID( split( id, ":" )[ 0 ].tointeger() );
-				if ( !user ) continue;
-				return AfkString( "AFK_InGame", user.Name, id );
+				if ( user && user.lName == target )
+					return AfkString( "AFK_InGame", user.Name, id );
 			}
 		}
 	}

@@ -13,7 +13,7 @@ function onPlayerConnect( player )
 	{
 		local user = GetUser( player );
 		EMessage( iCol( 3, player.ColouredName +" joined the server." ), colGreen );
-		if ( config.rawin( "server_motd" ) ) AdminPM( config.server_motd, player );
+		AdminPM( config.server_motd, player );
 
 		onUserJoin( user );
 		PluginEvent( onPlayerConnect, player );
@@ -76,7 +76,7 @@ function onPlayerKill ( killer, player, weapon, bodypart )
 
 function onPlayerAction ( player, text )
 {
-	Echo( iCol( 7, "* " ) + FindLevel( player, 3 ) + iCol( 7, " " + text ) );
+	Echo( iCol( 7, "* " ) + FindLevel( player, 3 ) + iCol( 7, " " + StripGameCol( text ) ) );
 	Message( "* "+ FindLevel( player, 2 ) + player.ColouredName +" "+ text, colYellow );
 	PluginEvent( onPlayerAction, player, text );
 	return 0;
@@ -88,14 +88,15 @@ function onPlayerChat ( player, text )
 	{
 		local p = CmdParamsfromText( text.slice( 1 ) );
 		text = p.params ? p.cmd +" "+ p.params : p.cmd;
-		Echo( FindLevel( player, 3 ) +iCol( 4, ": !" )+ text );
+		Echo( FindLevel( player, 3 ) +iCol( 4, ": !" )+ StripGameCol( text ) );
 		Message( FindLevel( player, 2 ) + player.ColouredName +": "+ LUcolRed +"!"+ LUcolClose + text, colWhite );
-		NewTimer( "onCommand", 200, 1, player, p.cmd, p.params );
+		NewTimer( "onCommand", 200, 1, player, p.cmd, StripGameCol( p.params ) );
 	}
 	else
 	{
-		Echo( FindLevel( player, 3 ) +iCol( 5, ":" )+ " " + text );
 		Message( FindLevel( player, 2 ) + player.ColouredName +": "+ text, colWhite );
+		text = StripGameCol( text );
+		Echo( FindLevel( player, 3 ) +iCol( 5, ":" )+ " " + text );
 		PluginEvent( onPlayerChat, player, text );
 	}
 	return 0;

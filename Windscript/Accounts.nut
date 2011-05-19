@@ -84,6 +84,7 @@ class User
 		ID = ::AddData( "User_Name_To_ID", name, nID );			// Add new data for this user name
 		sID = ID.tostring();
 		Name = Player.Name;
+		lName = Player.Name.tolower();
 		Level = 1;							// Set default user level for unregistered users
 	}
 
@@ -107,12 +108,11 @@ class User
 
 	function Login ( password, autologin = false )
 	{
-		if ( autologin ) return ::onUserLogin( this, true );
-		if ( Registered && ::SHA1( password ) == Pass )			// If password hashes match and user registered
+		if ( autologin || ( Registered && ::SHA1( password ) == Pass ) )// If password hashes match and user registered
 		{
 			LoggedIn = 1;
 			::IncData( "UserData", "LoginsCount" );			// Increase login count
-			return ::onUserLogin( this );
+			return ::onUserLogin( this, autologin );
 		}
 		if ( Pass ) return -1;						// If registered but pass mismatch
 		return 0;							// Not registered
