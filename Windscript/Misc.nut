@@ -173,22 +173,34 @@ function Duration ( num )
 	local secs = num % 60;
 	local weeks = floor ( ( num - days*86400 - hours*3600 - mins*60 - secs ) / 604800 );
 	local a = [];
-	if ( weeks != 0 ) a.append( weeks + "wks" );
-	if ( days != 0 ) a.append( days + "days" );
-	if ( hours != 0 ) a.append( hours + "hrs" );
-	if ( mins != 0 ) a.append( mins + "mins" );
-	if ( secs != 0 ) a.append( secs + "secs" );
+	if ( weeks != 0 ) a.append( weeks +"wks" );
+	if ( days != 0 ) a.append( days +"days" );
+	if ( hours != 0 ) a.append( hours +"hrs" );
+	if ( mins != 0 ) a.append( mins +"mins" );
+	if ( secs != 0 ) a.append( secs +"secs" );
+	if ( a.len() > 2 ) a = a.slice( 0, 2 );					// If more than 2 bits to the statement,
+										// reduce to 2 most significant ones.
 	return JoinArray( a, " " );
 }
 
+// This is a function to prettify duration
 function TimeDiff ( saved )
 {
 	local dt = date( saved ), now = date(), msg;
-	if ( dt.day == now.day )			// If left today
+	if ( now.day == dt.day && now.hour == dt.hour )
+	{
+		if ( now.min == dt.min )
+			return ( now.sec - dt.sec ) +" seconds ago";
+		else
+			return ( now.min - dt.min ) + " minutes ago";
+	}
+	else if ( time() - saved <= 86400 )					// If left within 24 hours
 		return Duration( time() - saved ) +" ago";
-	if ( dt.month == now.month )			// If left on current month
+	else if ( now.day - dt.day == 1 )
+		msg = "yesterday";
+	else if ( dt.month == now.month )					// If left on current month
 		msg = "on the "+ GetNth( dt.day );
-	else						// If left on another month
+	else									// If left on another month
 		msg = "on "+ GetNth( dt.day ) +" "+ GetMonth( dt.month );
 	msg += format( " at %02i:%02i", dt.hour, dt.min );
 	return msg;
@@ -290,17 +302,17 @@ function GetMonth ( num )
 {
 	switch ( num )
 	{
-		case 1: return "Jan";
-		case 2: return "Feb";
-		case 3: return "Mar";
-		case 4: return "Apr";
-		case 5: return "May";
-		case 6: return "Jun";
-		case 7: return "Jul";
-		case 8: return "Aug";
-		case 9: return "Sep";
-		case 10: return "Oct";
-		case 11: return "Nov";
-		case 12: return "Dec";
+		case 0: return "Jan";
+		case 1: return "Feb";
+		case 2: return "Mar";
+		case 3: return "Apr";
+		case 4: return "May";
+		case 5: return "Jun";
+		case 6: return "Jul";
+		case 7: return "Aug";
+		case 8: return "Sep";
+		case 9: return "Oct";
+		case 10: return "Nov";
+		case 11: return "Dec";
 	}
 }

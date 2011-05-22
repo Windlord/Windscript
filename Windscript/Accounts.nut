@@ -12,14 +12,14 @@ OnlineUsers <- {};								// Store all online player instances and their
 										// associated user instances into a table
 function GetUser ( plr )
 {										// Get user instance from table with player instance
+	local name;
 	if ( typeof ( plr ) == "IRCUser" ) return plr;				// If IRC user, return user.
-
-	local name = plr.Name;
+	if ( type ( plr ) == "string" ) name = plr;
+	else name = plr.Name;
 	if ( OnlineUsers.rawin( name ) ) return OnlineUsers.rawget( name );	// Get user instance from table with player instance
 	else									// If entry in table does not exist
 	{
-		local user = User( plr );
-		OnlineUsers.rawset( name, user );
+		OnlineUsers.rawset( name, User( plr ) );
 		return OnlineUsers.rawget( name );
 	}
 }
@@ -52,8 +52,7 @@ class User
 	constructor ( p_plr )
 	{
 		Player = p_plr;							// Set Player instance
-		Error = false;
-		local name, input_type = typeof( Player );
+		local name, lname, input_type = typeof( Player );
 		if ( input_type == "Player" )					// If p_plr is a Player instance
 		{
 			name = Player.Name;
@@ -63,28 +62,21 @@ class User
 		{
 			name = Player;
 			InGame = false;
+			Player = ::FindPlayer( name );
 		}
 
-		name = name.tolower();						// Use lowercase name to avoid two same nicknames being registered
-		ID = ::GetData( "User_Name_To_ID", name );			// Get account ID for this user
+		lname = name.tolower();						// Use lowercase name to avoid two same nicknames being registered
+		ID = ::GetData( "User_Name_To_ID", lname );			// Get account ID for this user
 		if ( ID == 0 )
-		{
-			if ( !InGame )
-			{
-				ID = ::FindUserIDfromName( name );
-				if ( ID == null ) Error = true;
-			}
-			else Add( name, ::IncData( "UserData", "TotalUsersCount" ) );
-		}
-		if ( !Error ) sID = ID.tostring();
+			Add( name, lname, ::IncData( "UserData", "TotalUsers" ) );
 	}
 
-	function Add ( name, nID )
+	function Add ( name, lname, nID )
 	{
-		ID = ::AddData( "User_Name_To_ID", name, nID );			// Add new data for this user name
+		ID = ::AddData( "User_Name_To_ID", lname, nID );		// Add new data for this user name
 		sID = ID.tostring();
-		Name = Player.Name;
-		lName = Player.Name.tolower();
+		Name = name;
+		lName = lname;
 		Level = 1;							// Set default user level for unregistered users
 	}
 
@@ -93,10 +85,10 @@ class User
 		local hash_pass = ::SHA1( password );
 		if ( !Registered )						// If not registered
 		{
+			LoggedIn = 1;						// Set as being logged in
 			Pass = hash_pass;					// Set password hash
 			Level = 2;						// Set registered user level
-			LoggedIn = 1;						// Set as being logged in
-			return ::onUserRegister( this, ::IncData( "UserData", "RegisteredUsersCount" ) );
+			return ::onUserRegister( this, ::IncData( "UserData", "TotalRegisteredUsers" ) );
 		}
 		else if ( LoggedIn )						// If registered and logged in
 		{
@@ -111,36 +103,38 @@ class User
 		if ( autologin || ( Registered && ::SHA1( password ) == Pass ) )// If password hashes match and user registered
 		{
 			LoggedIn = 1;
-			::IncData( "UserData", "LoginsCount" );			// Increase login count
+			::IncData( "UserData", "TotalLogins" );			// Increase login count
 			return ::onUserLogin( this, autologin );
 		}
 		if ( Pass ) return -1;						// If registered but pass mismatch
 		return 0;							// Not registered
 	}
 
-	function Inc ( prop )
+	function RestoreSettings ()
 	{
-		if ( Error ) return null;
-		switch ( prop )
-		{
-			default: return ::IncData( "UserData_"+ prop, sID );
-		}
+		Player.Cash = Cash;
 	}
 
-	function Dec ( prop )
+	function Inc ( prop, amount = 1 )
 	{
-		if ( Error ) return null;
-		switch ( prop )
-		{
-			default: return ::DecData( "UserData_"+ prop, sID );
-		}
+		local result = Get( prop ) + amount;
+		return Set( result );
+	}
+
+	function Dec ( prop, amount = 1 )
+	{
+		local result = Get( prop ) - amount;
+		result = result < 0 ? 0 : result;
+		return Set( result );
 	}
 
 	function Get ( prop )
 	{
-		if ( Error ) return null;
 		switch ( prop )
 		{
+			case "Cash":
+				Player.Cash = Money;
+				return Money;
 			case "Registered": return Pass ? true : false;		// Return true if pass exists
 			case "Level": return LoggedIn ? ::GetData( "UserData_Level", sID ) : 1;	// If logged in, return correct level, else 1
 			case "IP": return ::split( IPs, " " ).pop();
@@ -150,10 +144,23 @@ class User
 
 	function Set ( prop, value )
 	{
-		if ( Error ) return null;
 		switch ( prop )
 		{
-			default: return ::AddData( "UserData_"+ prop, sID, value );
+			case "Name":
+			case "lName":
+			case "Level":
+			case "LoggedIn":
+				return ::AddData( "UserData_"+ prop, sID, value );
+			case "Cash":
+				Player.Cash = value;
+				Money = value;
+				return value;
+			case "IP":
+				IPs = ::AddToList( IPs, value );
+				return value;
+			default:
+				if ( LoggedIn || value == 0 ) ::AddData( "UserData_"+ prop, sID, value );
+				else return value;
 		}
 	}
 
@@ -170,11 +177,13 @@ class User
 		else return -1;
 	}
 
+	function _tostring ()
+		return Name;
+
 	function _typeof()
 		return "Windscript User";
 
 	Player = null;
-	Error = false;
 	ID = 0;
 	sID = "0";
 	InGame = false;

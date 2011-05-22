@@ -19,7 +19,7 @@ function LoadPlugins ()
 		if ( result ) count++;
 	}
 	if ( count )
-		debug( "Loaded "+ count + ( count > 1 ? " plugins." : " plugin." ) );
+		debug( "[PLUGIN] Loaded "+ count + ( count > 1 ? " plugins." : " plugin." ) );
 }
 
 function FindPlugin ( name )

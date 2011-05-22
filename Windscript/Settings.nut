@@ -13,7 +13,7 @@ function ParseConfig ()
 	local fIO = FileIO( "CONFIG.txt", 'w' );
 	local raw = split( fIO.Stream, "\r\n" );				// Split string chunk into lines
 	fIO.File.flush();
-	local lines = raw.len(), line, linelen, li, chr, key, data, strtrig, is_str;
+	local lines = raw.len(), line, linelen, li, chr, key, data, strtrig, is_str, cfgnum = 0;
 	for ( local i = 0; i < lines ; i++ )					// Iterate through lines
 	{
 		line = raw[ i ]; linelen = line.len();
@@ -60,21 +60,30 @@ function ParseConfig ()
 					break;
 			}
 			config.rawset( key, data );				// Set key in the table 'config'
+			cfgnum++;
 		}
 	}
+	if ( cfgnum ) print( "[CONFIG] "+ cfgnum +" configuration setting"+ ( cfgnum == 1 ? "" : "s" ) +" loaded." );
 	ConfigDefaults();
 }
 
 function ConfigDefaults()
 {
 	ConfigSetIfNone( "server_motd", "Welcome to Windscript "+ cScript_Version );
+	ConfigSetIfNone( "server_url", "www.windlord.net" );
+	ConfigSetIfNone( "server_adminbot", "AdminServ" );
 	ConfigSetIfNone( "debug", true );
+	ConfigSetIfNone( "irc_server", "irc.gtanet.com" );
+	ConfigSetIfNone( "irc_port", 6667 );
 }
 
 function ConfigSetIfNone ( item, setting )
 {
 	if ( !config.rawin( item ) )
+	{
 		config.rawset( item, setting );
+		print( "[CONFIG] Setting not found for "+ item +", setting value: "+ setting );
+	}
 }
 
 // This class deals with writing to files

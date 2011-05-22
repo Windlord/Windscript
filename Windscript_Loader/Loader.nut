@@ -35,8 +35,7 @@ function onScriptLoad ()
 	debug ( "Loaded Windscript Loader" );
 
 	InitialiseBots();
-
-	NewTimer( "LoadMainScript", 0, 1 );
+	SetServerRule( "Running on", "Windscript "+ cScript_Version );
 }
 
 function AttemptLoad ( script )

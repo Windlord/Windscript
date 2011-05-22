@@ -10,29 +10,30 @@
 function onUserJoin ( user )
 {
 	user.Joins++;
-	user.JoinTime = time();
 	user.LoggedIn = 0;
 	user.Spree = 0;
 
-	if ( user.LastIP == user.Player.IP )					// If current IP equals last used IP
+	if ( !user.Registered )
+		AdminPM( "Register this nickname with /register today!", user );
+	else if ( user.LastLoginIP == user.Player.IP )				// If current IP equals last used IP
 		user.Login( "", true );
-	if ( user.Registered && !user.LoggedIn )
+	else if ( user.Registered && !user.LoggedIn )
 		AdminPM( "This nickname is registered. Please login using /login.", user );
 
 	UpdateIPInfo( user );
+	IncData( "UserData", "TotalVisits" );
 	PluginEvent( onUserJoin, user );
 	return 1;
 }
 
 function onUserPart ( user, reason )
 {
-	if ( user.JoinTime )
-	{
-		user.Uptime = time() - user.JoinTime;
-		user.JoinTime = 0;
-	}
-
 	PluginEvent( onUserPart, user, reason );
+	if ( user.LoggedIn )
+	{
+		user.Uptime = time() - user.LastLoginTime;
+		user.LoggedIn = 0;
+	}
 	return 1;
 }
 
@@ -64,10 +65,10 @@ function onUserLogin ( user, autologin = false )
 		AdminPM( "Logged in successfully", user );
 		Echo( iCol( 6, ":: "+ user.Player +" has logged in" ) );
 	}
-	if ( user.LastLogin )
-		AdminPM( "Last Logged in "+ TimeDiff( user.LastLogin ), user );
-	user.LastLogin = time();
-	user.LastIP = user.Player.IP;
+	if ( user.LastLoginTime )
+		AdminPM( "Last Logged in "+ TimeDiff( user.LastLoginTime ), user );
+	user.LastLoginTime = time();
+	user.LastLoginIP = user.Player.IP;
 	PluginEvent( onUserLogin, user );
 	return 1;
 }

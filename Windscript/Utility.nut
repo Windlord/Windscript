@@ -10,16 +10,31 @@
 
 function targetparams ( player, params )
 {
-	if ( !params ) return null;
-	local cloc = params.find( " " );
-	local tstring = cloc ? params.slice( 0, cloc ) : params;
-	local target = FindPlayer( tstring );
-	if ( !target )
+	params = params ? split( params, " " ) : "";
+	local tplr, tprms;
+	switch ( params.len() )
 	{
-		mError( "Invalid Player ("+ tstring.toupper() +")", player );
-		return -1;
+		case 0:
+			tplr = player;
+			break;
+		case 1:
+			tplr = FindPlayer( params[ 0 ] );
+			if ( !tplr )
+			{
+				tplr = player;
+				tprms = params[ 0 ];
+			}
+			break;
+		default:
+			tplr = FindPlayer( params[ 0 ] );
+			if ( !tplr )
+			{
+				mError( "Invalid Player ("+ params[ 0 ].toupper() +")", player );
+				return null;
+			}
+			tprms = JoinArray( params.slice( 1 ), " " );
 	}
-	return { target = target, params = cloc ? params.slice( cloc + 1 ) : 0 };
+	return { target = tplr, params = tprms ? tprms : null };
 }
 
 // Messaging functions

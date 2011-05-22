@@ -46,9 +46,10 @@ class IPInfo
 	{
 		switch ( prop )
 		{
-			case "rDNS": return Get( prop );
-			case "Country": return Get( prop );
-			case "City": return Get( prop );
+			case "rDNS":
+			case "Country":
+			case "City":
+				return Get( prop );
 		}
 	}
 
@@ -82,23 +83,22 @@ function onIRCInfoConnected ( socket )
 
 function onRawIPInfo ( socket, raw )
 {
-	local ipinf = FindQueryIPInfo( socket ), ip = ipinf.IP;
+	local ip = FindQueryIPInfo( socket ).IP;
 	raw = split( raw, "</>\r\n" );
 	foreach ( idx, bit in raw )
 	{
 		if ( bit == "IP: "+ ip )
 		{
-			print( raw[ idx + 5 ].slice( 8 ) );
 			AddData( "IPInfo_rDNS", ip, raw[ idx + 5 ].slice( 8 ) );
+			continue;
 		}
 		else if ( bit == "Country" )
 		{
-			print( raw[ idx + 3 ] );
 			AddData( "IPInfo_Country", ip, raw[ idx + 3 ] );
+			continue;
 		}
 		else if ( bit == "City" )
 		{
-			print( raw[ idx + 3 ] );
 			AddData( "IPInfo_City", ip, raw[ idx + 3 ] );
 			NewTimer( "RemQueryIPInfo", 0, 1, ip );
 			break;

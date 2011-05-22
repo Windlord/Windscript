@@ -9,13 +9,12 @@
 
 function cmdIP ( player, params )
 {
-	local p = targetparams( player, params );
-	if ( !p ) return mFormat ( "/ip <Player>", player );
-	if ( p == -1 ) return;
 	if ( CheckLevel( player, "ip" ) )
 	{
-		local tuser = GetUser( p.target );
-		local ipf = IPInfo( tuser.IP );
+		local p = targetparams( player, params );
+		if ( !p ) return mFormat ( "ip <Player>", player );
+
+		local ipf = IPInfo( GetUser( p.target ).IP );
 		AdminPM( "Information for "+ ipf.IP, player );
 		AdminPM( "rDNS: "+ ipf.rDNS, player );
 		AdminPM( "Country: "+ ipf.Country, player );
@@ -25,19 +24,13 @@ function cmdIP ( player, params )
 
 function cmdKick ( player, params )
 {
-	if ( !params ) return mFormat ( "/kick <Player> <Reason>", player );
 	if ( CheckLevel( player, "kick" ) )
 	{
 		local p = targetparams( player, params );
+		if ( !p || !p.params ) return mFormat ( "kick <Player> <Reason>", player );
+
 		local user = GetUser( player ), kuser = GetUser( p.target );
-		if ( p )
-		{
-			if ( p.params == "" ) return mFormat ( "/kick <Player> <Reason>", player );
-			user.Kicks++;
-			kuser.Kicked++;
-			KickPlayer( p.target );
-			onPlayerPart( p.target, PARTREASON_KICKED, p.params );
-		}
+		return AdminKick( user, kuser, p.params );
 	}
 }
 

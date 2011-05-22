@@ -102,4 +102,38 @@ function onPlayerChat ( player, text )
 	return 0;
 }
 
+function onPlayerHealthChange ( player, oldhp, newhp )
+{
+	if ( player.Spawned )
+	{
+		local user = GetUser( player );
+		if ( newhp > oldhp )
+			AdminKick( AdminServ, user, "Health Cheats Detected" );
+	}
+	PluginEvent( onPlayerHealthChange, player, oldhp, newhp );
+	return 1;
+}
 
+function onPlayerHealthChange ( player, oldarm, newarm )
+{
+	if ( player.Spawned )
+	{
+		local user = GetUser( player );
+		if ( newarm > oldarm )
+			AdminKick( AdminServ, user, "Armour Cheats Detected" );
+	}
+	PluginEvent( onPlayerArmourChange, player, oldarm, newarm );
+	return 1;
+}
+
+function onPlayerCashChange ( player, oldcash, newcash )
+{
+	if ( player.Spawned )
+	{
+		local user = GetUser( player );
+		if ( newcash > oldcash )
+			AdminKick( AdminServ, user, "Armour Cheats Detected" );
+	}
+	PluginEvent( onPlayerArmourChange, player, oldcash, newcash );
+	return 1;
+}

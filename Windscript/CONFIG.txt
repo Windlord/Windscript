@@ -15,13 +15,13 @@
 
 debug			true				# Set this to true if you want to view all debug messages. (Default: true)
 
-server_motd		"Welcome to Windscript's Testing Server!"
+server_motd		"Welcome to Windscript 1.0"
 server_rules		"Always respect other players."
 
 email_replyto		windlord@windlord.net		# This is the address the reply to sent emails will be sent to
 email_server		127.0.0.1			# This is the mail server which will be used
 
-irc_server		irc.liberty-unleashed.co.uk	# This is the IRC server IP which you want to connect to. (Default: irc.liberty-unleashed.co.uk)
+irc_server		irc.gtanet.com			# This is the IRC server IP which you want to connect to. (Default: irc.gtanet.com)
 irc_port		6667				# Port which the bot should connect through (Default: 6667)
 irc_password		"123456"			# Nickserv password for bot
 

@@ -14,6 +14,12 @@ CTCP_FINGER_REPLY	<- "\x0001FINGER "+ iBold( iCol( 4, "Watch it!" ) ) +"\x0001";
 // This function is called onScriptLoad to start up all bots needed
 function InitialiseBots ()
 {
+	if ( !config.rawin( "irc_botnames" ) || !config.rawin( "irc_password" ) )
+	{
+		NewTimer( "LoadMainScript", 0, 1 );
+		return;
+	}
+
 	local botslist = split( config.irc_botnames, ", " );			// Get an array of bot names from config
 	foreach ( idx, bot in botslist )					// For each of the bots in config,
 	{
@@ -72,10 +78,16 @@ function RecoverBot ( bot )
 
 // This is the Echo Script's equivalent to "FindPlayer"
 // It loops through the table, "IRCBots" and identifies which bot instance the socket is being used by
-function FindBot ( socket )
+function FindBot ( input )
 {
+	if ( type( input ) == "string" )
+	{
+		input = input.tolower();
+		foreach ( bot in IRCBots )
+			if ( bot.lName == input ) return bot;
+	}
 	foreach ( bot in IRCBots )
-		if ( bot.Socket.ID == socket.ID ) return bot;			// If socket ids match return bot instance
+		if ( bot.Socket.ID == input.ID ) return bot;			// If socket ids match return bot instance
 	return false;								// If bot not found, return false
 }
 
@@ -361,6 +373,7 @@ function ProcessRaw ( bot, raw, nick, address )
 	{
 		bot.Debug( "CONNECTED", "Connected to "+ raw[ 6 ] );
 		bot.Login();							// Proceed to logging into the network.
+		if ( bot == MainBot ) NewTimer( "LoadMainScript", 500, 1 );	// Load main script if mainbot's connected.
 	}
 
 	else if ( raw[ 0 ] == "ERROR" )
@@ -418,7 +431,7 @@ function ProcessRaw ( bot, raw, nick, address )
 				chan.Users.rawdelete( nick );
 			}
 		}
-		CallFunc2( "UpdateIRCUserNickname", nick, newnick );
+		CallFunc2( "UpdateIRCUserNickname", nick, newnick, address );
 	}
 
 	else if	( raw[ 1 ] == "PRIVMSG" )
@@ -558,9 +571,9 @@ function ProcessModes ( channel, changes )
 function CheckBotLogin ( botname )
 {
 	local bot = IRCBots.rawget( botname );
-	if ( bot && !bot.NickServ )
+	if ( bot && !bot.NickServ && config.irc_registerbots )
 	{
-		if ( config.irc_registerbots )
+		if ( bot == MainBot )
 		{
 			bot.Msg( "NickServ", "Register "+ config.irc_password + " windscript@windlord.net" );	// Register the bot.
 			config.irc_registerbots <- false;

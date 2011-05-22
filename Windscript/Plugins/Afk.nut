@@ -74,8 +74,13 @@ function FindAfk ( params, channel )
 			target = words[ 0 ];
 			break;
 		case 2:
-			if ( words[ 0 ] == "where's" ) target = words[ 1 ];
-			break;
+			switch ( words[ 0 ] )
+			{
+				case "wheres":
+				case "where's":
+					target = words[ 1 ];
+					break;
+			}
 		case 3:
 			if ( words[ 0 ] + words[ 1 ] == "whereis" ) target = words[ 2 ];
 			break;
@@ -125,7 +130,7 @@ function AfkString ( hash, name, id )
 	local atime, reason, msg;
 	reason = GetData( hash, id + ".Reason" );
 	atime = GetData( hash, id + ".Time" );
-	msg = ( name == "You" ? " have" : " has" ) +" left "+ TimeDiff( atime );
+	msg = " left "+ TimeDiff( atime );
 	return iCol( 3, iBold( name ) + msg + " ("+ reason +")" );
 }
 

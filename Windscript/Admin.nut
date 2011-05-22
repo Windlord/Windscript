@@ -8,6 +8,21 @@
 	                                 by Windlord	*/
 
 
+AdminServ <- User( config.server_adminbot );
+AdminServ.Level = 6;
+
+// This function is for use in kicking players
+function AdminKick ( admin, user, reason = "No Reason" )
+{
+	if ( admin == user ) return mError( "You are trying to kick yourself.", admin );
+	admin.Kicks++;
+	user.Kicked++;
+	AdminPM ( "You have been kicked by "+ admin + " for \""+ reason +"\".", user );
+	AdminPM ( "If you believe this is unfair, please appeal at "+ config.server_url, user );
+	onPlayerPart( user.Player, PARTREASON_KICKED, reason );
+	KickPlayer( user.Player );
+}
+
 // This function is to check whether the nickname of a player is valid.
 function CheckNickname ( player )
 {
@@ -16,6 +31,8 @@ function CheckNickname ( player )
 
 	foreach ( val in IRC_LEVELNAME )					// If user's name is the same as level names
 		if ( val.tolower() == lname ) return null;			// there's a slight confusion
+
+	if ( lname == config.server_adminbot.tolower() ) return null;
 
 	if ( "invalid_names" in config )					// If explicitly set in config
 	{
@@ -54,18 +71,17 @@ function UpdateIPInfo ( user )
 	if ( user.InGame )
 	{
 		// Add current IP to user access list
-		local name = user.Player.Name, ip = user.Player.IP, ips = user.IPs;
-		local result = AddToList( ips ? ips : "", ip );
-		if ( result ) user.IPs = result;
+		local name = user.Name, ip = user.Player.IP;
+		user.IP = ip;
 
 		// Add nickname to IP_Records list
-		local names = GetData( "IP_Records", ip );
+		local names = GetData( "IP_Records", ip ), result;
 		names = names ? names : "";
 		result = AddToList( names, name );
-		if ( result )
+		if ( result != names )
 		{
 			AddData( "IP_Records", ip, result );
-			IncData( "UserData", "VisitorIPsCount" );
+			IncData( "UserData", "TotalVisitorIPs" );
 			if ( names == "" ) GetIPInfo( ip );
 		}
 
@@ -74,7 +90,7 @@ function UpdateIPInfo ( user )
 		names = GetData( "Subnet_Records", subnet );
 		names = names ? names : "";
 		result = AddToList( names, name );
-		if ( result ) AddData( "Subnet_Records", subnet, result );
+		if ( result != names ) AddData( "Subnet_Records", subnet, result );
 	}
 }
 

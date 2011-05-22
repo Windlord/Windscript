@@ -24,7 +24,7 @@ function AddData ( section, item, data )
 
 function CheckDataSection ( section, keeploaded = false )
 {
-	if ( !Data.rawin( section ) )
+	if ( !Data.rawin( section ) || !Data.rawget( section ) )
 		Data.rawset( section, WindData( section, keeploaded ) );
 	return Data.rawget( section );
 }
@@ -132,10 +132,10 @@ class WindData
 			if ( keepLoaded ) return false;
 			Hash.Close();
 			debug( "Unloaded" );
-			Data.rawdelete( Name );
+			Data.rawset( Name, null );
 			return true;
 		}
-		else debug( "Aborting unload due to save failure" );
+		else return debug( "Aborting unload due to save failure" );
 	}
 
 	function Check ()
@@ -165,13 +165,13 @@ class WindData
 function SyncData ()
 {
 	foreach ( key, data in Data )
-		data.Check();
+		if ( data ) data.Check();
 	return 1;
 }
 
 function UnloadData ()
 {
 	foreach ( key, data in Data )
-		data.Unload();
+		if ( data ) data.Unload();
 	return 1;
 }

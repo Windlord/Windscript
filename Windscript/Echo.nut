@@ -22,7 +22,7 @@ class IRCUser
 
 	function Level ( channel = null )
 	{
-		if ( !channel ) channel = ::FindIRCChannel( config.irc_echo );
+		if ( !channel ) channel = ::FindIRCChannel( ::config.irc_echo );
 		if ( !channel || !channel.Users.rawin( Name ) ) return false;
 		return channel.Users.rawget( Name );
 	}
@@ -35,7 +35,13 @@ class IRCUser
 		return false;
 	}
 
-	function _typeof()
+	function _get ( prop )
+		return 1;
+	function _set ( prop, val )
+		return val;
+	function _tostring ()
+		return Name;
+	function _typeof ()
 		return "IRCUser";
 
 	Name = "";
@@ -57,12 +63,10 @@ function UpdateIRCUser ( name, address )
 	else IRCUsers.rawset( name, IRCUser( name, address ) );
 }
 
-function UpdateIRCUserNickname ( oldname, newname )
+function UpdateIRCUserNickname ( oldname, newname, address )
 {
-	local oldaddr = IRCUsers.rawin( oldname ) ? IRCUsers.rawget( oldname ).Address : "";
-	IRCUsers.rawset( newname, IRCUser( newname, oldaddr ) );
+	IRCUsers.rawset( newname, IRCUser( newname, address ) );
 	IRCUsers.rawdelete( oldname );
-	local newuser = IRCUsers.rawget( newname );
 	foreach ( chan in IRCChannels )
 	{
 		if ( chan.Users.rawin( oldname ) )
