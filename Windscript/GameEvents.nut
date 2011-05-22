@@ -29,7 +29,8 @@ function onPlayerConnect( player )
 KickReasons <- {};
 function onPlayerPart( player, reason, adminreason = "None" )
 {
-	if ( player.Name in OnlineUsers )
+	local user = GetUser( player );
+	if ( user )
 	{
 		local reason = GetPartReason( reason );
 		switch( reason )
@@ -44,7 +45,7 @@ function onPlayerPart( player, reason, adminreason = "None" )
 				EMessage( iCol( 3, player.ColouredName +" left the server. ("+ reason +")" ), colGreen );
 				break;
 		}
-		onUserPart( GetUser( player ), reason );
+		onUserPart( user, reason );
 		PluginEvent( onPlayerPart, player, reason );
 		OnlineUsers.rawdelete( player.Name );
 	}
