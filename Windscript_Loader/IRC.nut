@@ -15,10 +15,7 @@ CTCP_FINGER_REPLY	<- "\x0001FINGER "+ iBold( iCol( 4, "Watch it!" ) ) +"\x0001";
 function InitialiseBots ()
 {
 	if ( !config.rawin( "irc_botnames" ) || !config.rawin( "irc_password" ) )
-	{
-		NewTimer( "LoadMainScript", 0, 1 );
 		return;
-	}
 
 	local botslist = split( config.irc_botnames, ", " );			// Get an array of bot names from config
 	foreach ( idx, bot in botslist )					// For each of the bots in config,
@@ -373,7 +370,6 @@ function ProcessRaw ( bot, raw, nick, address )
 	{
 		bot.Debug( "CONNECTED", "Connected to "+ raw[ 6 ] );
 		bot.Login();							// Proceed to logging into the network.
-		if ( bot == MainBot ) NewTimer( "LoadMainScript", 500, 1 );	// Load main script if mainbot's connected.
 	}
 
 	else if ( raw[ 0 ] == "ERROR" )
