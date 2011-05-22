@@ -114,7 +114,7 @@ function onPlayerHealthChange ( player, oldhp, newhp )
 	return 1;
 }
 
-function onPlayerHealthChange ( player, oldarm, newarm )
+function onPlayerArmourChange ( player, oldarm, newarm )
 {
 	if ( player.Spawned )
 	{

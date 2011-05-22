@@ -9,14 +9,14 @@
 
 
 // Define difference in hours
-RealTime_TZ = 0;
+RealTime_TZ <- 0;
 
 // Lock time changes so that the script can manually change time.
 SetTimeLock( true );
 
 function SyncRealTime ()
 {
-	local now = date( time() + RealTime_TZ );
+	local now = date( time() + RealTime_TZ * 3600 );
 	if ( GetMinute() != now.min || GetHour() != now.hour )
 	{
 		SetTime( now.hour, now.min );

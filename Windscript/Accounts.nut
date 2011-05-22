@@ -12,15 +12,16 @@ OnlineUsers <- {};								// Store all online player instances and their
 										// associated user instances into a table
 function GetUser ( plr )
 {										// Get user instance from table with player instance
-	local name;
+	local name, lname;
 	if ( typeof ( plr ) == "IRCUser" ) return plr;				// If IRC user, return user.
 	if ( type ( plr ) == "string" ) name = plr;
 	else name = plr.Name;
-	if ( OnlineUsers.rawin( name ) ) return OnlineUsers.rawget( name );	// Get user instance from table with player instance
+	lname = name.tolower();
+	if ( OnlineUsers.rawin( lname ) ) return OnlineUsers.rawget( lname );	// Get user instance from table with player instance
 	else									// If entry in table does not exist
 	{
-		OnlineUsers.rawset( name, User( plr ) );
-		return OnlineUsers.rawget( name );
+		OnlineUsers.rawset( lname, User( plr ) );
+		return OnlineUsers.rawget( lname );
 	}
 }
 

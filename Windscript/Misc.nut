@@ -173,11 +173,11 @@ function Duration ( num )
 	local secs = num % 60;
 	local weeks = floor ( ( num - days*86400 - hours*3600 - mins*60 - secs ) / 604800 );
 	local a = [];
-	if ( weeks != 0 ) a.append( weeks +"wks" );
-	if ( days != 0 ) a.append( days +"days" );
-	if ( hours != 0 ) a.append( hours +"hrs" );
-	if ( mins != 0 ) a.append( mins +"mins" );
-	if ( secs != 0 ) a.append( secs +"secs" );
+	if ( weeks != 0 ) a.append( weeks +"wk"+ Ssuffix( week ) );
+	if ( days != 0 ) a.append( days +"day"+ Ssuffix( days ) );
+	if ( hours != 0 ) a.append( hours +"hr"+ Ssuffix( hours ) );
+	if ( mins != 0 ) a.append( mins +"min"+ Ssuffix( mins ) );
+	if ( secs != 0 ) a.append( secs +"sec"+ Ssuffix( secs ) );
 	if ( a.len() > 2 ) a = a.slice( 0, 2 );					// If more than 2 bits to the statement,
 										// reduce to 2 most significant ones.
 	return JoinArray( a, " " );
@@ -190,9 +190,15 @@ function TimeDiff ( saved )
 	if ( now.day == dt.day && now.hour == dt.hour )
 	{
 		if ( now.min == dt.min )
-			return ( now.sec - dt.sec ) +" seconds ago";
+		{
+			local diff = now.sec - dt.sec;
+			return diff +" second"+ Ssuffix( diff ) +" ago";
+		}
 		else
-			return ( now.min - dt.min ) + " minutes ago";
+		{
+			local diff = now.min - dt.min;
+			return diff + " minute"+ Ssuffix( diff ) +" ago";
+		}
 	}
 	else if ( time() - saved <= 86400 )					// If left within 24 hours
 		return Duration( time() - saved ) +" ago";
@@ -224,6 +230,11 @@ function ToThousands ( num )
 	}
 	return output;
 }
+
+// This function returns a "s" if the input isn't 1 and "" otherwise
+function Ssuffix ( num )
+	return num == 1 ? "" : "s";
+
 
 // This function returns the subnet from an ip string
 function GetSubnet ( ip )
