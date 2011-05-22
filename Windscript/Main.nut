@@ -115,6 +115,7 @@ function onScriptUnload ()
 {
 	DEBUG = false;								// CallFunc fails onScriptUnload for some reason
 	print ( "\r       \n- Unloading Windscript Version "+ cScript_Version );
+	onPluginsUnload();
 	UnloadPlayers();
 	UnloadData();
 	if ( GameTimer ) GameTimer.Delete();
@@ -161,4 +162,7 @@ function onConsoleInput ( cmd, text )
 	{
 		if ( text ) CallFunc2( "CreateBot" split( text, " " )[ 0 ] );
 	}
+
+	PluginEvent( onConsoleInput, cmd, text );
+	return 1;
 }

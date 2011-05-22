@@ -22,6 +22,12 @@ function LoadPlugins ()
 		debug( "[PLUGIN] Loaded "+ count + ( count > 1 ? " plugins." : " plugin." ) );
 }
 
+function onPluginsLoad ()
+	PluginEvent( onPluginsLoad );
+
+function onPluginsUnload ()
+	PluginEvent( onPluginsUnload );
+
 function FindPlugin ( name )
 	return Plugins.rawin( name ) ? Plugins.rawget( name ) : false;		// Look for plugin by name in Plugins table
 
