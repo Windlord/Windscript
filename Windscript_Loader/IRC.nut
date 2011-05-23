@@ -51,15 +51,15 @@ function CreateBot ( name )
 
 function RemoveBot ( bot, unloading = false )
 {
-	local name = bot.lName;							// Cache bot's name and id for the print below
-
+	bot = FindBot( bot );
+	if ( !bot ) return;
 	if ( bot.Socket )
 	{
 		bot.Quit( "Windscript Version "+ cScript_Version );		// In case the bot is still connected, send QUIT message
 		bot.Socket.Delete();						// Delete socket instance
 	}
 	bot.Debug( "REMOVE", "Removing bot from slot "+ bot.ID );
-	IRCBots.rawdelete( name );						// Remove bot data from IRCBots
+	IRCBots.rawdelete( bot.lName );						// Remove bot data from IRCBots
 
 	if ( !unloading )
 		foreach ( a in IRCChannels ) UpdateAvailBots( a );		// Update pool of available bots per channel
@@ -69,7 +69,7 @@ function RecoverBot ( bot )
 {
 	local deadbot = bot.Name, deadbotid = bot.ID;
 	bot.Debug( "RECOVER", "Recovering dead bot" );
-	RemoveBot( bot );
+	NewTimer( RemoveBot, 0, 1, deadbot );
 	NewTimer( "CreateBot", 2000 * ( deadbotid + 1 ), 1, deadbot );
 }
 
@@ -329,7 +329,7 @@ function onIRCConnected ( socket )
 function onIRCDisconnected ( socket )
 {
 	local bot = FindBot( socket );					// This process is the equivalent to FindPlayer()
-	RemoveBot( bot );
+	NewTimer( RemoveBot, 0, 1, bot.Name );
 }
 
 // This function is triggered when the sockets receive data from the IRC server
@@ -377,11 +377,12 @@ function ProcessRaw ( bot, raw, nick, address )
 	else if ( raw[ 0 ] == "ERROR" )
 	{
 		bot.Debug( "ERROR", JoinArray( raw.slice( 1 ), " " ).slice( 1 ) );
-		if ( raw[ 1 ] == ":Closing" && raw[2] == "Link:" )		// For some reason the bot is losing its connection
+		if ( raw[ 1 ] == ":Closing" )
 		{
-			if ( raw[ 4 ] == "\x0028Ping" && raw[ 5 ] == "timeout\x0029" )
-				RecoverBot ( bot );
-			else RemoveBot ( bot );
+			local reason = JoinArray( raw.slice( 4 ), " " );
+			if ( reason == "[Ping timeout]" ) RecoverBot( bot );
+			else NewTimer( RemoveBot, 0, 1, bot.Name );
+			return;
 		}
 	}
 	else if ( raw[ 0 ] == "PING" ) { bot.Send( "PONG " + raw[ 1 ] ); }	// Reply to server PING events to keep bot alive
@@ -413,7 +414,15 @@ function ProcessRaw ( bot, raw, nick, address )
 	}
 
 	else if ( raw[ 1 ] == "QUIT" )
+	{
+		local chan = AddUpdateChannel( raw[ 2 ] );
 		RemoveUser( FindIRCUser( nick ) );
+		if ( nick == bot.Name )
+		{
+			NewTimer( RemoveBot, 0, 1, bot.Name );
+			return;
+		}
+	}
 
 	else if ( raw[ 1 ] == "NICK" )
 	{
@@ -639,17 +648,14 @@ function DealWithNickServ ( bot, text )
 BotTimeoutChecker <- NewTimer( "CheckBotTimeout", 30000, 0 );
 function CheckBotTimeout ( )
 {
-	local deadbot, deadbotid, dur;
+	local dur, now = time();
 	foreach ( bot in IRCBots )
 	{
-		if ( bot )
-		{
-			dur = time() - bot.LastPing;
-			if ( dur > 120 )
-				RecoverBot( bot );
-			else if ( dur > 100 )
-				bot.Send( "PING :"+ time() );
-		}
+		dur = now - bot.LastPing;
+		if ( dur > 120 )
+			RecoverBot( bot );
+		else if ( dur > 100 )
+			bot.Send( "PING :"+ time() );
 	}
 }
 
