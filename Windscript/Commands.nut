@@ -45,7 +45,8 @@ function cmdChangePass ( player, params )
 {
 	local user = GetUser( player );
 	if ( !user.Pass ) return mError ( "Please register first using /register", player );
-	if ( !param ) return mError ( );
+	if ( !param ) return mFormat ( "/changepass <Password>", player );
+	user.SetPassword( params );
 }
 
 function cmdHelp ( player, params )
@@ -90,61 +91,48 @@ function cmdUptime ( player )
 
 function cmdCreateBot ( player, param )
 {
-	if ( CheckLevel( player, "createbot" ) )
+	if ( param.len() > 1 )
 	{
-		if ( param.len() > 1 )
-		{
-			param = split( param, " " )[ 0 ];
-			Echo( iCol( 5, "* Creating a bot with the name of \""+ param +"\"" ) );
-			CallFunc2( "CreateBot", param );
-			return 1;
-		}
-		else mFormat( "!createBot <Bot Name>", player );
+		param = split( param, " " )[ 0 ];
+		Echo( iCol( 5, "* Creating a bot with the name of \""+ param +"\"" ) );
+		CallFunc2( "CreateBot", param );
+		return 1;
 	}
+	else mFormat( "!createBot <Bot Name>", player );
 }
 
 function cmdIRCDo ( player, params )
 {
-	if ( CheckLevel( player, "ircdo" ) )
-	{
-		local p = split( params, " " );
-		if ( p.len() > 1 )
-			CallFunc2( "FindBotDo", p[ 0 ], JoinArray( p.slice( 1 ), " " ) );
-		else mFormat( "!IRCDo <Bot Name> <Raw IRC Command>", player );
-	}
+	local p = split( params, " " );
+	if ( p.len() > 1 )
+		CallFunc2( "FindBotDo", p[ 0 ], JoinArray( p.slice( 1 ), " " ) );
+	else mFormat( "!IRCDo <Bot Name> <Raw IRC Command>", player );
 }
 
 function cmdRaw ( player, params )
 {
-	if ( CheckLevel( player, "raw" ) )
+	if ( params )
 	{
-		if ( params )
+		local result, exec = compilestring( "return "+ params );
+		try { result = exec(); } catch ( err )
+		if ( err )
 		{
-			local result, exec = compilestring( "return "+ params );
-			try { result = exec(); } catch ( err )
-			if ( err )
-			{
-				mError( err, player );
-				return;
-			}
-			SendMessage( iBold( iCol( 4, "RAW :: " ) ) + result, player, colRed );
+			mError( err, player );
+			return;
 		}
-		else mFormat( "!raw <Squirrel Code>", player );
+		SendMessage( iBold( iCol( 4, "RAW :: " ) ) + result, player, colRed );
 	}
+	else mFormat( "!raw <Squirrel Code>", player );
 }
 
 function cmdReload ( player )
 {
-	if ( CheckLevel( player, "reload" ) )
+	local dur = GameTimerTicks - cInit_Ticks;
+	if ( dur > 60000 )
 	{
-		local dur = GameTimerTicks - cInit_Ticks;
-		if ( dur > 60000 )
-		{
-			EMessage( iCol( 4, "* Reloading Windscript..." ), colRed );
-			CallFunc2( "ReloadScript" );
-		}
-		else mError( "Wait "+ Duration( ( 60000 - dur ) / 1000 ) +" more to use this command.", player );
+		EMessage( iCol( 4, "* Reloading Windscript..." ), colRed );
+		CallFunc2( "ReloadScript" );
 	}
-	return 1;
+	else mError( "Wait "+ Duration( ( 60000 - dur ) / 1000 ) +" more to use this command.", player );
 }
 

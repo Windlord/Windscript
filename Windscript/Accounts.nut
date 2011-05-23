@@ -25,6 +25,23 @@ function GetUser ( plr )
 	}
 }
 
+function FindUser ( search )
+{
+	search = search.tolower();
+	local id = GetData( "User_Name_To_ID", search );
+	if ( id ) return User( GetData( "UserData_Name",  id.tostring() ) );
+
+	local uname, max = GetData( "UserData", "TotalUsersCount" );
+	for ( local i = 1; i <= max; i++ )
+	{
+		uname = GetData( "UserData_Name", i.tostring() );
+		if ( !uname ) continue;
+		if ( uname.tolower().find( search ) != null )
+			return User( GetData( uname ) );
+	}
+	return null;
+}
+
 // This is to get an ingame user from their account id
 function GetUserFromID ( aID )
 {
@@ -64,6 +81,11 @@ class User
 			name = Player;
 			InGame = false;
 			Player = ::FindPlayer( name );
+			if ( Player )
+			{
+				name = Player.Name;
+				InGame = true;
+			}
 		}
 
 		lname = name.tolower();						// Use lowercase name to avoid two same nicknames being registered

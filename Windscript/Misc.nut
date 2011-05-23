@@ -173,7 +173,7 @@ function Duration ( num )
 	local secs = num % 60;
 	local weeks = floor ( ( num - days*86400 - hours*3600 - mins*60 - secs ) / 604800 );
 	local a = [];
-	if ( weeks != 0 ) a.append( weeks +"wk"+ Ssuffix( week ) );
+	if ( weeks != 0 ) a.append( weeks +"wk"+ Ssuffix( weeks ) );
 	if ( days != 0 ) a.append( days +"day"+ Ssuffix( days ) );
 	if ( hours != 0 ) a.append( hours +"hr"+ Ssuffix( hours ) );
 	if ( mins != 0 ) a.append( mins +"min"+ Ssuffix( mins ) );

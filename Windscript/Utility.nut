@@ -18,7 +18,7 @@ function targetparams ( player, params )
 			tplr = player;
 			break;
 		case 1:
-			tplr = FindPlayer( params[ 0 ] );
+			tplr = FindUser( params[ 0 ] );
 			if ( !tplr )
 			{
 				tplr = player;
@@ -26,7 +26,7 @@ function targetparams ( player, params )
 			}
 			break;
 		default:
-			tplr = FindPlayer( params[ 0 ] );
+			tplr = FindUser( params[ 0 ] );
 			if ( !tplr )
 			{
 				mError( "Invalid Player ("+ params[ 0 ].toupper() +")", player );

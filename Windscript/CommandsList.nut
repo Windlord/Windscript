@@ -35,6 +35,7 @@ function onCommand ( player, command, params )
 		if ( val != '!' && val != '/' ) a += val.tochar();	// Only write char if value isn't "!" or "/"
 	command = (a == "") ? null : a;					// This strips command of "!" and "/"
 									// Note that this bit of code also makes it impossible for command names with "!" or "/" in them to work.
+	CheckLevel( player, command );
 	switch ( command )
 	{
 		case "suggest": return cmdSuggest( player, params );
