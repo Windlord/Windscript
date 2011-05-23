@@ -1,11 +1,4 @@
->	     __       __)
->	    (, )  |  /  ,       /)             ,
->	       | /| /    __   _(/  _   _  __    __  _/_
->	       |/ |/  _(_/ (_(_(_ /_)_(__/ (__(_/_)_(__
->	       /  |                          .-/
->	    _______________________________ (_/ ________
->	                                     version 1.0
->	                                     by Windlord
+![Windscript](http://img.windlord.net/windscript.png)
 
 *Last Updated: 29/04/2011 08:00 GMT*
 
@@ -82,22 +75,23 @@ comments as possible inside of my scripts. Please do not ignore them.
 
 There are a few ways you can obtain help for Windscript
 
-1.  Liberty Unleashed Forums - [http://forum.liberty-unleashed.co.uk/]
-2.  Liberty Unleashed Wiki - [http://liberty-unleashed.co.uk/LUWiki]
+1.  Liberty Unleashed Forums - <http://forum.liberty-unleashed.co.uk/>
+2.  Liberty Unleashed Wiki - <http://liberty-unleashed.co.uk/LUWiki>
 2.  LUnet IRC Network - irc://irc.liberty-unleashed.co.uk/Windlord
 3.  GTAnet IRC Network - irc://irc.gtanet.com/Windlord
-4.  Windlord.Net - [http://www.windlord.net/]
-5.  E-mail - [windlord@windlord.net] - refrain from contacting unless urgent
+4.  Windlord.Net - <http://www.windlord.net/>
+5.  E-mail - <windlord@windlord.net> - refrain from contacting unless urgent
 
 
 ## 6. Credits
 
 Every single line of script written in this script package has been written by:
 
-### Windlord ([windlord@windlord.net])
+### Windlord (<windlord@windlord.net>)
 
-- Tester for Liberty Unleashed and Vice Unleashed   - [http://liberty-unleashed.co.uk/]
-- Senior member of the Kuslahden alaste clan        - [http://forum.liberty-unleashed.co.uk/]
+- Tester for Liberty Unleashed and Vice Unleashed   - <http://liberty-unleashed.co.uk/>
+- Founder of Project-Apollo                         - <http://project-apollo.co.uk/>
+- Senior member of the Kuslahden alaste clan        - <http://ka-clan.net/>
 
 I would like to thank the following people for their valuable help:
 
@@ -125,10 +119,3 @@ bot directly and solve your issue.
 
 
 [Download Windscript]:				https://github.com/Windlord/Windscript/zipball/master	"Windscript Source"
-[Liberty Unleashed]:				http://liberty-unleashed.co.uk/				"Liberty Unleashed"
-[http://liberty-unleashed.co.uk/]:		http://liberty-unleashed.co.uk/				"Liberty Unleashed"
-[http://forum.liberty-unleashed.co.uk/]:	http://forum.liberty-unleashed.co.uk/			"Liberty Unleashed Forum"
-[http://liberty-unleashed.co.uk/LUWiki]:	http://liberty-unleashed.co.uk/LUWiki			"Liberty Unleashed Wiki"
-[http://www.windlord.net/]:			http://www.windlord.net/				"Windlord.Net"
-[windlord@windlord.net]:			mailto:windlord@windlord.net				"Contact Windlord"
-[http://www.ka-clan.net/]:			http://www.ka-clan.net/					"Kuslahden alaste Clan Forum"

@@ -17,6 +17,10 @@ debug			true				# Set this to true if you want to view all debug messages. (Defa
 
 server_motd		"Welcome to Windscript 1.0"
 server_rules		"Always respect other players."
+server_url		"www.windlord.net"
+server_adminbot		"Cow"
+
+invalid_names		"God, Satan, Administrator"
 
 email_replyto		windlord@windlord.net		# This is the address the reply to sent emails will be sent to
 email_server		127.0.0.1			# This is the mail server which will be used
@@ -38,5 +42,5 @@ irc_echo		"#Windlord"			# This sets the echo channel for the bot to echo server 
 
 irc_registerbots	false				# Set to true if you want the script to register your bot for you
 
-plugins			"Afk"				# List all plugin names (folder names) of plugins you want to run with Windscript.
+plugins			"Afk, Realtime"			# List all plugin names (folder names) of plugins you want to run with Windscript.
 							# For example: "Plugin1, Plugin2, Plugin3"
