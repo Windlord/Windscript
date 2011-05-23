@@ -94,6 +94,7 @@ function FindLevel ( player, type = 1 )
 	local ilevel;
 	if ( typeof( player ) == "IRCUser" ) ilevel = player.Level();
 	else ilevel = GetUser( player ).Level;
+	if ( !ilevel ) return ilevel;
 	switch ( type )
 	{
 		case 1:
@@ -105,7 +106,6 @@ function FindLevel ( player, type = 1 )
 		default:
 			return ilevel;
 	}
-	return 1;
 }
 
 

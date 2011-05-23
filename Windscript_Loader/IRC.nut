@@ -83,8 +83,9 @@ function FindBot ( input )
 		foreach ( bot in IRCBots )
 			if ( bot.lName == input ) return bot;
 	}
-	foreach ( bot in IRCBots )
-		if ( bot.Socket.ID == input.ID ) return bot;			// If socket ids match return bot instance
+	else
+		foreach ( bot in IRCBots )
+			if ( bot.Socket.ID == input.ID ) return bot;		// If socket ids match return bot instance
 	return false;								// If bot not found, return false
 }
 
@@ -259,10 +260,11 @@ class IRCUser
 	function Level ( channel, newlevel = 0 )
 	{
 		if ( !channel.Users.rawin( this ) ) channel.Users.rawset( this, 1 );
-		if ( !newlevel ) return channel.Users.rawget( this );
+		if ( newlevel == null ) return channel.Users.rawget( this );
+		if ( newlevel == 0 ) channel.Users.rawdelete( this );
 		else channel.Users.rawset( this, newlevel );
 		::UpdateMainScriptIRCChannel( channel, this, newlevel );
-		return true;
+		return newlevel;
 	}
 
 	function _tostring ()
@@ -415,10 +417,10 @@ function ProcessRaw ( bot, raw, nick, address )
 
 	else if ( raw[ 1 ] == "NICK" )
 	{
-		local newnick = raw[ 2 ].slice( 1 );
+		local userbot = FindBot( nick );
+		local newnick = raw[ 2 ];
 		IRCUsers.rawset( newnick, IRCUser( newnick, address ) );
 		IRCUsers.rawdelete( nick );
-		local newuser = IRCUsers.rawget( newnick )
 		foreach ( chan in IRCChannels )
 		{
 			if ( chan.Users.rawin( nick ) )
@@ -426,6 +428,11 @@ function ProcessRaw ( bot, raw, nick, address )
 				chan.Users.rawset( newnick, chan.Users.rawget( nick ) );
 				chan.Users.rawdelete( nick );
 			}
+		}
+		if ( userbot )
+		{
+			userbot.Name = newnick;
+			userbot.lName = newnick.tolower();
 		}
 		CallFunc2( "UpdateIRCUserNickname", nick, newnick, address );
 	}
@@ -468,20 +475,27 @@ function ProcessRaw ( bot, raw, nick, address )
 		if ( nick == "NickServ" ) DealWithNickServ( bot, text );		// The notice was sent by NickServ!
 	}
 
-	if ( nick == bot.Name )
+	else if ( raw[ 1 ] == "JOIN" )
 	{
-		if ( raw[ 1 ] == "JOIN" )
+		local chan = AddUpdateChannel( raw[ 2 ].slice( 1 ) );
+		local user = FindIRCUser( nick );
+		user.Level( chan, 1 );
+		if ( nick == bot.Name )
 		{
-			local chan = AddUpdateChannel( raw[ 2 ].slice( 1 ) );
 			if ( !bot.Channels.rawin( chan.Name ) ) bot.Channels.rawset( chan.Name, chan );
 			bot.Send( "MODE "+ chan.Name );
 			bot.Debug( "JOIN", chan.Name );
 			UpdateAvailBots( chan );
 			if ( bot == MainBot ) bot.Send( "WHO :"+ chan.Name );		// If MainBot send WHO request to retrieve user addresses
 		}
-		else if ( raw[ 1 ] == "PART" )
+	}
+	else if ( raw[ 1 ] == "PART" )
+	{
+		local chan = AddUpdateChannel( raw[ 2 ] );
+		local user = FindIRCUser( nick );
+		user.Level( user, 0 );
+		if ( nick == bot.Name )
 		{
-			local chan = AddUpdateChannel( raw[ 2 ] );
 			bot.Channels.rawdelete( chan.Name );
 			bot.Debug( "PART", chan.Name );
 			UpdateAvailBots( chan );

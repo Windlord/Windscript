@@ -23,7 +23,7 @@ class IRCUser
 	function Level ( channel = null )
 	{
 		if ( !channel ) channel = ::FindIRCChannel( ::config.irc_echo );
-		if ( !channel || !channel.Users.rawin( Name ) ) return false;
+		if ( !channel || !channel.Users.rawin( Name ) ) return 0;
 		return channel.Users.rawget( Name );
 	}
 
@@ -69,7 +69,7 @@ function UpdateIRCUserNickname ( oldname, newname, address )
 	IRCUsers.rawdelete( oldname );
 	foreach ( chan in IRCChannels )
 	{
-		if ( chan.Users.rawin( oldname ) )
+		if ( oldname in chan.Users )
 		{
 			chan.Users.rawset( newname, chan.Users.rawget( oldname ) );
 			chan.Users.rawdelete( oldname );
@@ -91,9 +91,10 @@ function RemoveIRCUser ( name, cname = null )
 
 function FindIRCUser ( name )
 {
-	foreach ( uname, user in IRCUsers )
+	name = name.tolower();
+	foreach ( user in IRCUsers )
 	{
-		if ( uname.find( name ) != null ) return user;
+		if ( user.lName == name ) return user;
 	}
 	return null;
 }
@@ -126,9 +127,12 @@ class IRCChannel
 function UpdateIRCChannel ( cname, uname, level )
 {
 	//print( "Updating IRCChannel "+cname );
-	if ( !IRCChannels.rawin( cname ) )
+	if ( level != 0 && !IRCChannels.rawin( cname ) )
 		IRCChannels.rawset( cname, IRCChannel( cname ) );
-	IRCChannels.rawget( cname ).Users.rawset( uname, level );
+	if ( level == 0 )
+		IRCChannels.rawget( cname ).Users.rawdelete( uname );
+	else
+		IRCChannels.rawget( cname ).Users.rawset( uname, level );
 }
 
 function FindIRCChannel ( name )
