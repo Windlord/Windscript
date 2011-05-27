@@ -206,6 +206,5 @@ function RandNum ( start, ... )
         local end;
         if ( vargv.len() > 0 ) end = vargv[ 0 ];
         else { end = start; start = 1; }
-        local ticks = GetTickCount();
-        return start + ( ticks % ( end - start ) );
+        return start + ( rand() % ( end - start ) );
 }
