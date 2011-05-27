@@ -49,7 +49,7 @@ follows:-
 
 If you have not already,
 
-[![Liberty Unleashed](http://lu.windlord.net/luclient.png)](http://liberty-unleashed.co.uk/Downloads/lu-0.1-installer.zip)
+[![Liberty Unleashed](http://lu.windlord.net/luclient.png)](http://liberty-unleashed.co.uk/)
 
 1. [Download] the latest copy of Windscript.
 2. Move the folders into the `Scripts` folder.
