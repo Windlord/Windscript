@@ -1,7 +1,5 @@
 ![Windscript](http://img.windlord.net/windscript.png)
 
-*Last Updated: 29/04/2011 08:00 GMT*
-
 # NOTE: Windscript is still in development. Use at own risk!!!
 
 # Contents
@@ -19,14 +17,14 @@
 
 Windscript is a collection of tools which forms a solid base for any server
 scripter to work on for quick game-mode production for the GTA3 Multipleyer
-Modification, [Liberty Unleashed]. Windscript comes with several advanced features.
+Modification, Liberty Unleashed (<http://liberty-unleashed.co.uk/>). Windscript comes with several advanced features.
 The main ones are listed here:
 
 * Safe and automatic syncing of data between memory and HDD which minimises usage of resources by keeping track of changes.
 * Persistent IRC echo connections which never die unless your network does.
 * Useful administration tools such as IPInfo and E-Mail sending.
-* Plugin support which allows one to build on Windscript without editing it.
-* Seamless reloading of main script without reloading IRC echo
+* Plugin support which allows one to build on Windscript without editing of the original scripts.
+* Seamless reloading of main script without reloading IRC echo connections.
 * Unique and simple configuration file which allows for custom config storage.
 
 Windscript was developed slowly for a period of up to two years and is a culmination
@@ -49,11 +47,14 @@ follows:-
 
 ## 3. Script Installaion
 
-[Download Windscript]
+If you have not already,
 
-1. Move the folders into the `Scripts` folder
-2. Add `<script folder="Windscript_Loader"/>` to `LU/content.xml` and `VU/content.xml`.
-3. Edit `Scripts/Windscript/CONFIG.txt`
+[![Liberty Unleashed](http://lu.windlord.net/luclient.png)](http://lu.windlord.net/luclient.png)
+
+1. [Download] the latest copy of Windscript.
+2. Move the folders into the `Scripts` folder.
+3. Add `<script folder="Windscript_Loader"/>` to `LU/content.xml` and `VU/content.xml`.
+4. Copy `CONFIG_DEFAULT.txt` over to `Scripts/Windscript/CONFIG.txt` and edit accordingly.
 
 *Note: It is recommended that you run Windscript alone as a server-side script.*
 
@@ -75,12 +76,12 @@ comments as possible inside of my scripts. Please do not ignore them.
 
 There are a few ways you can obtain help for Windscript
 
-1.  Liberty Unleashed Forums - <http://forum.liberty-unleashed.co.uk/>
-2.  Liberty Unleashed Wiki - <http://liberty-unleashed.co.uk/LUWiki>
-2.  LUnet IRC Network - irc://irc.liberty-unleashed.co.uk/Windlord
-3.  GTAnet IRC Network - irc://irc.gtanet.com/Windlord
-4.  Windlord.Net - <http://www.windlord.net/>
-5.  E-mail - <windlord@windlord.net> - refrain from contacting unless urgent
+1.  Windscript Github Pages (Files, README, Wiki) - <https://github.com/Windlord/Windscript>
+2.  Liberty Unleashed Forums - <http://forum.liberty-unleashed.co.uk/>
+3.  Liberty Unleashed Wiki - <http://liberty-unleashed.co.uk/LUWiki>
+4.  LUnet IRC Network - irc://irc.liberty-unleashed.co.uk/Windlord
+5.  GTAnet IRC Network - irc://irc.gtanet.com/Windlord
+6.  E-mail - <windlord@windlord.net> *refrain from contacting unless urgent*
 
 
 ## 6. Credits
@@ -88,10 +89,6 @@ There are a few ways you can obtain help for Windscript
 Every single line of script written in this script package has been written by:
 
 ### Windlord (<windlord@windlord.net>)
-
-- Tester for Liberty Unleashed and Vice Unleashed   - <http://liberty-unleashed.co.uk/>
-- Founder of Project-Apollo                         - <http://project-apollo.co.uk/>
-- Senior member of the Kuslahden alaste clan        - <http://ka-clan.net/>
 
 I would like to thank the following people for their valuable help:
 
@@ -118,4 +115,4 @@ Once you have found out why the bots are not logging in, use
 bot directly and solve your issue.
 
 
-[Download Windscript]:				https://github.com/Windlord/Windscript/zipball/master	"Windscript Source"
+[Download]:	https://github.com/Windlord/Windscript/zipball/master	"Windscript Source"
