@@ -131,6 +131,7 @@ class WindData
 		{
 			if ( keepLoaded ) return false;
 			Hash.Close();
+			Hash = null;
 			debug( "Unloaded" );
 			return true;
 		}
